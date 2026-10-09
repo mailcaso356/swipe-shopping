@@ -121,8 +121,55 @@ export const TECH_GROUPS = [
   },
 ] as const
 
-export type Universe = 'moda' | 'tech'
-export type CategoryGroup = (typeof CATEGORY_GROUPS)[number] | (typeof TECH_GROUPS)[number]
+/**
+ * La sezione Gadget: oggetti curiosi e idee regalo, da comprare d'impulso.
+ * Solo marche note e, quando Amazon le fornisce, buone recensioni (vedi scripts/search-plan.ts).
+ */
+export const GADGET_GROUPS = [
+  {
+    id: 'casa',
+    label: 'Casa e cucina',
+    emoji: '🏠',
+    items: [
+      { id: 'gadget_cucina', label: 'Gadget da cucina' },
+      { id: 'lampade', label: 'Lampade e luci' },
+      { id: 'tazze', label: 'Tazze e borracce' },
+    ],
+  },
+  {
+    id: 'giochi',
+    label: 'Giochi e passatempi',
+    emoji: '🎲',
+    items: [
+      { id: 'giochi_tavolo', label: 'Giochi da tavolo' },
+      { id: 'rompicapi', label: 'Rompicapi' },
+      { id: 'costruzioni', label: 'Set da costruire' },
+    ],
+  },
+  {
+    id: 'regali',
+    label: 'Regali e curiosità',
+    emoji: '🎁',
+    items: [
+      { id: 'regali', label: 'Regali divertenti' },
+      { id: 'gadget_tech', label: 'Gadget tech' },
+    ],
+  },
+] as const
+
+export type Universe = 'moda' | 'tech' | 'gadget'
+
+/** Le sezioni dell'app, come app separate: ognuna con categorie, filtri e preferiti suoi. */
+export const SECTIONS: { id: Universe; label: string; hint: string; color: string }[] = [
+  { id: 'moda', label: 'Moda', hint: 'Vestiti, scarpe, borse, profumi', color: '#f43f5e' },
+  { id: 'tech', label: 'Tech', hint: 'Cuffie, smartphone, gaming', color: '#f97316' },
+  { id: 'gadget', label: 'Gadget', hint: 'Idee regalo e oggetti curiosi', color: '#8b5cf6' },
+]
+export const UNIVERSES = SECTIONS.map((s) => s.id)
+export const isUniverse = (v: unknown): v is Universe => UNIVERSES.includes(v as Universe)
+export const sectionOf = (u: Universe) => SECTIONS.find((s) => s.id === u)!
+
+export type CategoryGroup = (typeof CATEGORY_GROUPS)[number] | (typeof TECH_GROUPS)[number] | (typeof GADGET_GROUPS)[number]
 export type CategoryId = CategoryGroup['items'][number]['id']
 
 const byId = new Map<string, { label: string; group: CategoryGroup; universe: Universe }>()
@@ -132,14 +179,18 @@ for (const group of CATEGORY_GROUPS) {
 for (const group of TECH_GROUPS) {
   for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'tech' })
 }
+for (const group of GADGET_GROUPS) {
+  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'gadget' })
+}
 
 export const isCategoryId = (id: string): id is CategoryId => byId.has(id)
 export const categoryLabel = (id: CategoryId) => byId.get(id)?.label ?? id
 export const categoryGroupOf = (id: CategoryId) => byId.get(id)?.group
-/** Moda o tech, in base alla categoria */
+/** Sezione della categoria (moda, tech o gadget) */
 export const universeOf = (id: CategoryId): Universe => byId.get(id)?.universe ?? 'moda'
 /** Gruppi di categorie della sezione */
-export const groupsOf = (u: Universe): readonly CategoryGroup[] => (u === 'tech' ? TECH_GROUPS : CATEGORY_GROUPS)
+export const groupsOf = (u: Universe): readonly CategoryGroup[] =>
+  u === 'tech' ? TECH_GROUPS : u === 'gadget' ? GADGET_GROUPS : CATEGORY_GROUPS
 /** Tutte le categorie della sezione */
 export const categoryIdsOf = (u: Universe) => groupsOf(u).flatMap((g) => g.items.map((i) => i.id)) as CategoryId[]
 /** Tutte le categorie della moda (la sezione principale) */

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
-import { universeOf, type Universe } from '../config/categories'
+import { UNIVERSES, isUniverse, universeOf, type Universe } from '../config/categories'
 import { track } from '../lib/analytics'
 import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
@@ -26,12 +26,12 @@ type CatalogState =
 
 interface State {
   catalog: CatalogState
-  /** Sezione aperta: moda (principale) o tech */
+  /** Sezione aperta: moda (principale), tech o gadget */
   mode: Universe
   /** Filtri della moda (sincronizzati con l'account) */
   filters: Filters
-  /** Filtri della sezione tech (solo su questo dispositivo) */
-  techFilters: Filters
+  /** Filtri delle altre sezioni (solo su questo dispositivo) */
+  sectionFilters: Record<OtherSection, Filters>
   wishlist: WishItem[]
   disliked: string[]
   lastAction: { type: 'like' | 'dislike'; product: Product } | null
@@ -51,6 +51,16 @@ type Action =
   | { type: 'renameFolder'; from: string; to?: string }
 
 const MAX_DISLIKED = 5000
+
+type OtherSection = Exclude<Universe, 'moda'>
+
+/** ?sezione=tech arriva dalle pagine Google ("Apri l'app"); altrimenti l'ultima sezione aperta. */
+function initialMode(): Universe {
+  const fromUrl = new URLSearchParams(window.location.search).get('sezione')
+  if (isUniverse(fromUrl)) return fromUrl
+  const saved = load<string>('mode', 'moda')
+  return isUniverse(saved) ? saved : 'moda'
+}
 
 /** Copia salvata nei preferiti senza prezzi: i prezzi si leggono sempre dal catalogo aggiornato. */
 const snapshot = ({ price: _p, originalPrice: _o, priceCheckedAt: _c, priceFrom: _f, ...rest }: Product): Product => rest
@@ -95,15 +105,15 @@ function reducer(state: State, action: Action): State {
     case 'remove':
       return { ...state, wishlist: state.wishlist.filter((w) => w.product.id !== action.id), lastAction: null }
     case 'filters':
-      return state.mode === 'tech'
-        ? { ...state, techFilters: normalizeFilters(action.filters) }
-        : { ...state, filters: normalizeFilters(action.filters) }
+      return state.mode === 'moda'
+        ? { ...state, filters: normalizeFilters(action.filters) }
+        : { ...state, sectionFilters: { ...state.sectionFilters, [state.mode]: normalizeFilters(action.filters) } }
     case 'mode':
       return { ...state, mode: action.mode, lastAction: null }
     case 'resetSeen':
       return { ...state, disliked: [], lastAction: null }
     case 'clearAll':
-      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, techFilters: DEFAULT_FILTERS, lastAction: null }
+      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, sectionFilters: { tech: DEFAULT_FILTERS, gadget: DEFAULT_FILTERS }, lastAction: null }
     case 'folder':
       return {
         ...state,
@@ -128,28 +138,32 @@ function reducer(state: State, action: Action): State {
 function useAppStore() {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     catalog: { status: 'loading' },
-    // ?sezione=tech arriva dalle pagine Google del tech ("Apri l'app").
-    mode: new URLSearchParams(window.location.search).get('sezione') === 'tech' || load<Universe>('mode', 'moda') === 'tech' ? 'tech' : 'moda',
+    mode: initialMode(),
     filters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) }),
-    techFilters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('techFilters', {}) }),
+    sectionFilters: {
+      tech: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('techFilters', {}) }),
+      gadget: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('gadgetFilters', {}) }),
+    },
     wishlist: stripPrices(load<WishItem[]>('wishlist', [])),
     disliked: load<string[]>('disliked', []),
     lastAction: null,
   }))
 
   useEffect(() => save('filters:v2', state.filters), [state.filters])
-  useEffect(() => save('techFilters', state.techFilters), [state.techFilters])
+  useEffect(() => save('techFilters', state.sectionFilters.tech), [state.sectionFilters.tech])
+  useEffect(() => save('gadgetFilters', state.sectionFilters.gadget), [state.sectionFilters.gadget])
   useEffect(() => {
     save('mode', state.mode)
-    document.documentElement.classList.toggle('tech', state.mode === 'tech')
+    // Classe per i colori della sezione (vedi src/index.css).
+    for (const u of UNIVERSES) if (u !== 'moda') document.documentElement.classList.toggle(u, state.mode === u)
   }, [state.mode])
-  const activeFilters = state.mode === 'tech' ? state.techFilters : state.filters
+  const activeFilters = state.mode === 'moda' ? state.filters : state.sectionFilters[state.mode]
   useEffect(() => save('wishlist', state.wishlist), [state.wishlist])
   useEffect(() => save('disliked', state.disliked), [state.disliked])
 
   const sync = useCloudSync(state, dispatch)
 
-  // Prima la sezione aperta (si vede subito), poi l'altra in sottofondo (preferiti, link condivisi, cambio sezione).
+  // Prima la sezione aperta (si vede subito), poi le altre in sottofondo (preferiti, link condivisi, cambio sezione).
   const modeRef = useRef(state.mode)
   useEffect(() => {
     modeRef.current = state.mode
@@ -161,13 +175,13 @@ function useAppStore() {
       .then(async (r) => {
         setNewBaseline(r.products)
         dispatch({ type: 'catalog', catalog: { status: 'ready', products: r.products, exploreMode: r.exploreMode, sections: r.sections } })
-        if (r.sections.length === 2) return
-        const other = first === 'moda' ? 'tech' : 'moda'
-        const rest = await loadCatalog(other, signal).catch(() => null)
+        const others = UNIVERSES.filter((u) => !r.sections.includes(u))
+        if (others.length === 0) return
+        const rest = await Promise.all(others.map((u) => loadCatalog(u, signal).catch(() => null)))
         if (signal?.aborted) return
-        const products = rest ? [...r.products, ...rest.products] : r.products
+        const products = [...r.products, ...rest.flatMap((x) => x?.products ?? [])]
         setNewBaseline(products)
-        dispatch({ type: 'catalog', catalog: { status: 'ready', products, exploreMode: false, sections: ['moda', 'tech'] } })
+        dispatch({ type: 'catalog', catalog: { status: 'ready', products, exploreMode: false, sections: [...UNIVERSES] } })
       })
       .catch((e: unknown) => {
         if (signal?.aborted) return
@@ -254,7 +268,7 @@ function useAppStore() {
         dispatch({ type: 'remove', id: product.id })
       },
       setFilters: (filters: Filters) => dispatch({ type: 'filters', filters }),
-      /** Passa dalla moda al tech e viceversa */
+      /** Cambia sezione (moda, tech, gadget) */
       setMode: (mode: Universe) => dispatch({ type: 'mode', mode }),
       resetSeen: () => dispatch({ type: 'resetSeen' }),
       clearAll: () => dispatch({ type: 'clearAll' }),

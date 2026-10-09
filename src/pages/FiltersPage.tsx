@@ -1,6 +1,6 @@
 import { Check, X } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { NO_CATEGORY, categoryIdsOf, groupsOf, type CategoryId } from '../config/categories'
+import { NO_CATEGORY, categoryIdsOf, groupsOf, sectionOf, type CategoryId } from '../config/categories'
 import { colorSwatch } from '../config/colors'
 import { BrandPicker } from '../components/BrandPicker'
 import { PriceRange } from '../components/PriceRange'
@@ -27,7 +27,8 @@ export function FiltersPage() {
   const { state, products, actions } = useApp()
   const f = state.filters
   const set = (patch: Partial<Filters>) => actions.setFilters({ ...f, ...patch })
-  const tech = state.mode === 'tech'
+  // Tech e gadget sono per tutti e senza colori: niente genere né colore.
+  const unisex = state.mode !== 'moda'
   const facets = facetValues(products)
   const matching = products.filter((p) => p.availability !== 'out_of_stock' && matchesFilters(p, f)).length
   // Come per le marche: nessuna selezionata (o tutte) = tutte le categorie.
@@ -52,7 +53,7 @@ export function FiltersPage() {
   return (
     <div className="space-y-6 pb-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Filtri{tech ? ' Tech' : ''}</h1>
+        <h1 className="text-2xl font-bold">Filtri{unisex ? ` ${sectionOf(state.mode).label}` : ''}</h1>
         {activeFilterCount(f) > 0 && (
           <button type="button" onClick={() => actions.setFilters(DEFAULT_FILTERS)} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-[#fff] shadow-sm active:scale-95">
             Azzera filtri
@@ -75,7 +76,7 @@ export function FiltersPage() {
         <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Nessun prodotto con questi filtri: prova ad allargarli.</p>
       )}
 
-      {!tech && (
+      {!unisex && (
         <Section title="Genere">
           <div className="grid grid-cols-3 gap-1 rounded-2xl bg-neutral-100 p-1">
             {(
@@ -189,7 +190,7 @@ export function FiltersPage() {
       {facets.sizes.length > 0 && (
         <ChipSection title="Taglia" values={facets.sizes} selected={f.sizes} onToggle={(v) => set({ sizes: flipKeepOne(f.sizes, v, facets.sizes) })} />
       )}
-      {!tech && facets.colors.length > 0 && (
+      {!unisex && facets.colors.length > 0 && (
         <Section
           title="Colore"
           actions={

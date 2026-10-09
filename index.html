@@ -13,7 +13,8 @@
           document.documentElement.classList.add('dark')
           document.querySelector('meta[name=theme-color]').content = '#0e0e10'
         }
-        if (/[?&]sezione=tech/.test(location.search) || JSON.parse(localStorage.getItem('swipeshop:v1:mode') || 'null') === 'tech') document.documentElement.classList.add('tech')
+        var m = (/[?&]sezione=(tech|gadget)\b/.exec(location.search) || [])[1] || JSON.parse(localStorage.getItem('swipeshop:v1:mode') || 'null')
+        if (m === 'tech' || m === 'gadget') document.documentElement.classList.add(m)
       } catch (e) {}
     </script>
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -23,7 +24,8 @@
       l.rel = 'preload'
       l.as = 'fetch'
       l.crossOrigin = 'anonymous'
-      l.href = './catalog-' + (document.documentElement.classList.contains('tech') ? 'tech' : 'moda') + '.json'
+      var c = document.documentElement.classList
+      l.href = './catalog-' + (c.contains('tech') ? 'tech' : c.contains('gadget') ? 'gadget' : 'moda') + '.json'
       document.head.appendChild(l)
     </script>
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />

@@ -57,6 +57,22 @@ body {
   --color-rose-700: #fdba74;
 }
 
+/* Sezione Gadget: viola. */
+:root.gadget {
+  --color-rose-50: #f5f3ff;
+  --color-rose-100: #ede9fe;
+  --color-rose-300: #c4b5fd;
+  --color-rose-400: #a78bfa;
+  --color-rose-500: #8b5cf6;
+  --color-rose-600: #7c3aed;
+  --color-rose-700: #6d28d9;
+}
+:root.gadget.dark {
+  --color-rose-50: #261a40;
+  --color-rose-100: #31205a;
+  --color-rose-700: #c4b5fd;
+}
+
 body {
   background: var(--color-neutral-50);
 }

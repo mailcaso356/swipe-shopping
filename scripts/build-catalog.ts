@@ -1,7 +1,7 @@
 // Dopo `vite build`: riscrive dist/catalog.json compatto (senza spazi e senza prodotti esauriti),
 // così l'app scarica e legge meno dati all'avvio.
 import { readFileSync, writeFileSync } from 'node:fs'
-import { universeOf, type CategoryId } from '../src/config/categories.ts'
+import { UNIVERSES, universeOf, type CategoryId } from '../src/config/categories.ts'
 
 const file = new URL('../dist/catalog.json', import.meta.url)
 const source = readFileSync(file, 'utf8')
@@ -10,7 +10,7 @@ const out = JSON.stringify(catalog)
 writeFileSync(file, out)
 // Una copia per sezione, più leggera: senza campi ricostruibili (vedi expand() in src/lib/catalog.ts).
 // catalog.json resta intero per le versioni dell'app già installate.
-for (const section of ['moda', 'tech'] as const) {
+for (const section of UNIVERSES) {
   const list = catalog
     .filter((p) => universeOf((p as { category: CategoryId }).category) === section)
     .map((raw) => {

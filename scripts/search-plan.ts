@@ -13,11 +13,16 @@ export interface CategoryPlan {
   minPrice: number
   /** Reparto Amazon in cui cercare (di base Fashion) */
   searchIndex?: string
+  /** Solo prodotti con buone recensioni (se Amazon le fornisce): stelle minime e numero minimo di voti */
+  minRating?: number
+  minReviews?: number
 }
 
 const BOTH: SearchGender[] = ['uomo', 'donna']
 /** Prodotti per tutti: una sola ricerca, senza uomo/donna */
 const TECH: SearchGender[] = ['unisex']
+/** Gadget: per tutti, con almeno 4 stelle e 50 recensioni quando Amazon le fornisce */
+const GADGET = { genders: TECH, minRating: 4, minReviews: 50 }
 
 export const SEARCH_PLAN: CategoryPlan[] = [
   // Abbigliamento
@@ -111,6 +116,32 @@ export const SEARCH_PLAN: CategoryPlan[] = [
     brands: ['Samsung', 'LG', 'ASUS', 'Dell', 'AOC', 'BenQ', 'MSI', 'Philips'] },
   { category: 'tastiere_mouse', keywords: 'tastiera mouse', searchIndex: 'Electronics', minPrice: 25, genders: TECH,
     brands: ['Logitech', 'Razer', 'Corsair', 'Keychron', 'SteelSeries', 'Microsoft', 'Apple'] },
+  // Sezione Gadget: idee regalo e oggetti curiosi, solo marche note
+  { category: 'gadget_cucina', keywords: 'gadget cucina', searchIndex: 'HomeAndKitchen', minPrice: 10, ...GADGET,
+    brands: ['Joseph Joseph', 'OXO', 'Kikkerland', 'Fred', 'Tescoma', 'Lékué', 'Zyliss', 'Fizz Creations'] },
+  { category: 'lampade', keywords: 'lampada', searchIndex: 'Lighting', minPrice: 15, ...GADGET,
+    brands: ['Paladone', 'Govee', 'Philips', 'Fizz Creations', 'Twinkly', 'Nanoleaf', 'LEGO', 'Lumie'] },
+  { category: 'tazze', keywords: 'tazza', searchIndex: 'HomeAndKitchen', minPrice: 10, ...GADGET,
+    brands: ['Paladone', 'Fizz Creations', 'Thumbs Up', 'Pyramid International', 'Half Moon Bay', 'Ember', 'Stanley', 'Contigo'] },
+  { category: 'giochi_tavolo', keywords: 'gioco da tavolo', searchIndex: 'ToysAndGames', minPrice: 12, ...GADGET,
+    brands: ['Asmodee', 'Hasbro', 'Mattel', 'Ravensburger', 'Exploding Kittens', 'Big Potato', 'Cranio Creations', 'dV Giochi'] },
+  { category: 'rompicapi', keywords: 'rompicapo', searchIndex: 'ToysAndGames', minPrice: 8, ...GADGET,
+    brands: ["Rubik's", 'ThinkFun', 'Hanayama', 'GAN', 'MoYu', 'SmartGames', 'Ravensburger'] },
+  { category: 'costruzioni', keywords: 'LEGO adulti', searchIndex: 'ToysAndGames', minPrice: 30, ...GADGET, brands: ['LEGO'] },
+  { category: 'costruzioni', keywords: 'LEGO Icons', searchIndex: 'ToysAndGames', minPrice: 30, ...GADGET, brands: ['LEGO'] },
+  { category: 'costruzioni', keywords: 'LEGO fiori', searchIndex: 'ToysAndGames', minPrice: 15, ...GADGET, brands: ['LEGO'] },
+  { category: 'regali', keywords: 'regalo divertente', searchIndex: 'HomeAndKitchen', minPrice: 10, ...GADGET,
+    brands: ['Paladone', 'Fizz Creations', 'Thumbs Up', 'Gift Republic', 'Kikkerland', 'Suck UK', 'Mustard', 'Luckies of London'] },
+  { category: 'regali', keywords: 'gadget', searchIndex: 'ToysAndGames', minPrice: 10, ...GADGET,
+    brands: ['Paladone', 'Fizz Creations', 'Thumbs Up', 'Kikkerland', 'Funko', 'Tamagotchi', 'Bandai'] },
+  { category: 'gadget_tech', keywords: 'fotocamera istantanea', searchIndex: 'Electronics', minPrice: 50, ...GADGET,
+    brands: ['Fujifilm', 'Polaroid', 'Kodak'] },
+  { category: 'gadget_tech', keywords: 'stampante fotografica portatile', searchIndex: 'Electronics', minPrice: 40, ...GADGET,
+    brands: ['Fujifilm', 'Kodak', 'Canon', 'HP', 'Polaroid'] },
+  { category: 'gadget_tech', keywords: 'localizzatore bluetooth', searchIndex: 'Electronics', minPrice: 15, ...GADGET,
+    brands: ['Apple', 'Tile', 'Samsung', 'Chipolo'] },
+  { category: 'gadget_tech', keywords: 'mini proiettore', searchIndex: 'Electronics', minPrice: 100, ...GADGET,
+    brands: ['XGIMI', 'Samsung', 'Anker', 'Nebula', 'Philips'] },
 ]
 
 /** Confronto tollerante tra marche ("TOMMY HILFIGER" = "Tommy Hilfiger", "Levi's" = "Levis"). */

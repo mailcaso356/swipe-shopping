@@ -186,6 +186,16 @@ function applyOffer(p: Record<string, any>, offer: Offer | null) {
 // Foto aggiuntive e caratteristiche per la scheda prodotto. Se Amazon rifiuta questi campi,
 // la ricerca continua senza (meglio un catalogo senza dettagli che nessun catalogo).
 let detailResources = ['images.variants.large', 'itemInfo.features']
+let reviewResources = ['customerReviews.count', 'customerReviews.starRating']
+
+/** Almeno `minRating` stelle e `minReviews` voti. Senza dati sulle recensioni basta la marca nota. */
+function goodReviews(item: any, minRating: number, minReviews: number) {
+  const r = item?.customerReviews
+  if (!r) return true
+  const stars = Number(r?.starRating?.value ?? r?.starRating)
+  const count = Number(r?.count)
+  return stars >= minRating && count >= minReviews
+}
 const details = new Map<string, ProductDetails>()
 
 function readDetails(item: any): ProductDetails | null {
@@ -223,6 +233,7 @@ async function searchCatalog(token: string) {
   const pages = Number(process.env.AMAZON_SEARCH_PAGES ?? 2)
   let rejectedBrand = 0
   let rejectedPrice = 0
+  let rejectedReviews = 0
 
   outer: for (const plan of SEARCH_PLAN) {
     for (const gender of plan.genders) {
@@ -233,6 +244,7 @@ async function searchCatalog(token: string) {
             break outer
           }
           let body: any
+          const wantReviews = plan.minRating !== undefined
           try {
             const search = () =>
               callApi('searchItems', token, {
@@ -243,15 +255,26 @@ async function searchCatalog(token: string) {
                 itemPage: page,
                 minPrice: plan.minPrice * 100,
                 availability: 'Available',
-                resources: ['images.primary.large', 'itemInfo.title', 'itemInfo.byLineInfo', ...detailResources, ...OFFER_RESOURCES],
+                resources: [
+                  'images.primary.large', 'itemInfo.title', 'itemInfo.byLineInfo', ...detailResources, ...OFFER_RESOURCES,
+                  ...(wantReviews ? reviewResources : []),
+                ],
               })
-            try {
-              body = await search()
-            } catch (e) {
-              if (!detailResources.length || !/HTTP 400/.test(String(e))) throw e
-              annotate('warning', `Dettagli prodotto non disponibili, continuo senza: ${e instanceof Error ? e.message : String(e)}`)
-              detailResources = []
-              body = await search()
+            // Se Amazon rifiuta le risorse facoltative (HTTP 400) le togliamo una alla volta e riproviamo.
+            for (;;) {
+              try {
+                body = await search()
+                break
+              } catch (e) {
+                if (!/HTTP 400/.test(String(e))) throw e
+                if (wantReviews && reviewResources.length) {
+                  annotate('warning', `Recensioni non disponibili, continuo senza: ${e instanceof Error ? e.message : String(e)}`)
+                  reviewResources = []
+                } else if (detailResources.length) {
+                  annotate('warning', `Dettagli prodotto non disponibili, continuo senza: ${e instanceof Error ? e.message : String(e)}`)
+                  detailResources = []
+                } else throw e
+              }
             }
           } catch (e) {
             annotate('warning', `Ricerca ${plan.category}/${gender}/${brand}: ${e instanceof Error ? e.message : String(e)}`)
@@ -272,6 +295,11 @@ async function searchCatalog(token: string) {
             }
             if (!isUsable(offer) || offer.price < plan.minPrice || offer.price > 3000) {
               rejectedPrice++
+              continue
+            }
+            // Gadget: niente articoli con poche recensioni o voti bassi (quando Amazon le fornisce).
+            if (wantReviews && reviewResources.length && !goodReviews(item, plan.minRating!, plan.minReviews ?? 0)) {
+              rejectedReviews++
               continue
             }
             const category = classify(title, plan.category)
@@ -313,7 +341,7 @@ async function searchCatalog(token: string) {
       }
     }
   }
-  annotate('notice', `Ricerca: ${found.size} prodotti trovati, ${rejectedBrand} scartati per marca, ${rejectedPrice} per prezzo/disponibilità.`)
+  annotate('notice', `Ricerca: ${found.size} prodotti trovati, ${rejectedBrand} scartati per marca, ${rejectedPrice} per prezzo/disponibilità, ${rejectedReviews} per recensioni.`)
   return [...found.values()]
 }
 
