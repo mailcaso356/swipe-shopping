@@ -300,8 +300,13 @@ async function syncCalzedonia(): Promise<Found[]> {
   for (const url of order.slice(0, CALZEDONIA_MAX_PAGES)) {
     read++
     let ld: any
+    let listPrice: number | undefined
     try {
-      ld = productLd(await get(url, CALZEDONIA_GAP_MS))
+      const html = await get(url, CALZEDONIA_GAP_MS)
+      ld = productLd(html)
+      // Prezzo pieno quando l'articolo è scontato: "c_price":{"sales":{...},"list":{"value":39.95,...}}
+      const block = html.slice(html.indexOf('"c_price"'), html.indexOf('"c_price"') + 1500)
+      listPrice = Number(block.match(/"list":\{"value":([\d.]+)/)?.[1]) || undefined
     } catch (e) {
       annotate('warning', `Calzedonia: ${e instanceof Error ? e.message : String(e)}`)
       continue
@@ -332,6 +337,7 @@ async function syncCalzedonia(): Promise<Found[]> {
       imageUrl: images[0],
       url,
       price,
+      originalPrice: listPrice,
       colorText: String(ld.color ?? ''),
     })
     const f = features(String(ld.description ?? ''))
