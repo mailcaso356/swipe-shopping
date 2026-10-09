@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { track } from '../lib/analytics'
 import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
-import { matchesFilters, sortProducts } from '../lib/filters'
+import { matchesFilters, normalizeFilters, sortProducts } from '../lib/filters'
 import { priceDrop } from '../lib/price'
 import { load, save } from '../lib/storage'
 import { DEFAULT_FILTERS, type Filters, type Product } from '../types/product'
@@ -78,7 +78,7 @@ function reducer(state: State, action: Action): State {
     case 'remove':
       return { ...state, wishlist: state.wishlist.filter((w) => w.product.id !== action.id), lastAction: null }
     case 'filters':
-      return { ...state, filters: action.filters }
+      return { ...state, filters: normalizeFilters(action.filters) }
     case 'resetSeen':
       return { ...state, disliked: [], lastAction: null }
     case 'clearAll':
@@ -88,7 +88,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         wishlist: action.wishlist,
         disliked: action.disliked.slice(-MAX_DISLIKED),
-        filters: { ...DEFAULT_FILTERS, ...action.filters },
+        filters: normalizeFilters({ ...DEFAULT_FILTERS, ...action.filters }),
         lastAction: null,
       }
   }
@@ -97,7 +97,7 @@ function reducer(state: State, action: Action): State {
 function useAppStore() {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     catalog: { status: 'loading' },
-    filters: { ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) },
+    filters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) }),
     wishlist: load<WishItem[]>('wishlist', []),
     disliked: load<string[]>('disliked', []),
     lastAction: null,

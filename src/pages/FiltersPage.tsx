@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { CATEGORY_GROUPS, type CategoryId } from '../config/categories'
+import { ALL_CATEGORY_IDS, CATEGORY_GROUPS, type CategoryId } from '../config/categories'
 import { STORES, type StoreId } from '../config/stores'
 import { activeFilterCount, facetValues, matchesFilters } from '../lib/filters'
 import { routeHref } from '../lib/useHashRoute'
@@ -15,6 +15,12 @@ export function FiltersPage() {
   const set = (patch: Partial<Filters>) => actions.setFilters({ ...f, ...patch })
   const facets = facetValues(products)
   const matching = products.filter((p) => p.availability !== 'out_of_stock' && matchesFilters(p, f)).length
+  // Lista vuota = tutte le categorie: le mostriamo tutte accese e si tocca per escludere.
+  const included = f.categories.length ? f.categories : ALL_CATEGORY_IDS
+  const setIncluded = (list: CategoryId[]) => {
+    if (list.length === 0) return // almeno una categoria deve restare
+    set({ categories: list })
+  }
   const parsePrice = (v: string) => (v === '' ? undefined : Math.max(0, Number(v)))
 
   return (
@@ -50,17 +56,17 @@ export function FiltersPage() {
         </div>
       </Section>
 
-      <Section title="Categorie" hint="Puoi sceglierne più di una">
+      <Section title="Categorie" hint="Tocca per escludere quelle che non ti interessano">
         <div className="space-y-4">
           {CATEGORY_GROUPS.map((group) => {
             const ids = group.items.map((i) => i.id) as CategoryId[]
-            const all = ids.every((id) => f.categories.includes(id))
+            const all = ids.every((id) => included.includes(id))
             return (
               <div key={group.id} className="space-y-2">
                 <button
                   type="button"
                   onClick={() =>
-                    set({ categories: all ? f.categories.filter((c) => !ids.includes(c)) : [...new Set([...f.categories, ...ids])] })
+                    setIncluded(all ? included.filter((c) => !ids.includes(c)) : [...new Set([...included, ...ids])])
                   }
                   className="flex items-center gap-2 text-sm font-semibold"
                 >
@@ -71,8 +77,8 @@ export function FiltersPage() {
                   {group.items.map((item) => (
                     <Chip
                       key={item.id}
-                      active={f.categories.includes(item.id)}
-                      onClick={() => set({ categories: toggle(f.categories, item.id as CategoryId) })}
+                      active={included.includes(item.id)}
+                      onClick={() => setIncluded(toggle(included, item.id as CategoryId))}
                     >
                       {item.label}
                     </Chip>

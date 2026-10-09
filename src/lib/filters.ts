@@ -1,3 +1,4 @@
+import { ALL_CATEGORY_IDS } from '../config/categories'
 import type { Filters, Product } from '../types/product'
 import { freshPrice } from './price'
 
@@ -44,7 +45,7 @@ export function sortProducts(list: Product[], sort: Filters['sort'], seed = '') 
 export function activeFilterCount(f: Filters) {
   return (
     (f.gender !== 'tutti' ? 1 : 0) +
-    f.categories.length +
+    excludedCategories(f) +
     f.brands.length +
     f.stores.length +
     f.sizes.length +
@@ -69,3 +70,16 @@ export function facetValues(products: Product[]) {
   const sort = (s: Set<string>) => [...s].sort((a, b) => a.localeCompare(b, 'it'))
   return { brands: sort(brands), stores: [...stores], sizes: [...sizes], colors: sort(colors) }
 }
+
+/**
+ * Lista categorie vuota = tutte incluse. Se l'utente le seleziona tutte (o nessuna) torniamo a "tutte",
+ * così filtri e notifica contano solo le categorie escluse.
+ */
+export function normalizeFilters(f: Filters): Filters {
+  const valid = f.categories.filter((c) => ALL_CATEGORY_IDS.includes(c))
+  const unique = [...new Set(valid)]
+  return { ...f, categories: unique.length >= ALL_CATEGORY_IDS.length ? [] : unique }
+}
+
+export const excludedCategories = (f: Filters) =>
+  f.categories.length === 0 ? 0 : ALL_CATEGORY_IDS.length - f.categories.length

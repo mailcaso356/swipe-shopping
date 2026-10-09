@@ -70,3 +70,4 @@ for (const group of CATEGORY_GROUPS) {
 export const isCategoryId = (id: string): id is CategoryId => byId.has(id)
 export const categoryLabel = (id: CategoryId) => byId.get(id)?.label ?? id
 export const categoryGroupOf = (id: CategoryId) => byId.get(id)?.group
+export const ALL_CATEGORY_IDS = [...byId.keys()] as CategoryId[]
