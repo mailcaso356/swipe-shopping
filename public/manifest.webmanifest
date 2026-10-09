@@ -1,0 +1,19 @@
+{
+  "name": "Swipe Shopping",
+  "short_name": "Swipe Shop",
+  "description": "Fai shopping come su Tinder: scorri, salva e acquista moda dai migliori negozi.",
+  "lang": "it",
+  "id": "./",
+  "start_url": "./#/scopri",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fafafa",
+  "theme_color": "#ffffff",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

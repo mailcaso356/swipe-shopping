@@ -1,6 +1,7 @@
 import { BarChart3, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { AccountCard } from '../components/AccountCard'
+import { InstallCard } from '../components/InstallCard'
 import { AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
@@ -17,6 +18,8 @@ export function ProfilePage() {
   return (
     <div className="space-y-5 pb-6">
       <h1 className="text-2xl font-bold">Profilo</h1>
+
+      <InstallCard />
 
       <Card icon={<UserRound className="size-5" />} title="Il tuo account">
         <AccountCard>
