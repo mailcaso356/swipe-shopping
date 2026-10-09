@@ -4,6 +4,7 @@ import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
 import { matchesFilters, normalizeFilters, sortProducts } from '../lib/filters'
 import { priceDrop } from '../lib/price'
+import { sharedProductId } from '../lib/share'
 import { load, save } from '../lib/storage'
 import { DEFAULT_FILTERS, type Filters, type Product } from '../types/product'
 import { useAuth } from './AuthState'
@@ -127,11 +128,19 @@ function useAppStore() {
 
   const products = useMemo(() => (state.catalog.status === 'ready' ? state.catalog.products : []), [state.catalog])
 
+  // Prodotto aperto da un link condiviso: va in cima al mazzo una volta sola, anche se filtrato o già visto.
+  const [sharedId, setSharedId] = useState(() => sharedProductId())
+  useEffect(() => {
+    if (sharedId) window.history.replaceState(null, '', '#/scopri')
+  }, [sharedId])
+
   const deck = useMemo(() => {
     const seen = new Set([...state.disliked, ...state.wishlist.map((w) => w.product.id)])
     const list = products.filter((p) => p.availability !== 'out_of_stock' && !seen.has(p.id) && matchesFilters(p, state.filters))
-    return sortProducts(list, state.filters.sort, MIX_SEED)
-  }, [products, state.disliked, state.wishlist, state.filters])
+    const sorted = sortProducts(list, state.filters.sort, MIX_SEED)
+    const shared = sharedId ? products.find((p) => p.id === sharedId) : undefined
+    return shared ? [shared, ...sorted.filter((p) => p.id !== shared.id)] : sorted
+  }, [products, state.disliked, state.wishlist, state.filters, sharedId])
 
   /** Preferiti con i dati aggiornati dal catalogo quando il prodotto è ancora presente */
   const wishlist = useMemo(() => {
@@ -164,10 +173,12 @@ function useAppStore() {
   const actions = useMemo(
     () => ({
       like: (product: Product) => {
+        setSharedId(null)
         track('like', product)
         dispatch({ type: 'like', product })
       },
       dislike: (product: Product) => {
+        setSharedId(null)
         track('dislike', product)
         dispatch({ type: 'dislike', product })
       },

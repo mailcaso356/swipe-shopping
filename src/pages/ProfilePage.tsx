@@ -1,18 +1,20 @@
-import { BarChart3, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { AccountCard } from '../components/AccountCard'
 import { InstallCard } from '../components/InstallCard'
-import { AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
+import { ADMIN_EMAIL, AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
 import { remove } from '../lib/storage'
 import { useConsent } from '../lib/useConsent'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
+import { useAuth } from '../state/AuthState'
 
 export function ProfilePage() {
   const { state, wishlist, products, actions } = useApp()
   const consent = useConsent()
+  const { user } = useAuth()
   const [confirmClear, setConfirmClear] = useState(false)
   const stats = consent === 'granted' ? summary() : null
   const titleOf = (id: string) => products.find((p) => p.id === id)?.title ?? id
@@ -20,6 +22,18 @@ export function ProfilePage() {
   return (
     <div className="space-y-5 pb-6">
       <h1 className="text-2xl font-bold">Profilo</h1>
+
+      {user?.email?.toLowerCase() === ADMIN_EMAIL && (
+        <a
+          href={routeHref('admin')}
+          className="flex items-center justify-between rounded-2xl bg-neutral-900 p-4 font-semibold text-white shadow-sm"
+        >
+          <span className="flex items-center gap-2">
+            <BarChart3 className="size-5" /> Statistiche dell'app
+          </span>
+          <ChevronRight className="size-5" />
+        </a>
+      )}
 
       <InstallCard />
 
@@ -63,7 +77,7 @@ export function ProfilePage() {
         <label className="flex items-center justify-between gap-4 text-sm">
           <span>
             Statistiche anonime di utilizzo
-            <span className="block text-xs text-neutral-500">Restano su questo dispositivo, nessun cookie di terze parti.</span>
+            <span className="block text-xs text-neutral-500">Anonime, senza cookie di terze parti: ci aiutano a capire cosa piace.</span>
           </span>
           <input
             type="checkbox"

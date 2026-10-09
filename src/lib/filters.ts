@@ -1,6 +1,6 @@
 import { ALL_CATEGORY_IDS } from '../config/categories'
 import type { Filters, Product } from '../types/product'
-import { freshPrice } from './price'
+import { discountBadge, freshPrice } from './price'
 
 export function matchesFilters(p: Product, f: Filters) {
   if (f.gender !== 'tutti' && p.gender !== f.gender && p.gender !== 'unisex') return false
@@ -9,6 +9,7 @@ export function matchesFilters(p: Product, f: Filters) {
   if (f.stores.length && !f.stores.includes(p.store)) return false
   if (f.sizes.length && !p.sizes?.some((s) => f.sizes.includes(s))) return false
   if (f.colors.length && !p.colors?.some((c) => f.colors.includes(c))) return false
+  if (f.onlyDeals && discountBadge(p) === null) return false
   if (f.priceMin !== undefined || f.priceMax !== undefined) {
     // Con un filtro prezzo attivo escludiamo i prodotti senza prezzo verificato.
     const price = freshPrice(p)?.price
@@ -45,6 +46,7 @@ export function sortProducts(list: Product[], sort: Filters['sort'], seed = '') 
 export function activeFilterCount(f: Filters) {
   return (
     (f.gender !== 'tutti' ? 1 : 0) +
+    (f.onlyDeals ? 1 : 0) +
     excludedCategories(f) +
     f.brands.length +
     f.stores.length +
@@ -57,18 +59,20 @@ export function activeFilterCount(f: Filters) {
 
 /** Valori distinti presenti nel catalogo, per mostrare solo filtri utili. */
 export function facetValues(products: Product[]) {
-  const brands = new Set<string>()
+  const brandCount = new Map<string, number>()
   const stores = new Set<Product['store']>()
   const sizes = new Set<string>()
   const colors = new Set<string>()
   for (const p of products) {
-    if (p.brand) brands.add(p.brand)
+    if (p.brand) brandCount.set(p.brand, (brandCount.get(p.brand) ?? 0) + 1)
     stores.add(p.store)
     p.sizes?.forEach((s) => sizes.add(s))
     p.colors?.forEach((c) => colors.add(c))
   }
   const sort = (s: Set<string>) => [...s].sort((a, b) => a.localeCompare(b, 'it'))
-  return { brands: sort(brands), stores: [...stores], sizes: [...sizes], colors: sort(colors) }
+  // Marche dalla più presente: le prime sono quelle che l'utente cerca più spesso.
+  const brands = [...brandCount].sort((a, b) => b[1] - a[1]).map(([b]) => b)
+  return { brands, stores: [...stores], sizes: [...sizes], colors: sort(colors) }
 }
 
 /**

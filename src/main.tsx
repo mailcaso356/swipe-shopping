@@ -2,8 +2,11 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { startRemoteAnalytics } from './lib/remoteAnalytics'
 import { AppStateProvider } from './state/AppState.tsx'
 import { AuthProvider } from './state/AuthState.tsx'
+
+startRemoteAnalytics()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

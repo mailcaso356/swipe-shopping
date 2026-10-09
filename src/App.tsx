@@ -3,6 +3,7 @@ import { ConsentBanner } from './components/ConsentBanner'
 import { APP_NAME } from './config/app'
 import { useHashRoute } from './lib/useHashRoute'
 import { Welcome } from './components/Welcome'
+import { AdminPage } from './pages/AdminPage'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { FiltersPage } from './pages/FiltersPage'
 import { PrivacyPage } from './pages/PrivacyPage'
@@ -33,6 +34,7 @@ export default function App() {
         {route === 'filtri' && <FiltersPage />}
         {route === 'profilo' && <ProfilePage />}
         {route === 'privacy' && <PrivacyPage />}
+        {route === 'admin' && <AdminPage />}
       </main>
       <ConsentBanner />
       <Welcome />

@@ -14,7 +14,7 @@ export interface CatalogResult {
  * ricompilare l'app); domani potrà chiamare un'API/backend con la stessa firma.
  */
 export async function loadCatalog(signal?: AbortSignal): Promise<CatalogResult> {
-  const res = await fetch(`${import.meta.env.BASE_URL}catalog.json`, { signal, cache: 'no-cache' })
+  const res = await fetch(`${import.meta.env.BASE_URL}catalog.json`, { signal })
   if (!res.ok) throw new Error(`Catalogo non disponibile (HTTP ${res.status})`)
   const { valid, invalid } = checkCatalog(await res.json())
   if (invalid.length) console.warn('Prodotti scartati dal catalogo:', invalid)

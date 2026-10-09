@@ -13,3 +13,6 @@ export const PRIVACY_OWNER = {
   email: 'rispondea@gmail.com',
 }
 export const PRIVACY_UPDATED = '9 ottobre 2026'
+
+/** Unico account che vede la pagina Statistiche (#/admin). Il controllo vero è in Supabase (admin_stats). */
+export const ADMIN_EMAIL = 'kevinconti0118@gmail.com'

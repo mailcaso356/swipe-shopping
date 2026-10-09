@@ -37,8 +37,13 @@ export function PrivacyPage() {
             preferiti, prodotti scartati e filtri, per ritrovarli su ogni dispositivo.
           </li>
           <li>
-            <strong>Statistiche d'uso:</strong> solo se le attivi. Conteggi di prodotti visti, like e click, che restano sul tuo
-            dispositivo.
+            <strong>Statistiche d'uso:</strong> solo se le attivi. Prodotti visti, like, click e condivisioni, legati a un codice
+            casuale del dispositivo e non al tuo nome o alla tua email. Le usiamo solo in forma aggregata per capire cosa
+            piace e migliorare l'app.
+          </li>
+          <li>
+            <strong>Avvisi di prezzo:</strong> se hai un account, quando un tuo preferito costa meno ti scriviamo al massimo
+            un'email ogni 3 giorni. Puoi spegnerli in ogni momento dal Profilo.
           </li>
           <li>
             <strong>Dati tecnici:</strong> come ogni sito, il servizio di hosting registra indirizzo IP e tipo di browser per
@@ -52,6 +57,7 @@ export function PrivacyPage() {
         <ul className="list-disc space-y-1.5 pl-5">
           <li>Far funzionare l'app e il tuo account: esecuzione del servizio che hai richiesto (art. 6.1.b GDPR).</li>
           <li>Statistiche d'uso: il tuo consenso (art. 6.1.a), che puoi ritirare in ogni momento dal Profilo.</li>
+          <li>Avvisi di prezzo: un servizio legato al tuo account (art. 6.1.b), che puoi disattivare dal Profilo.</li>
           <li>Sicurezza del sito: legittimo interesse (art. 6.1.f).</li>
         </ul>
       </Section>
@@ -59,7 +65,10 @@ export function PrivacyPage() {
       <Section title="A chi affidiamo i dati">
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            <strong>Supabase</strong>: database e gestione degli account.
+            <strong>Supabase</strong>: database, gestione degli account e statistiche.
+          </li>
+          <li>
+            <strong>Resend</strong>: invio delle email (conferma dell'account, recupero password, avvisi di prezzo).
           </li>
           <li>
             <strong>GitHub Pages</strong> (GitHub Inc.): pubblicazione del sito.

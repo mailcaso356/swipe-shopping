@@ -1,6 +1,8 @@
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { ALL_CATEGORY_IDS, CATEGORY_GROUPS, type CategoryId } from '../config/categories'
+import { BrandPicker } from '../components/BrandPicker'
+import { PriceRange } from '../components/PriceRange'
 import { STORES, type StoreId } from '../config/stores'
 import { activeFilterCount, facetValues, matchesFilters } from '../lib/filters'
 import { routeHref } from '../lib/useHashRoute'
@@ -21,7 +23,6 @@ export function FiltersPage() {
     if (list.length === 0) return // almeno una categoria deve restare
     set({ categories: list })
   }
-  const parsePrice = (v: string) => (v === '' ? undefined : Math.max(0, Number(v)))
 
   return (
     <div className="space-y-6 pb-28">
@@ -90,28 +91,23 @@ export function FiltersPage() {
         </div>
       </Section>
 
-      <Section title="Prezzo (€)" hint="Mostra solo prodotti con prezzo verificato">
-        <div className="flex items-center gap-3">
+      <Section title="Offerte">
+        <label className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-neutral-200">
+          <span>
+            <span className="block font-medium">Solo prodotti in offerta</span>
+            <span className="text-xs text-neutral-500">Mostra solo quelli scontati almeno del 5%</span>
+          </span>
           <input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            placeholder="Min"
-            value={f.priceMin ?? ''}
-            onChange={(e) => set({ priceMin: parsePrice(e.target.value) })}
-            className="w-full rounded-xl bg-white px-4 py-2.5 ring-1 ring-neutral-200 outline-none focus:ring-2 focus:ring-neutral-900"
+            type="checkbox"
+            checked={!!f.onlyDeals}
+            onChange={(e) => set({ onlyDeals: e.target.checked || undefined })}
+            className="size-6 accent-rose-500"
           />
-          <span className="text-neutral-400">–</span>
-          <input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            placeholder="Max"
-            value={f.priceMax ?? ''}
-            onChange={(e) => set({ priceMax: parsePrice(e.target.value) })}
-            className="w-full rounded-xl bg-white px-4 py-2.5 ring-1 ring-neutral-200 outline-none focus:ring-2 focus:ring-neutral-900"
-          />
-        </div>
+        </label>
+      </Section>
+
+      <Section title="Prezzo" hint="Con un limite di prezzo vedi solo prodotti con prezzo aggiornato">
+        <PriceRange min={f.priceMin} max={f.priceMax} onChange={(priceMin, priceMax) => set({ priceMin, priceMax })} />
       </Section>
 
       {facets.stores.length > 1 && (
@@ -119,7 +115,14 @@ export function FiltersPage() {
           onToggle={(v) => set({ stores: toggle(f.stores, v as StoreId) })} />
       )}
       {facets.brands.length > 0 && (
-        <ChipSection title="Marca" values={facets.brands} selected={f.brands} onToggle={(v) => set({ brands: toggle(f.brands, v) })} />
+        <Section title="Marca" hint="Nessuna selezionata = tutte le marche">
+          <BrandPicker
+            brands={facets.brands}
+            selected={f.brands}
+            onToggle={(v) => set({ brands: toggle(f.brands, v) })}
+            onClear={() => set({ brands: [] })}
+          />
+        </Section>
       )}
       {facets.sizes.length > 0 && (
         <ChipSection title="Taglia" values={facets.sizes} selected={f.sizes} onToggle={(v) => set({ sizes: toggle(f.sizes, v) })} />

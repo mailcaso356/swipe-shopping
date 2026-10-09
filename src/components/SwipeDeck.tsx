@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/AppState'
 import { productImageUrl, storeLinkLabel } from '../config/stores'
+import { ShareButton } from './ShareButton'
 import { StoreLink } from './StoreLink'
 import { SwipeCard, type SwipeDir } from './SwipeCard'
 
@@ -91,6 +92,14 @@ export function SwipeDeck() {
         >
           <Heart className="size-6 fill-current" /> SÌ
         </button>
+        {top ? (
+          <ShareButton
+            product={top}
+            className="grid size-11 place-items-center rounded-full bg-white text-neutral-600 shadow-md ring-1 ring-black/5 transition active:scale-90"
+          />
+        ) : (
+          <span className="size-11" />
+        )}
       </div>
       {top && (
         <StoreLink

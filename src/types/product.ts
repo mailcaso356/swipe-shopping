@@ -56,6 +56,8 @@ export interface Filters {
   sizes: string[]
   colors: string[]
   sort: SortOrder
+  /** Solo prodotti scontati */
+  onlyDeals?: boolean
 }
 
 export const DEFAULT_FILTERS: Filters = {

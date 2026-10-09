@@ -2,6 +2,7 @@
 // Gira su GitHub Actions prima di ogni build: le credenziali restano nei Secrets del repository
 // e non finiscono mai nel sito. Uso: `npm run sync:amazon` con le variabili d'ambiente impostate.
 import { readFileSync, writeFileSync } from 'node:fs'
+import { classify } from './classify.ts'
 import { SEARCH_PLAN, normalizeBrand } from './search-plan.ts'
 
 const { AMAZON_CREDENTIAL_ID, AMAZON_CREDENTIAL_SECRET, AMAZON_CREDENTIAL_VERSION, AMAZON_TOKEN_URL } = process.env
@@ -241,7 +242,7 @@ async function searchCatalog(token: string) {
               title,
               brand,
               gender,
-              category: plan.category,
+              category: classify(title, plan.category),
               imageUrl: image,
               availability: 'in_stock',
               addedAt: previousAddedAt.get(id) ?? now,

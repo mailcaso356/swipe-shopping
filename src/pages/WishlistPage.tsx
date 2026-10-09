@@ -1,6 +1,7 @@
 import { Heart, Trash2, TrendingDown } from 'lucide-react'
 import { useEffect } from 'react'
 import { DiscountBadge } from '../components/DiscountBadge'
+import { ShareButton } from '../components/ShareButton'
 import { PriceTag } from '../components/PriceTag'
 import { ProductImage } from '../components/ProductImage'
 import { StoreLink } from '../components/StoreLink'
@@ -67,6 +68,10 @@ export function WishlistPage() {
                     Non disponibile
                   </span>
                 )}
+                <ShareButton
+                  product={product}
+                  className="absolute top-2 right-13 grid size-9 place-items-center rounded-full bg-white/90 text-neutral-600 shadow ring-1 ring-black/5 active:scale-90"
+                />
                 <button
                   type="button"
                   onClick={() => actions.remove(product)}

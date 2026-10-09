@@ -2,15 +2,15 @@ import type { Product } from '../types/product'
 import { load, remove, save } from './storage'
 
 /**
- * Analytics con consenso. Oggi gli eventi restano sul dispositivo (statistiche
- * nella pagina Profilo); per inviarli a un servizio (Plausible, PostHog,
- * Supabase...) basta registrare un sink con `addSink`.
+ * Analytics con consenso. Gli eventi restano anche sul dispositivo (statistiche nella pagina
+ * Profilo) e vengono inviati in forma anonima ai sink registrati con `addSink` (Supabase).
  */
-export type EventName = 'view' | 'like' | 'dislike' | 'click' | 'remove'
+export type EventName = 'view' | 'like' | 'dislike' | 'click' | 'remove' | 'share'
 export interface AnalyticsEvent {
   name: EventName
   productId: string
   category: string
+  brand?: string
   store: string
   at: number
 }
@@ -48,7 +48,7 @@ export const addSink = (fn: (e: AnalyticsEvent) => void) => sinks.push(fn)
 
 export function track(name: EventName, p: Product) {
   if (consent !== 'granted') return
-  const event: AnalyticsEvent = { name, productId: p.id, category: p.category, store: p.store, at: Date.now() }
+  const event: AnalyticsEvent = { name, productId: p.id, category: p.category, brand: p.brand, store: p.store, at: Date.now() }
   events.push(event)
   if (events.length > MAX_EVENTS) events = events.slice(-MAX_EVENTS)
   sinks.forEach((fn) => fn(event))
