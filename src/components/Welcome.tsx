@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Heart, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Cpu, Heart, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { APP_NAME } from '../config/app'
 import { CATEGORY_GROUPS, type CategoryId } from '../config/categories'
@@ -10,7 +10,7 @@ import { useAuth } from '../state/AuthState'
 import type { Filters } from '../types/product'
 import { AuthForm } from './AccountCard'
 
-type GroupId = (typeof CATEGORY_GROUPS)[number]['id']
+type GroupId = (typeof CATEGORY_GROUPS)[number]['id'] | 'tech'
 
 const GENDERS: { value: Filters['gender']; label: string }[] = [
   { value: 'donna', label: 'Donna' },
@@ -44,6 +44,8 @@ export function Welcome() {
       g.items.map((i) => i.id as CategoryId),
     )
     actions.setFilters({ ...state.filters, gender, categories })
+    // Si parte dalla moda; chi sceglie soprattutto il tech (tech + al massimo una categoria moda) parte dalla sezione Tech.
+    actions.setMode(groups.includes('tech') && groups.length <= 2 ? 'tech' : 'moda')
   }
 
   const next = () => {
@@ -97,7 +99,7 @@ export function Welcome() {
                 <img src="./icons/icon-192.png" alt="" className="mx-auto size-24 rounded-3xl shadow-lg ring-1 ring-black/5" />
                 <div className="space-y-2 text-center">
                   <h1 className="text-3xl font-black tracking-tight">Benvenuto su {APP_NAME}</h1>
-                  <p className="text-neutral-600">Scopri moda dai migliori marchi, un prodotto alla volta.</p>
+                  <p className="text-neutral-600">Moda, profumi e tech dai migliori marchi e negozi, un prodotto alla volta.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-center text-sm">
                   <div className="rounded-2xl bg-neutral-100 p-4">
@@ -111,7 +113,11 @@ export function Welcome() {
                     <p className="text-neutral-500">per salvare nei preferiti</p>
                   </div>
                 </div>
-                <p className="text-center text-sm text-neutral-500">Tocca la foto per vedere il prodotto sul negozio.</p>
+                <p className="text-center text-sm text-neutral-500">Tocca il prodotto per vedere foto e dettagli.</p>
+                <p className="flex items-center justify-center gap-1.5 text-center text-sm text-neutral-500">
+                  <Cpu className="size-4 shrink-0 text-[#f97316]" />
+                  Col pulsante in alto a sinistra passi alla sezione Tech.
+                </p>
               </>
             )}
 
@@ -160,6 +166,19 @@ export function Welcome() {
                       </button>
                     )
                   })}
+                  <button
+                    type="button"
+                    onClick={() => setGroups(groups.includes('tech') ? groups.filter((x) => x !== 'tech') : [...groups, 'tech'])}
+                    aria-pressed={groups.includes('tech')}
+                    // Il tech ha la sua sezione: qui non filtra la moda, decide solo da dove si parte.
+                    className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl text-base font-semibold ring-2 transition ${
+                      groups.includes('tech') ? 'bg-[#fff7ed] ring-[#f97316]' : 'bg-white ring-neutral-200'
+                    }`}
+                  >
+                    <span className="text-4xl">🎧</span>
+                    Tech
+                    <span className="text-xs font-normal text-neutral-500">cuffie, smartphone, gaming</span>
+                  </button>
                 </div>
               </>
             )}
@@ -169,8 +188,8 @@ export function Welcome() {
                 <div className="space-y-2 text-center">
                   <h2 className="text-2xl font-bold">Non perdere i tuoi preferiti</h2>
                   <p className="text-neutral-600">
-                    Con un account gratuito ritrovi i preferiti su ogni dispositivo e vedi subito quando un prodotto salvato cala
-                    di prezzo.
+                    Con un account gratuito ritrovi i preferiti su ogni dispositivo e vedi subito quando un prodotto salvato va in
+                    offerta.
                   </p>
                 </div>
                 <AuthForm initialMode="registrati" />
