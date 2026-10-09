@@ -1,5 +1,5 @@
 import { BarChart3, Info, ShieldCheck, Trash2, Undo2 } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
@@ -9,6 +9,7 @@ import { useApp } from '../state/AppState'
 export function ProfilePage() {
   const { state, wishlist, products, actions } = useApp()
   const consent = useConsent()
+  const [confirmClear, setConfirmClear] = useState(false)
   const stats = consent === 'granted' ? summary() : null
   const titleOf = (id: string) => products.find((p) => p.id === id)?.title ?? id
 
@@ -81,18 +82,33 @@ export function ProfilePage() {
           >
             <Undo2 className="size-4" /> Rivedi i prodotti scartati
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm('Cancellare preferiti, filtri e statistiche da questo dispositivo?')) {
-                actions.clearAll()
-                setConsent('unset')
-              }
-            }}
-            className="inline-flex items-center gap-2 text-left text-sm font-medium text-rose-600"
-          >
-            <Trash2 className="size-4" /> Cancella tutti i miei dati
-          </button>
+          {confirmClear ? (
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span>Cancellare preferiti, filtri e statistiche?</span>
+              <button
+                type="button"
+                onClick={() => {
+                  actions.clearAll()
+                  setConsent('unset')
+                  setConfirmClear(false)
+                }}
+                className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-white"
+              >
+                Sì, cancella
+              </button>
+              <button type="button" onClick={() => setConfirmClear(false)} className="px-2 py-1 font-medium text-neutral-500">
+                Annulla
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmClear(true)}
+              className="inline-flex items-center gap-2 text-left text-sm font-medium text-rose-600"
+            >
+              <Trash2 className="size-4" /> Cancella tutti i miei dati
+            </button>
+          )}
         </div>
       </Card>
 
