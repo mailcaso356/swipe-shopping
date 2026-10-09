@@ -17,12 +17,15 @@ export function Header() {
           onClick={() => actions.setMode(tech ? 'moda' : 'tech')}
           aria-label={tech ? 'Torna alla moda' : 'Passa alla sezione tech'}
           // Colori fissi: il pulsante mostra il colore della sezione in cui porta (rosa moda, arancione tech).
-          className={`flex h-9 w-20 items-center justify-center gap-1 rounded-full text-sm font-semibold text-[#fff] active:scale-95 ${
+          className={`flex h-10 w-24 items-center justify-center gap-1.5 rounded-full text-[#fff] active:scale-95 ${
             tech ? 'bg-[#f43f5e]' : 'bg-[#f97316]'
           }`}
         >
-          {tech ? <Shirt className="size-4" /> : <Cpu className="size-4" />}
-          {tech ? 'Moda' : 'Tech'}
+          {tech ? <Shirt className="size-4 shrink-0" /> : <Cpu className="size-4 shrink-0" />}
+          <span className="flex flex-col items-start leading-none">
+            <span className="text-[9px] font-semibold uppercase tracking-wide opacity-90">Passa a</span>
+            <span className="text-sm font-bold">{tech ? 'Moda' : 'Tech'}</span>
+          </span>
         </button>
         <a href="#/scopri" className="flex flex-1 flex-col items-center leading-none">
           <span className="text-lg font-black tracking-tight">
@@ -31,7 +34,7 @@ export function Header() {
           </span>
           <span className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.25em] text-rose-500">{tech ? 'Tech' : 'Moda'}</span>
         </a>
-        <span className="w-10" aria-hidden />
+        <span className="w-14" aria-hidden />
         <button
           type="button"
           onClick={toggle}
