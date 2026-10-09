@@ -89,11 +89,12 @@ export function facetValues(products: Product[]) {
  */
 export function normalizeFilters(f: Filters): Filters {
   // "Escludi tutto": nessuna categoria inclusa, resta così finché l'utente non ne riaccende una.
-  if (f.categories.includes(NO_CATEGORY)) return { ...stripOld(f), categories: [NO_CATEGORY] }
+  if (f.categories.includes(NO_CATEGORY)) return { ...stripOld(f), sort: 'mix', categories: [NO_CATEGORY] }
   const unique = [...new Set(f.categories.filter(isCategoryId))]
   // Tutte le categorie della sezione (moda o tech) = nessun filtro.
   const all = unique.length > 0 && unique.length >= categoryIdsOf(universeOf(unique[0])).length
-  return { ...stripOld(f), categories: all ? [] : unique }
+  // "Ordina per" non c'è più: il mazzo usa sempre il mix consigliato.
+  return { ...stripOld(f), sort: 'mix', categories: all ? [] : unique }
 }
 
 /** "Solo novità" e le vecchie "sezioni extra" non esistono più: le togliamo dai filtri salvati. */
