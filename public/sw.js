@@ -1,7 +1,7 @@
 // Service worker: l'app si apre subito anche con rete lenta e funziona offline con l'ultimo catalogo.
 // - pagina e catalogo: prima la rete (per avere prezzi aggiornati), se manca si usa la copia salvata
 // - file del build (nomi con hash, non cambiano mai): prima la copia salvata
-const CACHE = 'swipeshop-v1'
+const CACHE = 'swipeshop-v2'
 
 self.addEventListener('install', () => self.skipWaiting())
 
