@@ -61,10 +61,10 @@ export function FiltersPage() {
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-2xl bg-white p-3 text-sm ring-1 ring-neutral-200">
         <span className="text-neutral-600">Nella home vedi solo i prodotti verdi.</span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#dcfce7] px-2.5 py-0.5 font-medium text-[#166534] ring-1 ring-[#22c55e]">
+        <span className="inline-flex items-center gap-1 rounded-full chip-in px-2.5 py-0.5 font-medium ring-1">
           <Check className="size-3.5" /> incluso
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#fee2e2] px-2.5 py-0.5 font-medium text-[#991b1b] ring-1 ring-[#ef4444]">
+        <span className="inline-flex items-center gap-1 rounded-full chip-out px-2.5 py-0.5 font-medium ring-1">
           <X className="size-3.5" /> escluso
         </span>
         <span className="text-neutral-600">Tocca un filtro per cambiarlo.</span>
@@ -245,7 +245,7 @@ function AllNone({ all, none, onAll, onNone }: { all: boolean; none: boolean; on
         type="button"
         onClick={onAll}
         disabled={all}
-        className="shrink-0 rounded-full bg-[#dcfce7] px-2.5 py-1 text-xs whitespace-nowrap font-semibold text-[#166534] ring-1 ring-[#22c55e] active:scale-95 disabled:opacity-40"
+        className="shrink-0 rounded-full chip-in px-2.5 py-1 text-xs whitespace-nowrap font-semibold ring-1 active:scale-95 disabled:opacity-40"
       >
         Includi tutto
       </button>
@@ -253,7 +253,7 @@ function AllNone({ all, none, onAll, onNone }: { all: boolean; none: boolean; on
         type="button"
         onClick={onNone}
         disabled={none}
-        className="shrink-0 rounded-full bg-[#fee2e2] px-2.5 py-1 text-xs whitespace-nowrap font-semibold text-[#991b1b] ring-1 ring-[#ef4444] active:scale-95 disabled:opacity-40"
+        className="shrink-0 rounded-full chip-out px-2.5 py-1 text-xs whitespace-nowrap font-semibold ring-1 active:scale-95 disabled:opacity-40"
       >
         Escludi tutto
       </button>
@@ -281,7 +281,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       aria-pressed={active}
       // Verde = incluso nella ricerca, rosso = escluso. Colori fissi, uguali in tema chiaro e scuro.
       className={`inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium ring-1 transition active:scale-95 ${
-        active ? 'bg-[#dcfce7] text-[#166534] ring-[#22c55e]' : 'bg-[#fee2e2] text-[#991b1b] ring-[#ef4444]'
+        active ? 'chip-in' : 'chip-out'
       }`}
     >
       {active ? <Check className="size-3.5" /> : <X className="size-3.5" />}

@@ -46,7 +46,7 @@ export function BrandPicker({
               onClick={() => onToggle(b)}
               aria-pressed={active}
               className={`inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium ring-1 transition active:scale-95 ${
-                active ? 'bg-[#dcfce7] text-[#166534] ring-[#22c55e]' : 'bg-[#fee2e2] text-[#991b1b] ring-[#ef4444]'
+                active ? 'chip-in' : 'chip-out'
               }`}
             >
               {active ? <Check className="size-3.5" /> : <X className="size-3.5" />}

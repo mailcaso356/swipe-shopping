@@ -60,3 +60,25 @@ body {
 body {
   background: var(--color-neutral-50);
 }
+
+/* Filtri verde (incluso) / rosso (escluso): toni chiari di giorno, toni scuri col tema scuro. */
+.chip-in {
+  background: #dcfce7;
+  color: #166534;
+  --tw-ring-color: #22c55e;
+}
+.chip-out {
+  background: #fee2e2;
+  color: #991b1b;
+  --tw-ring-color: #ef4444;
+}
+:root.dark .chip-in {
+  background: #12301f;
+  color: #86efac;
+  --tw-ring-color: #16a34a;
+}
+:root.dark .chip-out {
+  background: #3a1414;
+  color: #fca5a5;
+  --tw-ring-color: #dc2626;
+}

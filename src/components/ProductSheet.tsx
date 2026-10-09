@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, Heart, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { categoryLabel } from '../config/categories'
 import { brandAndStore, storeLinkLabel, storeName } from '../config/stores'
 import { galleryOf } from '../lib/gallery'
-import { closeProduct, useOpenProduct } from '../lib/productSheet'
+import { closeProduct, openProduct, useOpenProduct } from '../lib/productSheet'
+import { similarProducts } from '../lib/similar'
 import { useDetails } from '../lib/useDetails'
 import { useApp } from '../state/AppState'
 import type { Product } from '../types/product'
@@ -18,6 +19,9 @@ import { StoreLink } from './StoreLink'
 /** Scheda prodotto a tutto schermo: più foto, caratteristiche e pulsanti. */
 export function ProductSheet() {
   const product = useOpenProduct()
+  const panel = useRef<HTMLDivElement>(null)
+  // Aprendo un prodotto simile si riparte dall'alto della scheda.
+  useEffect(() => panel.current?.scrollTo({ top: 0 }), [product?.id])
 
   useEffect(() => {
     if (!product) return
@@ -38,6 +42,7 @@ export function ProductSheet() {
           onClick={closeProduct}
         >
           <motion.div
+            ref={panel}
             role="dialog"
             aria-modal="true"
             aria-label={product.title}
@@ -57,7 +62,8 @@ export function ProductSheet() {
 }
 
 function SheetContent({ product }: { product: Product }) {
-  const { wishlist, actions } = useApp()
+  const { wishlist, actions, allProducts } = useApp()
+  const similar = useMemo(() => similarProducts(product, allProducts), [product, allProducts])
   const details = useDetails(product.id)
   const photos = galleryOf(product, details)
   const saved = wishlist.some((w) => w.product.id === product.id)
@@ -140,6 +146,26 @@ function SheetContent({ product }: { product: Product }) {
             <ul className="list-disc space-y-1.5 pl-5 text-sm text-neutral-700">
               {details.features.map((f) => (
                 <li key={f}>{f}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {similar.length > 0 && (
+          <div>
+            <h3 className="mb-2 font-semibold">Simili</h3>
+            <ul className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+              {similar.map((p) => (
+                <li key={p.id} className="w-32 shrink-0 snap-start">
+                  <button type="button" onClick={() => openProduct(p)} className="block w-full text-left active:scale-[0.97]">
+                    <span className="relative block aspect-square overflow-hidden rounded-2xl ring-1 ring-black/5">
+                      <ProductImage product={p} className="size-full" />
+                      <DiscountBadge product={p} size="sm" />
+                    </span>
+                    <span className="mt-1.5 block truncate text-[11px] font-medium tracking-wide text-neutral-500 uppercase">{p.brand}</span>
+                    <span className="line-clamp-2 text-xs leading-snug">{p.title}</span>
+                    <PriceTag product={p} />
+                  </button>
+                </li>
               ))}
             </ul>
           </div>
