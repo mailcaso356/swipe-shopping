@@ -18,10 +18,11 @@ jobs:
         env:
           URLS: ${{ inputs.urls }}
           GREP: ${{ inputs.grep }}
+          COOKIE: localization=IT; cart_currency=EUR
         run: |
           UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
           for u in $URLS; do
             echo "=== $u"
-            curl -sS -L --compressed -m 25 -A "$UA" -H 'Accept-Language: it-IT,it;q=0.9' -o /tmp/body -w 'status=%{http_code} size=%{size_download} type=%{content_type} final=%{url_effective}\n' "$u" || true
+            curl -sS -L --compressed -m 25 -A "$UA" -H 'Accept-Language: it-IT,it;q=0.9' -H "Cookie: $COOKIE" -o /tmp/body -w 'status=%{http_code} size=%{size_download} type=%{content_type} final=%{url_effective}\n' "$u" || true
             if [ -n "$GREP" ]; then grep -ozE "$GREP" /tmp/body | tr "\0" "\n" | head -c 8000; echo; else head -c 1500 /tmp/body | tr -s '\n\t ' ' ' ; echo; fi
           done
