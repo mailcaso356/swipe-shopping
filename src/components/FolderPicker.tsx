@@ -23,12 +23,12 @@ export function FolderPicker({ product, onClose }: { product: Product; onClose: 
 
   const row = 'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left font-medium active:bg-neutral-100'
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 pb-[12dvh]" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Sposta in una cartella"
-        className="w-full max-w-sm space-y-3 rounded-t-3xl bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl"
+        className="w-full max-w-sm space-y-3 rounded-3xl bg-white p-4 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
