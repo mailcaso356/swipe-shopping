@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 
 /** Routing via hash: funziona su qualsiasi hosting statico e dentro Capacitor. */
-export const ROUTES = ['scopri', 'preferiti', 'filtri', 'profilo', 'privacy', 'admin'] as const
+export const ROUTES = ['scopri', 'preferiti', 'filtri', 'profilo', 'privacy', 'admin', 'lista'] as const
 export type Route = (typeof ROUTES)[number]
 
 const parse = (): Route => {
   const r = window.location.hash.replace(/^#\/?/, '')
   if (r.startsWith('p/')) return 'scopri' // prodotto condiviso: si apre in Scopri
+  if (r.startsWith('lista/')) return 'lista' // cartella di preferiti condivisa
   return (ROUTES as readonly string[]).includes(r) ? (r as Route) : 'scopri'
 }
 

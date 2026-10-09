@@ -9,6 +9,7 @@ import { DiscoverPage } from './pages/DiscoverPage'
 import { FiltersPage } from './pages/FiltersPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { SharedListPage } from './pages/SharedListPage'
 import { WishlistPage } from './pages/WishlistPage'
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
         {route === 'profilo' && <ProfilePage />}
         {route === 'privacy' && <PrivacyPage />}
         {route === 'admin' && <AdminPage />}
+        {route === 'lista' && <SharedListPage />}
       </main>
       <ConsentBanner />
       <Welcome />

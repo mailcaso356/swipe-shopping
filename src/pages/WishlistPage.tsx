@@ -1,4 +1,4 @@
-import { BadgePercent, Folder, FolderInput, Heart, Trash2 } from 'lucide-react'
+import { BadgePercent, Folder, FolderInput, Heart, Share2, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { FolderPicker } from '../components/FolderPicker'
 import { NewBadge } from '../components/NewBadge'
@@ -12,6 +12,7 @@ import { universeOf } from '../config/categories'
 import { brandAndStore } from '../config/stores'
 import { discountBadge, freshPrice } from '../lib/price'
 import { openProduct } from '../lib/productSheet'
+import { shareList } from '../lib/share'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 import type { Product } from '../types/product'
@@ -26,6 +27,7 @@ export function WishlistPage() {
   const wishlist = useMemo(() => all.filter((w) => universeOf(w.product.category) === state.mode), [all, state.mode])
   const deals = wishlist.filter((w) => w.deal !== null).length
   const [folder, setFolder] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
   const [sort, setSort] = useState<WishSort>('recenti')
   const [moving, setMoving] = useState<Product | null>(null)
   const [dealsOnly, setDealsOnly] = useState(false)
@@ -103,6 +105,22 @@ export function WishlistPage() {
           <FolderChip key={name} active={current === name} onClick={() => setFolder(name)} label={name} count={n} folder />
         ))}
       </div>
+      {shown.length > 0 && (
+        <button
+          type="button"
+          onClick={async () => {
+            const result = await shareList(current ?? 'I miei preferiti', shown.map((w) => w.product))
+            if (result === 'copied') {
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            }
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-white py-2.5 text-sm font-semibold ring-1 ring-neutral-200 active:scale-[0.98]"
+        >
+          <Share2 className="size-4" />
+          {copied ? 'Link copiato' : current ? `Condividi la cartella "${current}"` : 'Condividi questa lista'}
+        </button>
+      )}
       <div className="flex items-center justify-between gap-3 text-sm">
         {current ? (
           <span className="flex gap-3">
