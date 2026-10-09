@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { ALL_CATEGORY_IDS, CATEGORY_GROUPS, type CategoryId } from '../config/categories'
+import { colorSwatch } from '../config/colors'
 import { BrandPicker } from '../components/BrandPicker'
 import { PriceRange } from '../components/PriceRange'
 import { STORES, type StoreId } from '../config/stores'
@@ -127,7 +128,22 @@ export function FiltersPage() {
         <ChipSection title="Taglia" values={facets.sizes} selected={f.sizes} onToggle={(v) => set({ sizes: toggle(f.sizes, v) })} />
       )}
       {facets.colors.length > 0 && (
-        <ChipSection title="Colore" values={facets.colors} selected={f.colors} onToggle={(v) => set({ colors: toggle(f.colors, v) })} />
+        <Section title="Colore" hint="Nessuno selezionato = tutti i colori">
+          <div className="flex flex-wrap gap-2">
+            {facets.colors.map((c) => (
+              <Chip key={c} active={f.colors.includes(c)} onClick={() => set({ colors: toggle(f.colors, c) })}>
+                {colorSwatch(c) && (
+                  <span
+                    aria-hidden
+                    className="size-3.5 rounded-full ring-1 ring-black/15"
+                    style={{ background: colorSwatch(c) }}
+                  />
+                )}
+                {c}
+              </Chip>
+            ))}
+          </div>
+        </Section>
       )}
 
       <Section title="Ordina per">

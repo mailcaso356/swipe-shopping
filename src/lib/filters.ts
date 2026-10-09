@@ -1,4 +1,5 @@
 import { ALL_CATEGORY_IDS } from '../config/categories'
+import { COLOR_ORDER } from '../config/colors'
 import type { Filters, Product } from '../types/product'
 import { discountBadge, freshPrice } from './price'
 
@@ -57,6 +58,8 @@ export function activeFilterCount(f: Filters) {
   )
 }
 
+const colorRank = (c: string) => (COLOR_ORDER.includes(c) ? COLOR_ORDER.indexOf(c) : COLOR_ORDER.length)
+
 /** Valori distinti presenti nel catalogo, per mostrare solo filtri utili. */
 export function facetValues(products: Product[]) {
   const brandCount = new Map<string, number>()
@@ -69,10 +72,9 @@ export function facetValues(products: Product[]) {
     p.sizes?.forEach((s) => sizes.add(s))
     p.colors?.forEach((c) => colors.add(c))
   }
-  const sort = (s: Set<string>) => [...s].sort((a, b) => a.localeCompare(b, 'it'))
   // Marche dalla più presente: le prime sono quelle che l'utente cerca più spesso.
   const brands = [...brandCount].sort((a, b) => b[1] - a[1]).map(([b]) => b)
-  return { brands, stores: [...stores], sizes: [...sizes], colors: sort(colors) }
+  return { brands, stores: [...stores], sizes: [...sizes], colors: [...colors].sort((a, b) => colorRank(a) - colorRank(b) || a.localeCompare(b)) }
 }
 
 /**

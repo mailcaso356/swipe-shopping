@@ -3,6 +3,7 @@
 // e non finiscono mai nel sito. Uso: `npm run sync:amazon` con le variabili d'ambiente impostate.
 import { readFileSync, writeFileSync } from 'node:fs'
 import { classify } from './classify.ts'
+import { detectColors } from '../src/config/colors.ts'
 import { SEARCH_PLAN, normalizeBrand } from './search-plan.ts'
 
 const { AMAZON_CREDENTIAL_ID, AMAZON_CREDENTIAL_SECRET, AMAZON_CREDENTIAL_VERSION, AMAZON_TOKEN_URL } = process.env
@@ -248,6 +249,8 @@ async function searchCatalog(token: string) {
               addedAt: previousAddedAt.get(id) ?? now,
               source: 'ricerca',
             }
+            const colors = detectColors(title)
+            if (colors.length) p.colors = colors
             applyOffer(p, offer)
             found.set(id, p)
           }
