@@ -4,6 +4,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { classify } from './classify.ts'
 import { detectColors } from '../src/config/colors.ts'
+import { validateProduct } from '../src/lib/validate.ts'
 import { DETAIL_SHARDS, detailShard, type ProductDetails } from '../src/lib/details.ts'
 import { SEARCH_PLAN, normalizeBrand } from './search-plan.ts'
 
@@ -259,11 +260,11 @@ async function searchCatalog(token: string) {
           const items: any[] = body?.searchResult?.items ?? []
           for (const item of items) {
             const asin = item?.asin
-            const title = item?.itemInfo?.title?.displayValue
+            const title = String(item?.itemInfo?.title?.displayValue ?? '').trim()
             const itemBrand = item?.itemInfo?.byLineInfo?.brand?.displayValue ?? ''
             const image = item?.images?.primary?.large?.url
             const offer = readListing(item)
-            if (!asin || !title || typeof image !== 'string' || !image.startsWith('https://')) continue
+            if (!asin || title.length < 3 || typeof image !== 'string' || !image.startsWith('https://')) continue
             // Solo la marca cercata: Amazon a volte restituisce marche simili o sconosciute.
             if (!normalizeBrand(itemBrand).includes(normalizeBrand(brand))) {
               rejectedBrand++
@@ -324,6 +325,12 @@ try {
     searched = catalog.filter((p) => p.source === 'ricerca')
     annotate('warning', 'Nessun risultato dalla ricerca: mantengo il catalogo precedente.')
   } else if (details.size > 0) writeDetails()
+  // Una voce strana di Amazon non deve bloccare tutto l'aggiornamento: la scartiamo.
+  const invalid = searched.filter((p) => validateProduct(p).length > 0)
+  if (invalid.length) {
+    annotate('warning', `Scartati ${invalid.length} risultati non validi: ${invalid.slice(0, 5).map((p) => `${p.id} (${validateProduct(p).join(', ')})`).join(' | ')}`)
+    searched = searched.filter((p) => validateProduct(p).length === 0)
+  }
   const others = catalog.filter((p) => p.store !== 'amazon')
   const next = [...curated, ...others, ...searched]
   writeFileSync(file, JSON.stringify(next, null, 1) + '\n')

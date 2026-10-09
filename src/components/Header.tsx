@@ -9,7 +9,8 @@ export function Header() {
   const { state, actions } = useApp()
   const tech = state.mode === 'tech'
   return (
-    <header className="shrink-0 pt-[env(safe-area-inset-top)]">
+    // Sticky con sfondo pieno: iOS 26 riconosce la barra e usa il suo colore sotto l'ora invece di sfocare il contenuto.
+    <header className="sticky top-0 z-20 shrink-0 bg-neutral-50 pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-14 max-w-md items-center gap-2 px-2 sm:max-w-2xl">
         <button
           type="button"
@@ -23,9 +24,12 @@ export function Header() {
           {tech ? <Shirt className="size-4" /> : <Cpu className="size-4" />}
           {tech ? 'Moda' : 'Tech'}
         </button>
-        <a href="#/scopri" className="flex-1 text-center text-lg font-black tracking-tight">
-          {APP_NAME.split(' ')[0]}
-          <span className="text-rose-500">{APP_NAME.split(' ').slice(1).join(' ')}</span>
+        <a href="#/scopri" className="flex flex-1 flex-col items-center leading-none">
+          <span className="text-lg font-black tracking-tight">
+            {APP_NAME.split(' ')[0]}
+            <span className="text-rose-500">{APP_NAME.split(' ').slice(1).join(' ')}</span>
+          </span>
+          <span className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.25em] text-rose-500">{tech ? 'Tech' : 'Moda'}</span>
         </a>
         <span className="w-10" aria-hidden />
         <button
