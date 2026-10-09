@@ -58,8 +58,6 @@ export interface Filters {
   sort: SortOrder
   /** Solo prodotti scontati */
   onlyDeals?: boolean
-  /** Solo prodotti arrivati negli ultimi giorni */
-  onlyNew?: boolean
 }
 
 export const DEFAULT_FILTERS: Filters = {

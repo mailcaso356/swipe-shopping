@@ -37,12 +37,6 @@ export function DiscoverPage() {
       <DeckTabs />
       {deck.length > 0 ? (
         <SwipeDeck />
-      ) : state.filters.onlyNew ? (
-        <Empty title="Nessuna novità per ora" text="I prodotti nuovi arrivano ogni giorno: torna presto a dare un'occhiata.">
-          <button type="button" onClick={() => actions.setFilters({ ...state.filters, onlyNew: undefined })} className={primaryBtn}>
-            Vedi tutto
-          </button>
-        </Empty>
       ) : (
         <Empty title="Hai visto tutto!" text="Non ci sono altri prodotti con questi filtri.">
           <a href={routeHref('filtri')} className={primaryBtn}>

@@ -1,7 +1,6 @@
 import { ALL_CATEGORY_IDS } from '../config/categories'
 import { COLOR_ORDER } from '../config/colors'
 import type { Filters, Product } from '../types/product'
-import { isNew } from './newness'
 import { discountBadge, freshPrice } from './price'
 
 export function matchesFilters(p: Product, f: Filters) {
@@ -12,7 +11,6 @@ export function matchesFilters(p: Product, f: Filters) {
   if (f.sizes.length && !p.sizes?.some((s) => f.sizes.includes(s))) return false
   if (f.colors.length && !p.colors?.some((c) => f.colors.includes(c))) return false
   if (f.onlyDeals && discountBadge(p) === null) return false
-  if (f.onlyNew && !isNew(p)) return false
   if (f.priceMin !== undefined || f.priceMax !== undefined) {
     // Con un filtro prezzo attivo escludiamo i prodotti senza prezzo verificato.
     const price = freshPrice(p)?.price
@@ -50,7 +48,6 @@ export function activeFilterCount(f: Filters) {
   return (
     (f.gender !== 'tutti' ? 1 : 0) +
     (f.onlyDeals ? 1 : 0) +
-    (f.onlyNew ? 1 : 0) +
     f.categories.length +
     f.brands.length +
     f.stores.length +
@@ -87,5 +84,7 @@ export function facetValues(products: Product[]) {
 export function normalizeFilters(f: Filters): Filters {
   const valid = f.categories.filter((c) => ALL_CATEGORY_IDS.includes(c))
   const unique = [...new Set(valid)]
-  return { ...f, categories: unique.length >= ALL_CATEGORY_IDS.length ? [] : unique }
+  // "Solo novità" non esiste più: lo togliamo anche dai filtri salvati.
+  const { onlyNew: _n, ...rest } = f as Filters & { onlyNew?: boolean }
+  return { ...rest, categories: unique.length >= ALL_CATEGORY_IDS.length ? [] : unique }
 }

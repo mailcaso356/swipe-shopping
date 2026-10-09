@@ -70,19 +70,13 @@ export function FiltersPage() {
         </Section>
       )}
 
-      <Section title="Offerte e novità">
-        <div className="divide-y divide-neutral-100 rounded-2xl bg-white ring-1 ring-neutral-200">
+      <Section title="Offerte">
+        <div className="rounded-2xl bg-white ring-1 ring-neutral-200">
           <Toggle
             label="Solo prodotti in offerta"
             hint="Scontati almeno del 5%"
             checked={!!f.onlyDeals}
             onChange={(v) => set({ onlyDeals: v || undefined })}
-          />
-          <Toggle
-            label="Solo novità"
-            hint="Arrivati negli ultimi 7 giorni"
-            checked={!!f.onlyNew}
-            onChange={(v) => set({ onlyNew: v || undefined })}
           />
         </div>
       </Section>
