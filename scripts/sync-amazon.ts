@@ -43,15 +43,28 @@ async function getToken() {
   return body.access_token as string
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+// Amazon concede circa una richiesta al secondo: le distanziamo e ritentiamo se rifiutate.
+const MIN_GAP_MS = 1100
+let lastCall = 0
+
 async function callApi(op: string, token: string, payload: Record<string, unknown>) {
-  const res = await fetch(`${API_BASE}/${op}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'x-marketplace': MARKETPLACE },
-    body: JSON.stringify({ marketplace: MARKETPLACE, partnerTag: PARTNER_TAG, languagesOfPreference: ['it_IT'], ...payload }),
-  })
-  const body = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(`${op} HTTP ${res.status}: ${JSON.stringify(body)}`)
-  return body
+  for (let attempt = 0; ; attempt++) {
+    await sleep(Math.max(0, lastCall + MIN_GAP_MS - Date.now()))
+    lastCall = Date.now()
+    const res = await fetch(`${API_BASE}/${op}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'x-marketplace': MARKETPLACE },
+      body: JSON.stringify({ marketplace: MARKETPLACE, partnerTag: PARTNER_TAG, languagesOfPreference: ['it_IT'], ...payload }),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (res.status === 429 && attempt < 4) {
+      await sleep(2000 * 2 ** attempt)
+      continue
+    }
+    if (!res.ok) throw new Error(`${op} HTTP ${res.status}: ${JSON.stringify(body)}`)
+    return body
+  }
 }
 
 const OFFER_RESOURCES = ['offersV2.listings.price', 'offersV2.listings.availability', 'offersV2.listings.isBuyBoxWinner']
