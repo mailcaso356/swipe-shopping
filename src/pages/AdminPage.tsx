@@ -124,7 +124,7 @@ function AdminStatsView() {
             <Grid>
               <Stat label="Prodotti visti" value={views} />
               <Stat label="Mi piace" value={likes} hint={pct(likes, views)} />
-              <Stat label="Click Amazon" value={clicks} hint={pct(clicks, views)} />
+              <Stat label="Click ai negozi" value={clicks} hint={pct(clicks, views)} />
               <Stat label="Condivisioni" value={t.share ?? 0} />
             </Grid>
           </Section>
@@ -135,7 +135,7 @@ function AdminStatsView() {
             </Section>
           )}
 
-          <Ranking title="Più cliccati su Amazon" rows={stats.top_clicked} label={titleOf} />
+          <Ranking title="Più cliccati" rows={stats.top_clicked} label={titleOf} />
           <Ranking title="Più salvati nei preferiti" rows={stats.top_liked} label={titleOf} />
           <Ranking title="Categorie (mi piace + click)" rows={stats.top_categories} label={(id) => (isCategoryId(id) ? categoryLabel(id) : id)} />
           <Ranking title="Marche (mi piace + click)" rows={stats.top_brands} label={(id) => id} />
