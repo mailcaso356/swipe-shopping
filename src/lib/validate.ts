@@ -33,6 +33,7 @@ export function validateProduct(raw: unknown): string[] {
   if (p.price !== undefined && !isPositive(p.price)) errors.push('price deve essere un numero > 0')
   if (p.originalPrice !== undefined && !isPositive(p.originalPrice)) errors.push('originalPrice deve essere un numero > 0')
   if (p.price !== undefined && !isIsoDate(p.priceCheckedAt)) errors.push('price senza priceCheckedAt')
+  if (p.priceFrom !== undefined && typeof p.priceFrom !== 'boolean') errors.push('priceFrom deve essere true/false')
   if (p.searchQuery !== undefined) errors.push('searchQuery non è ammesso nel catalogo verificato')
   for (const key of ['sizes', 'colors'] as const) {
     if (p[key] !== undefined && !(Array.isArray(p[key]) && p[key].every((s) => typeof s === 'string'))) {

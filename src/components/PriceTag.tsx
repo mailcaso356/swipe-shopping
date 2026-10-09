@@ -10,6 +10,7 @@ export function PriceTag({ product, size = 'md' }: { product: Product; size?: 'm
   return (
     <span className="flex flex-wrap items-baseline gap-x-2">
       <span className={`font-semibold text-neutral-900 ${size === 'lg' ? 'text-xl' : 'text-base'}`}>
+        {price.from && <span className="mr-1 text-sm font-normal text-neutral-500">da</span>}
         {formatPrice(price.price)}
       </span>
       {price.originalPrice && (

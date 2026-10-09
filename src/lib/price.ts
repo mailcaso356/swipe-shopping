@@ -16,5 +16,6 @@ export function freshPrice(p: Product, now = Date.now()) {
     originalPrice: discounted ? p.originalPrice : undefined,
     discountPct: discounted ? Math.round((1 - p.price / p.originalPrice!) * 100) : undefined,
     checkedAt: new Date(checked),
+    from: p.priceFrom === true,
   }
 }

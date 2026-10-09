@@ -22,6 +22,8 @@ export interface Product {
   imageUrl?: string
   /** Prezzo attuale in EUR */
   price?: number
+  /** true se `price` è il prezzo più basso tra taglie/varianti ("da 39,90 €") */
+  priceFrom?: boolean
   /** Prezzo pieno, se il prodotto è scontato */
   originalPrice?: number
   /** ISO date: quando il prezzo è stato verificato. Senza data il prezzo non viene mostrato. */
