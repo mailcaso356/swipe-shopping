@@ -47,7 +47,7 @@ export function activeFilterCount(f: Filters) {
   return (
     (f.gender !== 'tutti' ? 1 : 0) +
     (f.onlyDeals ? 1 : 0) +
-    excludedCategories(f) +
+    f.categories.length +
     f.brands.length +
     f.stores.length +
     f.sizes.length +
@@ -77,13 +77,10 @@ export function facetValues(products: Product[]) {
 
 /**
  * Lista categorie vuota = tutte incluse. Se l'utente le seleziona tutte (o nessuna) torniamo a "tutte",
- * così filtri e notifica contano solo le categorie escluse.
+ * come per le marche: il filtro conta solo quando restringe davvero.
  */
 export function normalizeFilters(f: Filters): Filters {
   const valid = f.categories.filter((c) => ALL_CATEGORY_IDS.includes(c))
   const unique = [...new Set(valid)]
   return { ...f, categories: unique.length >= ALL_CATEGORY_IDS.length ? [] : unique }
 }
-
-export const excludedCategories = (f: Filters) =>
-  f.categories.length === 0 ? 0 : ALL_CATEGORY_IDS.length - f.categories.length

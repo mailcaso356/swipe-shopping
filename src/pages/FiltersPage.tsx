@@ -17,12 +17,8 @@ export function FiltersPage() {
   const set = (patch: Partial<Filters>) => actions.setFilters({ ...f, ...patch })
   const facets = facetValues(products)
   const matching = products.filter((p) => p.availability !== 'out_of_stock' && matchesFilters(p, f)).length
-  // Lista vuota = tutte le categorie: le mostriamo tutte accese e si tocca per escludere.
-  const included = f.categories.length ? f.categories : ALL_CATEGORY_IDS
-  const setIncluded = (list: CategoryId[]) => {
-    if (list.length === 0) return // almeno una categoria deve restare
-    set({ categories: list })
-  }
+  // Come per le marche: nessuna selezionata (o tutte) = tutte le categorie.
+  const setCategories = (list: CategoryId[]) => set({ categories: list.length === ALL_CATEGORY_IDS.length ? [] : list })
 
   return (
     <div className="space-y-6 pb-28">
@@ -34,6 +30,25 @@ export function FiltersPage() {
           </button>
         )}
       </div>
+
+      <Section title="Offerte">
+        <label className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-neutral-200">
+          <span>
+            <span className="block font-medium">Solo prodotti in offerta</span>
+            <span className="text-xs text-neutral-500">Mostra solo quelli scontati almeno del 5%</span>
+          </span>
+          <input
+            type="checkbox"
+            checked={!!f.onlyDeals}
+            onChange={(e) => set({ onlyDeals: e.target.checked || undefined })}
+            className="size-6 accent-rose-500"
+          />
+        </label>
+      </Section>
+
+      <Section title="Prezzo" hint="Con un limite di prezzo vedi solo prodotti con prezzo aggiornato">
+        <PriceRange min={f.priceMin} max={f.priceMax} onChange={(priceMin, priceMax) => set({ priceMin, priceMax })} />
+      </Section>
 
       <Section title="Genere">
         <div className="grid grid-cols-3 gap-1 rounded-2xl bg-neutral-100 p-1">
@@ -57,29 +72,29 @@ export function FiltersPage() {
         </div>
       </Section>
 
-      <Section title="Categorie" hint="Tocca per escludere quelle che non ti interessano">
+      <Section title="Categorie" hint="Nessuna selezionata = tutte le categorie">
         <div className="space-y-4">
           {CATEGORY_GROUPS.map((group) => {
             const ids = group.items.map((i) => i.id) as CategoryId[]
-            const all = ids.every((id) => included.includes(id))
+            const all = ids.every((id) => f.categories.includes(id))
             return (
               <div key={group.id} className="space-y-2">
                 <button
                   type="button"
                   onClick={() =>
-                    setIncluded(all ? included.filter((c) => !ids.includes(c)) : [...new Set([...included, ...ids])])
+                    setCategories(all ? f.categories.filter((c) => !ids.includes(c)) : [...new Set([...f.categories, ...ids])])
                   }
                   className="flex items-center gap-2 text-sm font-semibold"
                 >
                   <span aria-hidden>{group.emoji}</span> {group.label}
-                  <span className="text-xs font-normal text-neutral-400">{all ? 'deseleziona' : 'tutte'}</span>
+                  <span className="text-xs font-normal text-neutral-400">{all ? 'deseleziona' : 'seleziona tutte'}</span>
                 </button>
                 <div className="flex flex-wrap gap-2">
                   {group.items.map((item) => (
                     <Chip
                       key={item.id}
-                      active={included.includes(item.id)}
-                      onClick={() => setIncluded(toggle(included, item.id as CategoryId))}
+                      active={f.categories.includes(item.id)}
+                      onClick={() => setCategories(toggle(f.categories, item.id as CategoryId))}
                     >
                       {item.label}
                     </Chip>
@@ -89,25 +104,6 @@ export function FiltersPage() {
             )
           })}
         </div>
-      </Section>
-
-      <Section title="Offerte">
-        <label className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-neutral-200">
-          <span>
-            <span className="block font-medium">Solo prodotti in offerta</span>
-            <span className="text-xs text-neutral-500">Mostra solo quelli scontati almeno del 5%</span>
-          </span>
-          <input
-            type="checkbox"
-            checked={!!f.onlyDeals}
-            onChange={(e) => set({ onlyDeals: e.target.checked || undefined })}
-            className="size-6 accent-rose-500"
-          />
-        </label>
-      </Section>
-
-      <Section title="Prezzo" hint="Con un limite di prezzo vedi solo prodotti con prezzo aggiornato">
-        <PriceRange min={f.priceMin} max={f.priceMax} onChange={(priceMin, priceMax) => set({ priceMin, priceMax })} />
       </Section>
 
       {facets.stores.length > 1 && (
