@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Check, Heart, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { categoryLabel } from '../config/categories'
-import { storeLinkLabel, storeName } from '../config/stores'
+import { brandAndStore, storeLinkLabel, storeName } from '../config/stores'
 import { galleryOf } from '../lib/gallery'
 import { closeProduct, useOpenProduct } from '../lib/productSheet'
 import { useDetails } from '../lib/useDetails'
@@ -105,7 +105,7 @@ function SheetContent({ product }: { product: Product }) {
       <div className="space-y-4 px-5 pt-4">
         <div className="space-y-1.5">
           <p className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-            {product.brand ?? categoryLabel(product.category)} · {storeName(product.store)}
+            {brandAndStore(product, categoryLabel(product.category))}
           </p>
           <h2 className="text-lg leading-snug font-semibold">{product.title}</h2>
           <PriceTag product={product} size="lg" />

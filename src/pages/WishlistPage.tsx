@@ -8,7 +8,7 @@ import { PriceTag } from '../components/PriceTag'
 import { ProductImage } from '../components/ProductImage'
 import { StoreLink } from '../components/StoreLink'
 import { AMAZON_DISCLOSURE } from '../config/app'
-import { storeName } from '../config/stores'
+import { brandAndStore } from '../config/stores'
 import { discountBadge, freshPrice } from '../lib/price'
 import { openProduct } from '../lib/productSheet'
 import { routeHref } from '../lib/useHashRoute'
@@ -185,8 +185,7 @@ export function WishlistPage() {
               </div>
               <div className="flex flex-1 flex-col gap-1 p-3">
                 <p className="text-[11px] font-medium tracking-wide text-neutral-500 uppercase">
-                  {product.brand ? `${product.brand} · ` : ''}
-                  {storeName(product.store)}
+                  {brandAndStore(product)}
                 </p>
                 <h3 className="line-clamp-2 text-sm leading-snug font-medium">{product.title}</h3>
                 <div className="mt-auto pt-1">

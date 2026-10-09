@@ -63,6 +63,12 @@ export type StoreId = keyof typeof STORES
 
 export const isStoreId = (id: string): id is StoreId => id in STORES
 export const storeName = (id: StoreId) => STORES[id].name
+/** "Marca · Negozio", o solo il negozio quando coincidono (es. Calzedonia su Calzedonia). */
+export const brandAndStore = (p: Product, fallback?: string) => {
+  const brand = p.brand ?? fallback
+  const store = storeName(p.store)
+  return !brand || brand.toLowerCase() === store.toLowerCase() ? store : `${brand} · ${store}`
+}
 export const productUrl = (p: Product) => STORES[p.store]?.buildUrl(p) ?? null
 export const productImageUrl = (p: Product): string | null => {
   if (p.imageUrl) return p.imageUrl

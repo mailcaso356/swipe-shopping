@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
 import { useRef, useState, type MouseEvent } from 'react'
 import { categoryLabel } from '../config/categories'
-import { storeName } from '../config/stores'
+import { brandAndStore } from '../config/stores'
 import type { Product } from '../types/product'
 import { galleryOf } from '../lib/gallery'
 import { openProduct } from '../lib/productSheet'
@@ -134,7 +134,7 @@ export function SwipeCard({
         }}
       >
         <p className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-          {product.brand ?? categoryLabel(product.category)} · {storeName(product.store)}
+          {brandAndStore(product, categoryLabel(product.category))}
         </p>
         <h2 className="line-clamp-2 text-lg leading-snug font-semibold text-neutral-900">{product.title}</h2>
         <div className="flex items-center justify-between gap-3">
