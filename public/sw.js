@@ -1,7 +1,7 @@
 // Service worker: l'app si apre subito anche con rete lenta e funziona offline con l'ultimo catalogo.
 // - pagina e catalogo: prima la rete (per avere prezzi aggiornati), se manca si usa la copia salvata
 // - file del build (nomi con hash, non cambiano mai): prima la copia salvata
-const CACHE = 'swipeshop-v3'
+const CACHE = 'swipeshop-v4'
 
 self.addEventListener('install', () => self.skipWaiting())
 
@@ -21,7 +21,7 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET' || url.origin !== self.location.origin) return
 
   const immutable = url.pathname.includes('/assets/') || url.pathname.includes('/icons/')
-  if (url.pathname.endsWith('/catalog.json')) event.respondWith(staleWhileRevalidate(event, req))
+  if (url.pathname.endsWith('/catalog.json')) event.respondWith(networkWithTimeout(event, req))
   else event.respondWith(immutable ? cacheFirst(req) : networkFirst(req))
 })
 
@@ -33,20 +33,19 @@ async function cacheFirst(req) {
   return res
 }
 
-// Catalogo: dalla seconda apertura si parte subito con la copia salvata, intanto si scarica
-// quella nuova per la volta dopo (i prezzi vengono comunque mostrati solo se recenti).
-async function staleWhileRevalidate(event, req) {
+// Catalogo: si usa quello nuovo (filtri e prezzi aggiornati); se la rete non risponde entro
+// 2,5 secondi si parte con la copia salvata e intanto si salva quella nuova per la volta dopo.
+async function networkWithTimeout(event, req) {
   const cache = await caches.open(CACHE)
-  const cached = await cache.match(req, { ignoreSearch: true })
   const update = fetch(req).then((res) => {
     if (res.ok) cache.put(req, res.clone())
     return res
   })
-  if (cached) {
-    event.waitUntil(update.catch(() => {}))
-    return cached
-  }
-  return update
+  event.waitUntil(update.catch(() => {}))
+  const cached = await cache.match(req, { ignoreSearch: true })
+  if (!cached) return update
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(cached), 2500))
+  return Promise.race([update.then((res) => (res.ok ? res : cached)).catch(() => cached), timeout])
 }
 
 async function networkFirst(req) {
