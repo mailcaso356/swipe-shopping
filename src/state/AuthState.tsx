@@ -49,8 +49,15 @@ function useAuthStore() {
       ready,
       user: session?.user ?? null,
       recovering,
-      signUp: (email: string, password: string) =>
-        run(() => supabase!.auth.signUp({ email, password, options: { emailRedirectTo: authRedirectUrl() } })),
+      signUp: (email: string, password: string, emailNews: boolean) =>
+        run(() =>
+          supabase!.auth.signUp({
+            email,
+            password,
+            // Copiata in user_data.email_news da un trigger (supabase/schema-3.sql).
+            options: { emailRedirectTo: authRedirectUrl(), data: { email_news: emailNews } },
+          }),
+        ),
       signIn: (email: string, password: string) => run(() => supabase!.auth.signInWithPassword({ email, password })),
       signOut: () => run(() => supabase!.auth.signOut()),
       resetPassword: (email: string) =>

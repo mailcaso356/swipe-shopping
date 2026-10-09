@@ -5,6 +5,25 @@
 -- Preferenza dell'utente: attiva di base, si spegne dal Profilo o dal link in fondo all'email.
 alter table public.user_data add column if not exists email_news boolean not null default true;
 
+-- Scelta fatta alla registrazione (casella "novità"): il sito la manda nei metadati dell'account,
+-- qui la copiamo in user_data appena l'account nasce. Poi si cambia dal Profilo.
+create or replace function public.user_data_on_signup()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.user_data (user_id, email_news)
+  values (new.id, coalesce((new.raw_user_meta_data ->> 'email_news')::boolean, true))
+  on conflict (user_id) do nothing;
+  return new;
+end;
+$$;
+drop trigger if exists user_data_on_signup on auth.users;
+create trigger user_data_on_signup after insert on auth.users
+  for each row execute function public.user_data_on_signup();
+
 create table if not exists public.broadcasts (
   id bigint generated always as identity primary key,
   created_at timestamptz not null default now(),

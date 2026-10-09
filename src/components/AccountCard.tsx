@@ -158,6 +158,7 @@ export function AuthForm({ initialMode = 'accedi' }: { initialMode?: Mode }) {
   const [mode, setMode] = useState<Mode>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [news, setNews] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
@@ -176,7 +177,7 @@ export function AuthForm({ initialMode = 'accedi' }: { initialMode?: Mode }) {
     try {
       if (mode === 'accedi') await auth.signIn(email.trim(), password)
       if (mode === 'registrati') {
-        await auth.signUp(email.trim(), password)
+        await auth.signUp(email.trim(), password, news)
         setInfo(`Ti abbiamo mandato un'email a ${email.trim()}: apri il link per confermare l'account.`)
       }
       if (mode === 'recupera') {
@@ -230,6 +231,17 @@ export function AuthForm({ initialMode = 'accedi' }: { initialMode?: Mode }) {
           onChange={(e) => setPassword(e.target.value)}
           className={input}
         />
+      )}
+      {mode === 'registrati' && (
+        <label className="flex items-start gap-2.5 px-1 text-neutral-600">
+          <input
+            type="checkbox"
+            checked={news}
+            onChange={(e) => setNews(e.target.checked)}
+            className="mt-0.5 size-4 shrink-0 accent-neutral-900"
+          />
+          <span>Voglio ricevere via email le novità di Swipe Shopping. Puoi cambiare idea quando vuoi dal Profilo.</span>
+        </label>
       )}
       {error && <p className="text-rose-600">{error}</p>}
       {info && (
