@@ -1,6 +1,6 @@
 # Swipe Shopping – MVP web app
 
-Shopping moda "come su Tinder": scorri i prodotti, salva quelli che ti piacciono, acquista sul negozio tramite link affiliato.
+Shopping moda a swipe: scorri i prodotti, salva quelli che ti piacciono, acquista sul negozio tramite link affiliato.
 
 ## Avvio
 

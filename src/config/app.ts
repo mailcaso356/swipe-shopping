@@ -1,6 +1,6 @@
 /** Nome e testi globali: cambiali qui quando scegli il brand definitivo. */
 export const APP_NAME = 'Swipe Shopping'
-export const APP_TAGLINE = 'Fai shopping come su Tinder'
+export const APP_TAGLINE = 'Scorri, salva, acquista'
 
 /** Testo di disclosure richiesto dal programma Amazon Associates (Italia). */
 export const AMAZON_DISCLOSURE = 'In qualità di Affiliato Amazon, ricevo un guadagno dagli acquisti idonei.'

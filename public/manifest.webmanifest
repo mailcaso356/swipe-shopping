@@ -1,7 +1,7 @@
 {
   "name": "Swipe Shopping",
   "short_name": "Swipe Shop",
-  "description": "Fai shopping come su Tinder: scorri, salva e acquista moda dai migliori negozi.",
+  "description": "Scorri, salva e acquista la moda dei migliori marchi, un prodotto alla volta.",
   "lang": "it",
   "id": "./",
   "start_url": "./#/scopri",
