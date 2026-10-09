@@ -19,6 +19,9 @@ const GENDERS: { value: Filters['gender']; label: string }[] = [
 ]
 
 /** Benvenuto al primo avvio: come funziona, per chi, cosa interessa, invito a registrarsi. */
+/** Avvisa la guida rapida che il benvenuto è finito. */
+export const ONBOARDED_EVENT = 'swipeshop:onboarded'
+
 export function Welcome() {
   const [open, setOpen] = useState(() => !load<boolean>('onboarded', false))
   const auth = useAuth()
@@ -32,6 +35,7 @@ export function Welcome() {
 
   const finish = () => {
     save('onboarded', true)
+    window.dispatchEvent(new Event(ONBOARDED_EVENT))
     setOpen(false)
   }
 
@@ -51,7 +55,9 @@ export function Welcome() {
   // Registrazione o accesso completati dal benvenuto: si entra subito nell'app.
   const signedUpHere = step === 3 && !!auth.user
   useEffect(() => {
-    if (signedUpHere) save('onboarded', true)
+    if (!signedUpHere) return
+    save('onboarded', true)
+    window.dispatchEvent(new Event(ONBOARDED_EVENT))
   }, [signedUpHere])
 
   if (!open || signedUpHere) return null

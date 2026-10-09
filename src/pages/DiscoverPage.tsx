@@ -1,6 +1,6 @@
 import { RefreshCw, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { SwipeDeck } from '../components/SwipeDeck'
-import { SwipeHint } from '../components/SwipeHint'
+import { DeckTabs } from '../components/DeckTabs'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 
@@ -34,11 +34,15 @@ export function DiscoverPage() {
           Catalogo in preparazione: per ora ogni card apre una ricerca reale su Amazon.
         </p>
       )}
+      <DeckTabs />
       {deck.length > 0 ? (
-        <>
-          <SwipeHint />
-          <SwipeDeck />
-        </>
+        <SwipeDeck />
+      ) : state.filters.onlyNew ? (
+        <Empty title="Nessuna novità per ora" text="I prodotti nuovi arrivano ogni giorno: torna presto a dare un'occhiata.">
+          <button type="button" onClick={() => actions.setFilters({ ...state.filters, onlyNew: undefined })} className={primaryBtn}>
+            Vedi tutto
+          </button>
+        </Empty>
       ) : (
         <Empty title="Hai visto tutto!" text="Non ci sono altri prodotti con questi filtri.">
           <a href={routeHref('filtri')} className={primaryBtn}>

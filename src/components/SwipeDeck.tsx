@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/AppState'
 import { productImageUrl, storeLinkLabel } from '../config/stores'
+import { CoachMarks } from './CoachMarks'
 import { ShareButton } from './ShareButton'
 import { StoreLink } from './StoreLink'
 import { SwipeCard, type SwipeDir } from './SwipeCard'
@@ -63,6 +64,7 @@ export function SwipeDeck() {
             .map((p, i) => <SwipeCard key={p.id} product={p} index={i} onSwipe={swipe} />)
             .reverse()}
         </AnimatePresence>
+        <CoachMarks />
       </div>
 
       <div className="flex items-center justify-center gap-3 sm:gap-4">
