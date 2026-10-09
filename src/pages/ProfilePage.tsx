@@ -5,6 +5,7 @@ import { InstallCard } from '../components/InstallCard'
 import { AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
+import { remove } from '../lib/storage'
 import { useConsent } from '../lib/useConsent'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
@@ -97,6 +98,7 @@ export function ProfilePage() {
                 onClick={() => {
                   actions.clearAll()
                   setConsent('unset')
+                  remove('onboarded')
                   setConfirmClear(false)
                 }}
                 className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-white"
