@@ -4,19 +4,25 @@
 // - solo account confermati che non hanno spento gli avvisi dal Profilo;
 // - niente link affiliati, prezzi o testi Amazon nell'email (regole Amazon Associates):
 //   l'email porta all'app, dove il prezzo aggiornato si vede accanto al prodotto.
-// Uso: `npm run alerts:price` (aggiungi `-- --dry` per vedere chi riceverebbe l'email senza inviarla).
+// Uso: `npm run alerts:price` (aggiungi `-- --dry` per vedere chi riceverebbe l'email senza inviarla,
+// oppure `-- --test=indirizzo@email.it` per mandare solo un'email di esempio a quell'indirizzo).
 import { readFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://hlsqxxcztysnlijznjng.supabase.co'
 const { SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY } = process.env
 const DRY = process.argv.includes('--dry')
+const TEST_TO = process.argv.find((a) => a.startsWith('--test='))?.slice('--test='.length).trim()
 const FROM = 'Swipe Shopping <noreply@swipeshopping.app>'
 const APP_URL = 'https://swipeshopping.app'
 const MIN_GAP_MS = 3 * 24 * 3_600_000
 const PRICE_MAX_AGE_MS = 24 * 3_600_000
 
-if (!SUPABASE_SERVICE_ROLE_KEY || (!RESEND_API_KEY && !DRY)) {
+if (TEST_TO !== undefined && (!RESEND_API_KEY || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(TEST_TO))) {
+  console.log('::error::Email di prova: serve RESEND_API_KEY e un indirizzo valido.')
+  process.exit(1)
+}
+if (TEST_TO === undefined && (!SUPABASE_SERVICE_ROLE_KEY || (!RESEND_API_KEY && !DRY))) {
   console.log('::notice::Avvisi prezzo non attivi: mancano i secrets SUPABASE_SERVICE_ROLE_KEY e/o RESEND_API_KEY.')
   process.exit(0)
 }
@@ -46,8 +52,6 @@ function droppedPrice(saved: Product) {
   const diff = saved.price - current.price
   return diff >= 1 && diff / saved.price >= 0.03 ? current.price : null
 }
-
-const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
 
 async function all<T>(table: string, columns: string, filter?: (q: any) => any): Promise<T[]> {
   const rows: T[] = []
@@ -81,6 +85,32 @@ function email(count: number) {
   return { subject, html, text }
 }
 
+async function send(to: string, count: number) {
+  const { subject, html, text } = email(count)
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: FROM,
+      to: [to],
+      subject,
+      html,
+      text,
+      headers: { 'List-Unsubscribe': `<${APP_URL}/#/profilo>` },
+    }),
+  })
+  if (!res.ok) console.log(`::warning::Email non inviata (${res.status}): ${(await res.text()).slice(0, 300)}`)
+  return res.ok
+}
+
+if (TEST_TO !== undefined) {
+  const ok = await send(TEST_TO, 2)
+  console.log(ok ? `Email di prova inviata a ${TEST_TO}.` : 'Email di prova non inviata.')
+  process.exit(ok ? 0 : 1)
+}
+
+const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } })
+
 const users = await all<{ user_id: string; wishlist: WishItem[] }>('user_data', 'user_id, wishlist', (q) => q.eq('email_alerts', true))
 const sentLog = new Map(
   (await all<{ user_id: string; last_sent_at: string | null; notified: Record<string, number> }>('price_alerts', 'user_id, last_sent_at, notified')).map(
@@ -108,26 +138,12 @@ for (const u of users) {
   const to = data?.user?.email
   if (error || !to || !data.user.email_confirmed_at) continue
 
-  const { subject, html, text } = email(count)
   if (DRY) {
-    console.log(`[prova] ${to}: ${subject}`)
+    console.log(`[prova] ${to}: ${email(count).subject}`)
     continue
   }
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: FROM,
-      to: [to],
-      subject,
-      html,
-      text,
-      headers: { 'List-Unsubscribe': `<${APP_URL}/#/profilo>` },
-    }),
-  })
-  if (!res.ok) {
+  if (!(await send(to, count))) {
     failed++
-    console.log(`::warning::Email non inviata (${res.status}): ${(await res.text()).slice(0, 300)}`)
     continue
   }
   const { error: upsertError } = await db

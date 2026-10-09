@@ -1,0 +1,28 @@
+name: Email di prova "prezzo sceso"
+
+# Manda un'email di esempio (2 preferiti scesi di prezzo) all'indirizzo indicato.
+on:
+  workflow_dispatch:
+    inputs:
+      to:
+        description: Indirizzo a cui mandare l'email di prova
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run alerts:price -- "--test=$TO"
+        env:
+          TO: ${{ inputs.to }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
