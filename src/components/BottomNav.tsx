@@ -1,6 +1,5 @@
 import { Flame, Heart, SlidersHorizontal, BadgePercent, User } from 'lucide-react'
 import { universeOf } from '../config/categories'
-import { activeFilterCount } from '../lib/filters'
 import { routeHref, type Route } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 
@@ -15,7 +14,6 @@ export function BottomNav({ current }: { current: Route }) {
   const { wishlist, state, unseenDeals } = useApp()
   const badges: Partial<Record<Route, number>> = {
     preferiti: wishlist.filter((w) => universeOf(w.product.category) === state.mode).length,
-    filtri: activeFilterCount(state.filters),
   }
   return (
     <nav
