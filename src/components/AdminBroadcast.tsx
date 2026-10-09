@@ -95,6 +95,11 @@ export function AdminBroadcast() {
         placeholder={'Messaggio\n\nUna riga vuota = nuovo paragrafo. I link https://… diventano cliccabili.'}
         className="w-full rounded-xl bg-neutral-50 p-3 text-base ring-1 ring-neutral-200 outline-none focus:ring-2 focus:ring-neutral-900"
       />
+      {!amazonLink && (subject || body) && !valid && (
+        <p className="text-sm text-neutral-500">
+          {subject.trim().length < 3 ? "L'oggetto deve avere almeno 3 caratteri." : `Il messaggio deve avere almeno 10 caratteri (ora ${body.trim().length}).`}
+        </p>
+      )}
       {amazonLink && <p className="text-sm text-rose-600">Niente link Amazon nelle email: le regole di Amazon Associates non lo permettono.</p>}
       <p className="text-xs text-neutral-500">
         Va a {info ? info.recipients : '…'} account confermati che non hanno spento le comunicazioni dal Profilo. In fondo all'email c'è
