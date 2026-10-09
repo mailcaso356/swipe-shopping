@@ -106,13 +106,13 @@ export function SwipeCard({
           <>
             <motion.span
               style={{ opacity: likeOpacity }}
-              className="pointer-events-none absolute top-6 left-5 -rotate-12 rounded-xl border-4 border-rose-500 bg-white/80 px-3 py-1 text-2xl font-black tracking-wide text-rose-500"
+              className="pointer-events-none absolute top-6 left-5 -rotate-12 rounded-xl border-4 border-rose-500 bg-rose-500 px-3 py-1 text-2xl font-black tracking-wide text-[#fff] shadow-lg"
             >
               MI PIACE
             </motion.span>
             <motion.span
               style={{ opacity: nopeOpacity }}
-              className="pointer-events-none absolute top-6 right-5 rotate-12 rounded-xl border-4 border-neutral-800 bg-white/80 px-3 py-1 text-2xl font-black tracking-wide text-neutral-800"
+              className="pointer-events-none absolute top-6 right-5 rotate-12 rounded-xl border-4 border-[#262626] bg-[#fff]/90 px-3 py-1 text-2xl font-black tracking-wide text-[#262626]"
             >
               NO
             </motion.span>
