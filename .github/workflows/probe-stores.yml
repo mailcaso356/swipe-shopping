@@ -6,6 +6,9 @@ on:
       urls:
         description: URL da provare, separati da spazi
         required: true
+      grep:
+        description: Espressione da estrarre dalle risposte (facoltativa)
+        required: false
 
 jobs:
   probe:
@@ -14,10 +17,11 @@ jobs:
       - name: Prova gli URL
         env:
           URLS: ${{ inputs.urls }}
+          GREP: ${{ inputs.grep }}
         run: |
           UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
           for u in $URLS; do
             echo "=== $u"
             curl -sS -L --compressed -m 25 -A "$UA" -H 'Accept-Language: it-IT,it;q=0.9' -o /tmp/body -w 'status=%{http_code} size=%{size_download} type=%{content_type} final=%{url_effective}\n' "$u" || true
-            head -c 1500 /tmp/body | tr -s '\n\t ' ' ' ; echo
+            if [ -n "$GREP" ]; then grep -oE "$GREP" /tmp/body | head -c 6000; echo; else head -c 1500 /tmp/body | tr -s '\n\t ' ' ' ; echo; fi
           done
