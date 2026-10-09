@@ -3,7 +3,7 @@ import { Heart, RotateCcw, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/AppState'
-import { storeLinkLabel } from '../config/stores'
+import { productImageUrl, storeLinkLabel } from '../config/stores'
 import { StoreLink } from './StoreLink'
 import { SwipeCard, type SwipeDir } from './SwipeCard'
 
@@ -40,7 +40,7 @@ export function SwipeDeck() {
   }, [top])
 
   useEffect(() => {
-    deck.slice(1, 6).forEach((p) => preload(p.imageUrl))
+    deck.slice(1, 6).forEach((p) => preload(productImageUrl(p) ?? undefined))
   }, [deck])
 
   useEffect(() => {
