@@ -1,9 +1,10 @@
 // Aggiorna public/catalog.json con foto, prezzi e disponibilità dalla Amazon Creators API.
 // Gira su GitHub Actions prima di ogni build: le credenziali restano nei Secrets del repository
 // e non finiscono mai nel sito. Uso: `npm run sync:amazon` con le variabili d'ambiente impostate.
-import { readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { classify } from './classify.ts'
 import { detectColors } from '../src/config/colors.ts'
+import { DETAIL_SHARDS, detailShard, type ProductDetails } from '../src/lib/details.ts'
 import { SEARCH_PLAN, normalizeBrand } from './search-plan.ts'
 
 const { AMAZON_CREDENTIAL_ID, AMAZON_CREDENTIAL_SECRET, AMAZON_CREDENTIAL_VERSION, AMAZON_TOKEN_URL } = process.env
@@ -181,6 +182,33 @@ function applyOffer(p: Record<string, any>, offer: Offer | null) {
   }
 }
 
+// Foto aggiuntive e caratteristiche per la scheda prodotto. Se Amazon rifiuta questi campi,
+// la ricerca continua senza (meglio un catalogo senza dettagli che nessun catalogo).
+let detailResources = ['images.variants.large', 'itemInfo.features']
+const details = new Map<string, ProductDetails>()
+
+function readDetails(item: any): ProductDetails | null {
+  const images = ((item?.images?.variants ?? []) as any[])
+    .map((v) => v?.large?.url)
+    .filter((u): u is string => typeof u === 'string' && u.startsWith('https://'))
+    .slice(0, 6)
+  const features = ((item?.itemInfo?.features?.displayValues ?? []) as unknown[])
+    .filter((f): f is string => typeof f === 'string' && f.trim().length > 0)
+    .map((f) => f.trim().slice(0, 300))
+    .slice(0, 6)
+  if (!images.length && !features.length) return null
+  return { ...(images.length ? { images } : {}), ...(features.length ? { features } : {}) }
+}
+
+function writeDetails() {
+  const dir = new URL('../public/details/', import.meta.url)
+  mkdirSync(dir, { recursive: true })
+  const shards: Record<string, ProductDetails>[] = Array.from({ length: DETAIL_SHARDS }, () => ({}))
+  for (const [id, d] of details) shards[detailShard(id)][id] = d
+  shards.forEach((s, n) => writeFileSync(new URL(`${n}.json`, dir), JSON.stringify(s)))
+  annotate('notice', `Dettagli: ${details.size} prodotti con foto o caratteristiche.`)
+}
+
 /** Cerca su Amazon i prodotti delle marche ammesse, categoria per categoria. */
 async function searchCatalog(token: string) {
   const found = new Map<string, Record<string, any>>()
@@ -198,16 +226,25 @@ async function searchCatalog(token: string) {
           }
           let body: any
           try {
-            body = await callApi('searchItems', token, {
-              keywords: `${plan.keywords} ${gender}`,
-              brand,
-              searchIndex: 'Fashion',
-              itemCount: 10,
-              itemPage: page,
-              minPrice: plan.minPrice * 100,
-              availability: 'Available',
-              resources: ['images.primary.large', 'itemInfo.title', 'itemInfo.byLineInfo', ...OFFER_RESOURCES],
-            })
+            const search = () =>
+              callApi('searchItems', token, {
+                keywords: `${plan.keywords} ${gender}`,
+                brand,
+                searchIndex: 'Fashion',
+                itemCount: 10,
+                itemPage: page,
+                minPrice: plan.minPrice * 100,
+                availability: 'Available',
+                resources: ['images.primary.large', 'itemInfo.title', 'itemInfo.byLineInfo', ...detailResources, ...OFFER_RESOURCES],
+              })
+            try {
+              body = await search()
+            } catch (e) {
+              if (!detailResources.length || !/HTTP 400/.test(String(e))) throw e
+              annotate('warning', `Dettagli prodotto non disponibili, continuo senza: ${e instanceof Error ? e.message : String(e)}`)
+              detailResources = []
+              body = await search()
+            }
           } catch (e) {
             annotate('warning', `Ricerca ${plan.category}/${gender}/${brand}: ${e instanceof Error ? e.message : String(e)}`)
             break
@@ -253,6 +290,8 @@ async function searchCatalog(token: string) {
             if (colors.length) p.colors = colors
             applyOffer(p, offer)
             found.set(id, p)
+            const d = readDetails(item)
+            if (d) details.set(id, d)
           }
           if (items.length < 10) break
         }
@@ -276,7 +315,7 @@ try {
     // Ricerca fallita: teniamo i risultati precedenti invece di svuotare il catalogo.
     searched = catalog.filter((p) => p.source === 'ricerca')
     annotate('warning', 'Nessun risultato dalla ricerca: mantengo il catalogo precedente.')
-  }
+  } else if (details.size > 0) writeDetails()
   const others = catalog.filter((p) => p.store !== 'amazon')
   const next = [...curated, ...others, ...searched]
   writeFileSync(file, JSON.stringify(next, null, 1) + '\n')

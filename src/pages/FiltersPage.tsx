@@ -25,7 +25,7 @@ export function FiltersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Filtri</h1>
         {activeFilterCount(f) > 0 && (
-          <button type="button" onClick={() => actions.setFilters(DEFAULT_FILTERS)} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm active:scale-95">
+          <button type="button" onClick={() => actions.setFilters(DEFAULT_FILTERS)} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-[#fff] shadow-sm active:scale-95">
             Azzera filtri
           </button>
         )}
@@ -57,19 +57,21 @@ export function FiltersPage() {
         </div>
       </Section>
 
-      <Section title="Offerte">
-        <label className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-neutral-200">
-          <span>
-            <span className="block font-medium">Solo prodotti in offerta</span>
-            <span className="text-xs text-neutral-500">Mostra solo quelli scontati almeno del 5%</span>
-          </span>
-          <input
-            type="checkbox"
+      <Section title="Offerte e novità">
+        <div className="divide-y divide-neutral-100 rounded-2xl bg-white ring-1 ring-neutral-200">
+          <Toggle
+            label="Solo prodotti in offerta"
+            hint="Scontati almeno del 5%"
             checked={!!f.onlyDeals}
-            onChange={(e) => set({ onlyDeals: e.target.checked || undefined })}
-            className="size-6 accent-rose-500"
+            onChange={(v) => set({ onlyDeals: v || undefined })}
           />
-        </label>
+          <Toggle
+            label="Solo novità"
+            hint="Arrivati negli ultimi 7 giorni"
+            checked={!!f.onlyNew}
+            onChange={(v) => set({ onlyNew: v || undefined })}
+          />
+        </div>
       </Section>
 
       <Section title="Prezzo" hint="Con un limite di prezzo vedi solo prodotti con prezzo aggiornato">
@@ -172,6 +174,18 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
       </div>
       {children}
     </section>
+  )
+}
+
+function Toggle({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center justify-between gap-4 px-4 py-3">
+      <span>
+        <span className="block font-medium">{label}</span>
+        <span className="text-xs text-neutral-500">{hint}</span>
+      </span>
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="size-6 accent-rose-500" />
+    </label>
   )
 }
 

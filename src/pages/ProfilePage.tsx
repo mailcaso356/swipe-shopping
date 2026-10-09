@@ -115,7 +115,7 @@ export function ProfilePage() {
                   remove('onboarded')
                   setConfirmClear(false)
                 }}
-                className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-white"
+                className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-[#fff]"
               >
                 Sì, cancella
               </button>
@@ -135,7 +135,9 @@ export function ProfilePage() {
         </div>
       </Card>
 
-      <p className="text-center text-xs text-neutral-400">{APP_NAME} · versione {__APP_VERSION__}</p>
+      <p className="text-center text-xs text-neutral-400">
+        <a href="./moda/" className="underline">Sfoglia categorie e marche</a> · {APP_NAME} · versione {__APP_VERSION__}
+      </p>
     </div>
   )
 }

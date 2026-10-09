@@ -179,7 +179,7 @@ export function Welcome() {
           type="button"
           onClick={next}
           className={`flex h-13 w-full items-center justify-center gap-1 rounded-full py-3.5 text-lg font-semibold ${
-            step === 3 ? 'text-neutral-500' : 'bg-rose-500 text-white active:scale-[0.98]'
+            step === 3 ? 'text-neutral-500' : 'bg-rose-500 text-[#fff] active:scale-[0.98]'
           }`}
         >
           {step === 3 ? 'Più tardi' : step === 2 && groups.length === 0 ? 'Mostrami tutto' : 'Continua'}

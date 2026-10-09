@@ -4,9 +4,20 @@ import { productImageUrl } from '../config/stores'
 import type { Product } from '../types/product'
 
 /** Foto prodotto con segnaposto elegante se manca o non si carica. */
-export function ProductImage({ product, eager, className }: { product: Product; eager?: boolean; className?: string }) {
+export function ProductImage({
+  product,
+  eager,
+  className,
+  src: srcOverride,
+}: {
+  product: Product
+  eager?: boolean
+  className?: string
+  /** Foto diversa da quella principale (galleria) */
+  src?: string
+}) {
   const [failed, setFailed] = useState(false)
-  const src = productImageUrl(product)
+  const src = srcOverride ?? productImageUrl(product)
   if (!src || failed) {
     const group = categoryGroupOf(product.category)
     return (
@@ -18,7 +29,7 @@ export function ProductImage({ product, eager, className }: { product: Product; 
     )
   }
   return (
-    <div className={`bg-white ${className ?? ''}`}>
+    <div className={`bg-[#fff] ${className ?? ''}`}>
       <img
         src={src}
         alt={product.title}

@@ -130,7 +130,7 @@ function LoggedIn({
               type="button"
               disabled={busy}
               onClick={() => act(onDelete)}
-              className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-white disabled:opacity-40"
+              className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-[#fff] disabled:opacity-40"
             >
               Sì, elimina
             </button>

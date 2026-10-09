@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/build-catalog.ts",
+    "build": "tsc -b && vite build && node scripts/build-catalog.ts && node scripts/build-seo.ts",
     "lint": "oxlint",
     "preview": "vite preview",
     "check:catalog": "node scripts/validate-catalog.ts",

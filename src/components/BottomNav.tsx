@@ -39,13 +39,13 @@ export function BottomNav({ current }: { current: Route }) {
                 {route === 'preferiti' && unseenDrops > 0 ? (
                   <span
                     aria-label={`${unseenDrops} preferiti con prezzo sceso`}
-                    className="absolute top-2 left-1/2 ml-2 flex h-5 items-center gap-0.5 rounded-full bg-emerald-500 px-1.5 text-[10px] font-bold text-white"
+                    className="absolute top-2 left-1/2 ml-2 flex h-5 items-center gap-0.5 rounded-full bg-emerald-500 px-1.5 text-[10px] font-bold text-[#fff]"
                   >
                     <TrendingDown className="size-3" />
                     {unseenDrops}
                   </span>
                 ) : !!badge && (
-                  <span className="absolute top-2 left-1/2 ml-2 min-w-5 rounded-full bg-rose-500 px-1.5 text-center text-[10px] leading-5 font-bold text-white">
+                  <span className="absolute top-2 left-1/2 ml-2 min-w-5 rounded-full bg-rose-500 px-1.5 text-center text-[10px] leading-5 font-bold text-[#fff]">
                     {badge > 99 ? '99+' : badge}
                   </span>
                 )}

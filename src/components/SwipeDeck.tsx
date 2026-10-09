@@ -88,7 +88,7 @@ export function SwipeDeck() {
           type="button"
           onClick={() => swipe(1)}
           aria-label="Sì, salva nei preferiti"
-          className="flex h-14 items-center gap-2 rounded-full bg-rose-500 px-5 font-semibold text-white shadow-lg shadow-rose-500/30 transition active:scale-90"
+          className="flex h-14 items-center gap-2 rounded-full bg-rose-500 px-5 font-semibold text-[#fff] shadow-lg shadow-rose-500/30 transition active:scale-90"
         >
           <Heart className="size-6 fill-current" /> SÌ
         </button>

@@ -1,9 +1,13 @@
 import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState, type MouseEvent } from 'react'
 import { categoryLabel } from '../config/categories'
 import { storeName } from '../config/stores'
 import type { Product } from '../types/product'
+import { galleryOf } from '../lib/gallery'
+import { openProduct } from '../lib/productSheet'
+import { useDetails } from '../lib/useDetails'
 import { DiscountBadge } from './DiscountBadge'
+import { NewBadge } from './NewBadge'
 import { PriceTag } from './PriceTag'
 import { ProductImage } from './ProductImage'
 import { StoreLink } from './StoreLink'
@@ -38,6 +42,19 @@ export function SwipeCard({
   const likeOpacity = useTransform(x, [20, SWIPE_DISTANCE], [0, 1])
   const nopeOpacity = useTransform(x, [-SWIPE_DISTANCE, -20], [1, 0])
   const dragged = useRef(false)
+  const details = useDetails(product.id, isTop)
+  const photos = galleryOf(product, details)
+  const [photo, setPhoto] = useState(0)
+
+  // Tocco sulla foto: ai lati cambia foto (come le storie), al centro apre la scheda.
+  const onImageClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (dragged.current || !isTop) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const pos = (e.clientX - rect.left) / rect.width
+    if (photos.length > 1 && pos < 0.33) setPhoto((i) => Math.max(0, i - 1))
+    else if (photos.length > 1 && pos > 0.67) setPhoto((i) => Math.min(photos.length - 1, i + 1))
+    else openProduct(product)
+  }
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > SWIPE_DISTANCE || info.velocity.x > SWIPE_VELOCITY) onSwipe(1)
@@ -64,18 +81,26 @@ export function SwipeCard({
       aria-label={isTop ? product.title : undefined}
     >
       <div className="relative min-h-0 flex-1">
-        {isTop ? (
-          <StoreLink
+        <div
+          className="size-full cursor-pointer"
+          onClick={onImageClick}
+          role={isTop ? 'button' : undefined}
+          aria-label={isTop ? `Dettagli di ${product.title}` : undefined}
+        >
+          <ProductImage
+            key={photos[photo] ?? 'main'}
             product={product}
-            icon={false}
-            ariaLabel={`Apri ${product.title} su ${storeName(product.store)}`}
-            className="block size-full"
-            onClickCapture={(e) => dragged.current && e.preventDefault()}
-          >
-            <ProductImage product={product} eager className="size-full" />
-          </StoreLink>
-        ) : (
-          <ProductImage product={product} eager={index < 2} className="size-full" />
+            src={isTop ? photos[photo] : undefined}
+            eager={index < 2}
+            className="size-full"
+          />
+        </div>
+        {isTop && photos.length > 1 && (
+          <div className="pointer-events-none absolute inset-x-4 top-2.5 flex gap-1">
+            {photos.map((src, i) => (
+              <span key={src} className={`h-1 flex-1 rounded-full ${i === photo ? 'bg-neutral-800' : 'bg-neutral-300/80'}`} />
+            ))}
+          </div>
         )}
         {isTop && (
           <>
@@ -94,13 +119,20 @@ export function SwipeCard({
           </>
         )}
         <DiscountBadge product={product} />
+        <NewBadge product={product} />
         {product.searchQuery && (
           <span className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-neutral-900/80 px-3 py-1 text-xs font-medium text-white">
             Esplora la categoria
           </span>
         )}
       </div>
-      <div className="space-y-1.5 border-t border-neutral-100 px-5 pt-3 pb-4">
+      <div
+        className="cursor-pointer space-y-1.5 border-t border-neutral-100 px-5 pt-3 pb-4"
+        onClick={(e) => {
+          // Il link "Apri" porta al negozio, il resto apre la scheda.
+          if (isTop && !dragged.current && !(e.target as HTMLElement).closest('a')) openProduct(product)
+        }}
+      >
         <p className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
           {product.brand ?? categoryLabel(product.category)} · {storeName(product.store)}
         </p>

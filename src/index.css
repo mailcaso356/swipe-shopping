@@ -9,3 +9,38 @@ body {
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
 }
+
+/*
+ * Modalità scura: invece di aggiungere "dark:" a ogni classe, si scambia la scala dei grigi.
+ * Le superfici bianche diventano scure, il testo scuro diventa chiaro, i bottoni neri diventano chiari.
+ * Le foto dei prodotti restano su fondo bianco (bg-[#fff]), i colori d'accento restano uguali.
+ */
+:root.dark {
+  color-scheme: dark;
+  --color-white: #1c1c1f;
+  --color-neutral-50: #0e0e10;
+  --color-neutral-100: #26262a;
+  --color-neutral-200: #34343a;
+  --color-neutral-300: #4a4a50;
+  --color-neutral-400: #74747b;
+  --color-neutral-500: #9d9da4;
+  --color-neutral-600: #b8b8be;
+  --color-neutral-700: #d2d2d7;
+  --color-neutral-800: #e6e6ea;
+  --color-neutral-900: #f4f4f6;
+  --color-neutral-950: #fafafa;
+  --color-rose-50: #3a1820;
+  --color-rose-100: #4f1d29;
+  --color-rose-700: #fda4af;
+  --color-emerald-50: #0f2a1f;
+  --color-emerald-100: #12392a;
+  --color-emerald-200: #1d5a40;
+  --color-emerald-800: #a7f3d0;
+  --color-amber-50: #33290f;
+  --color-amber-200: #5c4a14;
+  --color-amber-900: #fde68a;
+}
+
+body {
+  background: var(--color-neutral-50);
+}

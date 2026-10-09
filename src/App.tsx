@@ -1,6 +1,7 @@
 import { BottomNav } from './components/BottomNav'
 import { ConsentBanner } from './components/ConsentBanner'
-import { APP_NAME } from './config/app'
+import { Header } from './components/Header'
+import { ProductSheet } from './components/ProductSheet'
 import { useHashRoute } from './lib/useHashRoute'
 import { Welcome } from './components/Welcome'
 import { AdminPage } from './pages/AdminPage'
@@ -16,14 +17,7 @@ export default function App() {
 
   return (
     <div className="flex h-dvh flex-col bg-neutral-50 text-neutral-900">
-      <header className="shrink-0 pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex h-14 max-w-md items-center justify-center px-4 sm:max-w-2xl">
-          <a href="#/scopri" className="text-lg font-black tracking-tight">
-            {APP_NAME.split(' ')[0]}
-            <span className="text-rose-500">{APP_NAME.split(' ').slice(1).join(' ')}</span>
-          </a>
-        </div>
-      </header>
+      <Header />
       <main
         className={`mx-auto flex w-full min-h-0 flex-1 flex-col px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] ${
           isDiscover ? 'max-w-md overflow-hidden' : 'max-w-4xl overflow-y-auto'
@@ -38,6 +32,7 @@ export default function App() {
       </main>
       <ConsentBanner />
       <Welcome />
+      <ProductSheet />
       <BottomNav current={route} />
     </div>
   )

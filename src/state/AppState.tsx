@@ -3,6 +3,8 @@ import { track } from '../lib/analytics'
 import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
 import { matchesFilters, normalizeFilters, sortProducts } from '../lib/filters'
+import { setNewBaseline } from '../lib/newness'
+import { matchesQuery, parseQuery } from '../lib/search'
 import { priceDrop } from '../lib/price'
 import { sharedProductId } from '../lib/share'
 import { load, save } from '../lib/storage'
@@ -13,6 +15,8 @@ export interface WishItem {
   /** Copia del prodotto al momento del salvataggio: resta visibile anche se esce dal catalogo */
   product: Product
   savedAt: number
+  /** Cartella dei preferiti (nessuna = solo in "Tutti") */
+  folder?: string
 }
 
 type CatalogState =
@@ -37,6 +41,8 @@ type Action =
   | { type: 'resetSeen' }
   | { type: 'clearAll' }
   | { type: 'hydrate'; wishlist: WishItem[]; disliked: string[]; filters: Filters }
+  | { type: 'folder'; id: string; folder?: string }
+  | { type: 'renameFolder'; from: string; to?: string }
 
 const MAX_DISLIKED = 5000
 
@@ -84,6 +90,16 @@ function reducer(state: State, action: Action): State {
       return { ...state, disliked: [], lastAction: null }
     case 'clearAll':
       return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, lastAction: null }
+    case 'folder':
+      return {
+        ...state,
+        wishlist: state.wishlist.map((w) => (w.product.id === action.id ? { ...w, folder: action.folder } : w)),
+      }
+    case 'renameFolder':
+      return {
+        ...state,
+        wishlist: state.wishlist.map((w) => (w.folder === action.from ? { ...w, folder: action.to } : w)),
+      }
     case 'hydrate':
       return {
         ...state,
@@ -113,7 +129,10 @@ function useAppStore() {
   const reloadCatalog = useCallback((signal?: AbortSignal) => {
     dispatch({ type: 'catalog', catalog: { status: 'loading' } })
     loadCatalog(signal)
-      .then((r) => dispatch({ type: 'catalog', catalog: { status: 'ready', products: r.products, exploreMode: r.exploreMode } }))
+      .then((r) => {
+        setNewBaseline(r.products)
+        dispatch({ type: 'catalog', catalog: { status: 'ready', products: r.products, exploreMode: r.exploreMode } })
+      })
       .catch((e: unknown) => {
         if (signal?.aborted) return
         dispatch({ type: 'catalog', catalog: { status: 'error', error: e instanceof Error ? e.message : String(e) } })
@@ -134,13 +153,22 @@ function useAppStore() {
     if (sharedId) window.history.replaceState(null, '', '#/scopri')
   }, [sharedId])
 
+  // Ricerca: vale solo per questa visita e ignora i filtri (cerchi qualcosa di preciso).
+  const [query, setQuery] = useState('')
+  const parsedQuery = useMemo(() => parseQuery(query), [query])
+
   const deck = useMemo(() => {
-    const seen = new Set([...state.disliked, ...state.wishlist.map((w) => w.product.id)])
+    const saved = new Set(state.wishlist.map((w) => w.product.id))
+    if (parsedQuery) {
+      const found = products.filter((p) => p.availability !== 'out_of_stock' && !saved.has(p.id) && matchesQuery(p, parsedQuery))
+      return sortProducts(found, state.filters.sort, MIX_SEED)
+    }
+    const seen = new Set([...state.disliked, ...saved])
     const list = products.filter((p) => p.availability !== 'out_of_stock' && !seen.has(p.id) && matchesFilters(p, state.filters))
     const sorted = sortProducts(list, state.filters.sort, MIX_SEED)
     const shared = sharedId ? products.find((p) => p.id === sharedId) : undefined
     return shared ? [shared, ...sorted.filter((p) => p.id !== shared.id)] : sorted
-  }, [products, state.disliked, state.wishlist, state.filters, sharedId])
+  }, [products, state.disliked, state.wishlist, state.filters, sharedId, parsedQuery])
 
   /** Preferiti con i dati aggiornati dal catalogo quando il prodotto è ancora presente */
   const wishlist = useMemo(() => {
@@ -191,11 +219,16 @@ function useAppStore() {
       resetSeen: () => dispatch({ type: 'resetSeen' }),
       clearAll: () => dispatch({ type: 'clearAll' }),
       reloadCatalog: () => reloadCatalog(),
+      setQuery,
+      /** Sposta un preferito in una cartella (undefined = toglie dalla cartella) */
+      setFolder: (product: Product, folder?: string) => dispatch({ type: 'folder', id: product.id, folder: folder?.trim() || undefined }),
+      /** Rinomina una cartella; senza nuovo nome la elimina (i prodotti restano nei preferiti) */
+      renameFolder: (from: string, to?: string) => dispatch({ type: 'renameFolder', from, to: to?.trim() || undefined }),
     }),
     [reloadCatalog],
   )
 
-  return { state, products, deck, wishlist, actions, sync, unseenDrops, markDropsSeen }
+  return { state, products, deck, wishlist, actions, sync, unseenDrops, markDropsSeen, query, searching: !!parsedQuery }
 }
 
 export type SyncStatus = 'off' | 'loading' | 'synced' | 'saving' | 'error'

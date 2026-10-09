@@ -16,7 +16,7 @@ export function ShareButton({ product, className }: { product: Product; classNam
           setTimeout(() => setCopied(false), 2000)
         }
       }}
-      className={`relative ${className}`}
+      className={/\babsolute\b/.test(className) ? className : `relative ${className}`}
     >
       <Share2 className="size-5" />
       {copied && (
