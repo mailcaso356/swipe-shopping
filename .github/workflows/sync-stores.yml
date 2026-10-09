@@ -10,6 +10,9 @@ on:
         description: Solo prova, senza salvare
         type: boolean
         default: false
+      pages:
+        description: Pagine Calzedonia da leggere (vuoto = 420)
+        required: false
 
 permissions:
   contents: write
@@ -34,6 +37,8 @@ jobs:
       - run: npm ci
       - name: Leggi i prodotti dei negozi
         run: npm run sync:stores -- ${{ inputs.dry && '--dry' || '' }}
+        env:
+          CALZEDONIA_MAX_PAGES: ${{ inputs.pages || '420' }}
       - run: npm run check:catalog
       - name: Salva il catalogo aggiornato
         if: ${{ !inputs.dry }}
