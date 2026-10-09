@@ -138,7 +138,10 @@ function useAppStore() {
 
   useEffect(() => save('filters:v2', state.filters), [state.filters])
   useEffect(() => save('techFilters', state.techFilters), [state.techFilters])
-  useEffect(() => save('mode', state.mode), [state.mode])
+  useEffect(() => {
+    save('mode', state.mode)
+    document.documentElement.classList.toggle('tech', state.mode === 'tech')
+  }, [state.mode])
   const activeFilters = state.mode === 'tech' ? state.techFilters : state.filters
   useEffect(() => save('wishlist', state.wishlist), [state.wishlist])
   useEffect(() => save('disliked', state.disliked), [state.disliked])

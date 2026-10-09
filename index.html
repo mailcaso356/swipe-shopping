@@ -13,6 +13,7 @@
           document.documentElement.classList.add('dark')
           document.querySelector('meta[name=theme-color]').content = '#0e0e10'
         }
+        if (JSON.parse(localStorage.getItem('swipeshop:v1:mode') || 'null') === 'tech') document.documentElement.classList.add('tech')
       } catch (e) {}
     </script>
     <link rel="manifest" href="./manifest.webmanifest" />

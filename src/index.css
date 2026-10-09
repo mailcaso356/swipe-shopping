@@ -41,6 +41,22 @@ body {
   --color-amber-900: #fde68a;
 }
 
+/* Sezione Tech: stesso aspetto della moda ma con l'arancione al posto del rosa, per capire subito dove si è. */
+:root.tech {
+  --color-rose-50: #fff7ed;
+  --color-rose-100: #ffedd5;
+  --color-rose-300: #fdba74;
+  --color-rose-400: #fb923c;
+  --color-rose-500: #f97316;
+  --color-rose-600: #ea580c;
+  --color-rose-700: #c2410c;
+}
+:root.tech.dark {
+  --color-rose-50: #3a2210;
+  --color-rose-100: #4f2a12;
+  --color-rose-700: #fdba74;
+}
+
 body {
   background: var(--color-neutral-50);
 }

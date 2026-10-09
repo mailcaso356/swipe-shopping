@@ -15,8 +15,9 @@ export function Header() {
           type="button"
           onClick={() => actions.setMode(tech ? 'moda' : 'tech')}
           aria-label={tech ? 'Torna alla moda' : 'Passa alla sezione tech'}
-          className={`flex h-9 w-20 items-center justify-center gap-1 rounded-full text-sm font-semibold ring-1 transition active:scale-95 ${
-            tech ? 'bg-rose-500 text-[#fff] ring-rose-500' : 'bg-neutral-900 text-white ring-neutral-900'
+          // Colori fissi: il pulsante mostra il colore della sezione in cui porta (rosa moda, arancione tech).
+          className={`flex h-9 w-20 items-center justify-center gap-1 rounded-full text-sm font-semibold text-[#fff] active:scale-95 ${
+            tech ? 'bg-[#f43f5e]' : 'bg-[#f97316]'
           }`}
         >
           {tech ? <Shirt className="size-4" /> : <Cpu className="size-4" />}

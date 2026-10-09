@@ -33,7 +33,7 @@ export function FiltersPage() {
         )}
       </div>
 
-      {matching === 0 && (
+      {matching === 0 && products.length > 0 && (
         <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Nessun prodotto con questi filtri: prova ad allargarli.</p>
       )}
 
