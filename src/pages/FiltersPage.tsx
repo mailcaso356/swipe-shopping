@@ -95,16 +95,23 @@ export function FiltersPage() {
             const all = ids.every((id) => f.categories.includes(id))
             return (
               <div key={group.id} className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCategories(all ? f.categories.filter((c) => !ids.includes(c)) : [...new Set([...f.categories, ...ids])])
-                  }
-                  className="flex items-center gap-2 text-sm font-semibold"
-                >
-                  <span aria-hidden>{group.emoji}</span> {group.label}
-                  <span className="text-xs font-normal text-neutral-400">{all ? 'deseleziona' : 'seleziona tutte'}</span>
-                </button>
+                {ids.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCategories(all ? f.categories.filter((c) => !ids.includes(c)) : [...new Set([...f.categories, ...ids])])
+                    }
+                    className="flex items-center gap-2 text-sm font-semibold"
+                  >
+                    <span aria-hidden>{group.emoji}</span> {group.label}
+                    <span className="text-xs font-normal text-neutral-400">{all ? 'deseleziona' : 'seleziona tutte'}</span>
+                  </button>
+                ) : (
+                  // Gruppo con una sola voce (es. Profumi): basta il chip, il titolo non è un pulsante.
+                  <p className="flex items-center gap-2 text-sm font-semibold">
+                    <span aria-hidden>{group.emoji}</span> {group.label}
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-2">
                   {group.items.map((item) => (
                     <Chip
