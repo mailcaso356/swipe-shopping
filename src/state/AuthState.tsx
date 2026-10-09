@@ -10,6 +10,7 @@ function friendlyError(message: string) {
   if (m.includes('already registered')) return 'Esiste già un account con questa email. Prova ad accedere.'
   if (m.includes('password should be at least')) return 'La password deve avere almeno 6 caratteri.'
   if (m.includes('rate limit')) return 'Troppi tentativi. Riprova tra qualche minuto.'
+  if (m.includes('sending') && m.includes('email')) return "Non siamo riusciti a inviare l'email. Riprova tra qualche minuto."
   if (m.includes('invalid email') || m.includes('unable to validate email')) return "L'indirizzo email non è valido."
   return message
 }
