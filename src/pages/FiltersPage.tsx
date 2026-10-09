@@ -18,6 +18,7 @@ export function FiltersPage() {
   const facets = facetValues(products)
   const matching = products.filter((p) => p.availability !== 'out_of_stock' && matchesFilters(p, f)).length
   // Come per le marche: nessuna selezionata (o tutte) = tutte le categorie.
+  const setStores = (list: StoreId[]) => set({ stores: list.length === facets.stores.length ? [] : list })
   const setCategories = (list: CategoryId[]) => set({ categories: list.length === ALL_CATEGORY_IDS.length ? [] : list })
 
   return (
@@ -56,6 +57,18 @@ export function FiltersPage() {
           ))}
         </div>
       </Section>
+
+      {facets.stores.length > 1 && (
+        <Section title="Negozi" hint="Nessuno selezionato = tutti i negozi">
+          <div className="flex flex-wrap gap-2">
+            {facets.stores.map((id) => (
+              <Chip key={id} active={f.stores.includes(id)} onClick={() => setStores(toggle(f.stores, id))}>
+                {STORES[id].name}
+              </Chip>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <Section title="Offerte e novità">
         <div className="divide-y divide-neutral-100 rounded-2xl bg-white ring-1 ring-neutral-200">
@@ -112,10 +125,6 @@ export function FiltersPage() {
         </div>
       </Section>
 
-      {facets.stores.length > 1 && (
-        <ChipSection title="Negozio" values={facets.stores} selected={f.stores} label={(s) => STORES[s as StoreId].name}
-          onToggle={(v) => set({ stores: toggle(f.stores, v as StoreId) })} />
-      )}
       {facets.brands.length > 0 && (
         <Section title="Marca" hint="Nessuna selezionata = tutte le marche">
           <BrandPicker

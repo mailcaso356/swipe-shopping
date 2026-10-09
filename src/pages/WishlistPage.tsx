@@ -25,6 +25,8 @@ export function WishlistPage() {
   const [folder, setFolder] = useState<string | null>(null)
   const [sort, setSort] = useState<WishSort>('recenti')
   const [moving, setMoving] = useState<Product | null>(null)
+  const [dealsOnly, setDealsOnly] = useState(false)
+  const showDeals = dealsOnly && deals > 0
 
   const folders = useMemo(() => {
     const count = new Map<string, number>()
@@ -35,7 +37,7 @@ export function WishlistPage() {
   const current = folder && folders.some(([f]) => f === folder) ? folder : null
 
   const shown = useMemo(() => {
-    const list = current ? wishlist.filter((w) => w.folder === current) : [...wishlist]
+    const list = wishlist.filter((w) => (!current || w.folder === current) && (!showDeals || w.deal !== null))
     if (sort === 'sconto') return list.sort((a, b) => (discountBadge(b.product) ?? 0) - (discountBadge(a.product) ?? 0))
     if (sort !== 'recenti') {
       const dir = sort === 'prezzo_asc' ? 1 : -1
@@ -48,7 +50,7 @@ export function WishlistPage() {
       })
     }
     return list
-  }, [wishlist, current, sort])
+  }, [wishlist, current, sort, showDeals])
 
   // Aprendo i Preferiti l'avviso sul menu si spegne (l'etichetta sulle card resta).
   useEffect(() => markDealsSeen(), [markDealsSeen])
@@ -73,10 +75,24 @@ export function WishlistPage() {
         <span className="text-sm text-neutral-500">{wishlist.length} prodotti</span>
       </div>
       {deals > 0 && (
-        <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 ring-1 ring-emerald-200">
+        <button
+          type="button"
+          onClick={() => setDealsOnly(!showDeals)}
+          aria-pressed={showDeals}
+          className={`flex w-full items-center gap-2 rounded-2xl px-4 py-3 text-left text-sm font-medium ring-1 active:scale-[0.99] ${
+            showDeals ? 'bg-emerald-600 text-[#fff] ring-emerald-600' : 'bg-emerald-50 text-emerald-800 ring-emerald-200'
+          }`}
+        >
           <BadgePercent className="size-5 shrink-0" />
-          {deals === 1 ? 'Un tuo preferito è in offerta!' : `${deals} preferiti sono in offerta!`}
-        </p>
+          <span className="flex-1">
+            {showDeals
+              ? `Solo i preferiti in offerta (${deals})`
+              : deals === 1
+                ? 'Un tuo preferito è in offerta!'
+                : `${deals} preferiti sono in offerta!`}
+          </span>
+          <span className="text-xs font-semibold underline">{showDeals ? 'Mostra tutti' : 'Mostra'}</span>
+        </button>
       )}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
         <FolderChip active={!current} onClick={() => setFolder(null)} label="Tutti" count={wishlist.length} />
