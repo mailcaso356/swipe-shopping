@@ -1,6 +1,6 @@
 import { CheckCircle2, CloudOff, Loader2, LogOut, Mail, Trash2, UserRound } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { EmailAlertsToggle } from './EmailAlertsToggle'
+import { EmailAlertsToggle, EmailNewsToggle } from './EmailAlertsToggle'
 import { useApp, type SyncStatus } from '../state/AppState'
 import { useAuth } from '../state/AuthState'
 
@@ -112,6 +112,7 @@ function LoggedIn({
       </p>
       {SYNC_LABEL[sync] && <p className="flex items-center gap-2 text-neutral-600">{SYNC_LABEL[sync]}</p>}
       <EmailAlertsToggle />
+      <EmailNewsToggle />
       {children}
       {error && <p className="text-rose-600">{error}</p>}
       <div className="flex flex-col gap-2">

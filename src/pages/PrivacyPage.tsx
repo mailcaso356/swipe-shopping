@@ -46,6 +46,10 @@ export function PrivacyPage() {
             un'email ogni 3 giorni. Puoi spegnerli in ogni momento dal Profilo.
           </li>
           <li>
+            <strong>Comunicazioni:</strong> se hai un account, ogni tanto possiamo scriverti per novità importanti sull'app.
+            Puoi spegnerle in ogni momento dal Profilo o dal link in fondo a ogni email.
+          </li>
+          <li>
             <strong>Dati tecnici:</strong> come ogni sito, il servizio di hosting registra indirizzo IP e tipo di browser per
             sicurezza e funzionamento.
           </li>
@@ -68,7 +72,7 @@ export function PrivacyPage() {
             <strong>Supabase</strong>: database, gestione degli account e statistiche.
           </li>
           <li>
-            <strong>Resend</strong>: invio delle email (conferma dell'account, recupero password, avvisi di prezzo).
+            <strong>Resend</strong>: invio delle email (conferma dell'account, recupero password, avvisi di prezzo, comunicazioni).
           </li>
           <li>
             <strong>GitHub Pages</strong> (GitHub Inc.): pubblicazione del sito.
