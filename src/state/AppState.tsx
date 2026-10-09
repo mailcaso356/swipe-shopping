@@ -4,7 +4,6 @@ import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
 import { matchesFilters, normalizeFilters, sortProducts } from '../lib/filters'
 import { setNewBaseline } from '../lib/newness'
-import { matchesQuery, parseQuery } from '../lib/search'
 import { priceDrop } from '../lib/price'
 import { sharedProductId } from '../lib/share'
 import { load, save } from '../lib/storage'
@@ -153,22 +152,13 @@ function useAppStore() {
     if (sharedId) window.history.replaceState(null, '', '#/scopri')
   }, [sharedId])
 
-  // Ricerca: vale solo per questa visita e ignora i filtri (cerchi qualcosa di preciso).
-  const [query, setQuery] = useState('')
-  const parsedQuery = useMemo(() => parseQuery(query), [query])
-
   const deck = useMemo(() => {
-    const saved = new Set(state.wishlist.map((w) => w.product.id))
-    if (parsedQuery) {
-      const found = products.filter((p) => p.availability !== 'out_of_stock' && !saved.has(p.id) && matchesQuery(p, parsedQuery))
-      return sortProducts(found, state.filters.sort, MIX_SEED)
-    }
-    const seen = new Set([...state.disliked, ...saved])
+    const seen = new Set([...state.disliked, ...state.wishlist.map((w) => w.product.id)])
     const list = products.filter((p) => p.availability !== 'out_of_stock' && !seen.has(p.id) && matchesFilters(p, state.filters))
     const sorted = sortProducts(list, state.filters.sort, MIX_SEED)
     const shared = sharedId ? products.find((p) => p.id === sharedId) : undefined
     return shared ? [shared, ...sorted.filter((p) => p.id !== shared.id)] : sorted
-  }, [products, state.disliked, state.wishlist, state.filters, sharedId, parsedQuery])
+  }, [products, state.disliked, state.wishlist, state.filters, sharedId])
 
   /** Preferiti con i dati aggiornati dal catalogo quando il prodotto è ancora presente */
   const wishlist = useMemo(() => {
@@ -219,7 +209,6 @@ function useAppStore() {
       resetSeen: () => dispatch({ type: 'resetSeen' }),
       clearAll: () => dispatch({ type: 'clearAll' }),
       reloadCatalog: () => reloadCatalog(),
-      setQuery,
       /** Sposta un preferito in una cartella (undefined = toglie dalla cartella) */
       setFolder: (product: Product, folder?: string) => dispatch({ type: 'folder', id: product.id, folder: folder?.trim() || undefined }),
       /** Rinomina una cartella; senza nuovo nome la elimina (i prodotti restano nei preferiti) */
@@ -228,7 +217,7 @@ function useAppStore() {
     [reloadCatalog],
   )
 
-  return { state, products, deck, wishlist, actions, sync, unseenDrops, markDropsSeen, query, searching: !!parsedQuery }
+  return { state, products, deck, wishlist, actions, sync, unseenDrops, markDropsSeen }
 }
 
 export type SyncStatus = 'off' | 'loading' | 'synced' | 'saving' | 'error'

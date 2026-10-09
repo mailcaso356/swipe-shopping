@@ -1,11 +1,11 @@
-import { RefreshCw, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
+import { RefreshCw, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { SwipeDeck } from '../components/SwipeDeck'
 import { SwipeHint } from '../components/SwipeHint'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 
 export function DiscoverPage() {
-  const { state, deck, actions, query, searching } = useApp()
+  const { state, deck, actions } = useApp()
   const { catalog } = state
 
   if (catalog.status === 'loading') {
@@ -34,32 +34,12 @@ export function DiscoverPage() {
           Catalogo in preparazione: per ora ogni card apre una ricerca reale su Amazon.
         </p>
       )}
-      {searching && (
-        <div className="flex items-center justify-between gap-2 rounded-full bg-white px-4 py-1.5 text-sm ring-1 ring-neutral-200">
-          <span className="flex min-w-0 items-center gap-2">
-            <Search className="size-4 shrink-0 text-neutral-400" />
-            <span className="truncate">
-              «{query.trim()}» · {deck.length} {deck.length === 1 ? 'risultato' : 'risultati'}
-            </span>
-          </span>
-          <button type="button" onClick={() => actions.setQuery('')} aria-label="Annulla la ricerca" className="text-neutral-500">
-            <X className="size-4" />
-          </button>
-        </div>
-      )}
       {deck.length > 0 ? (
         <>
-          {!searching && <SwipeHint />}
+          <SwipeHint />
           <SwipeDeck />
         </>
       ) : (
-        searching ? (
-          <Empty title="Nessun risultato" text="Prova con meno parole o un'altra marca.">
-            <button type="button" onClick={() => actions.setQuery('')} className={primaryBtn}>
-              <X className="size-4" /> Annulla la ricerca
-            </button>
-          </Empty>
-        ) : (
         <Empty title="Hai visto tutto!" text="Non ci sono altri prodotti con questi filtri.">
           <a href={routeHref('filtri')} className={primaryBtn}>
             <SlidersHorizontal className="size-4" /> Modifica i filtri
@@ -70,7 +50,6 @@ export function DiscoverPage() {
             </button>
           )}
         </Empty>
-        )
       )}
     </div>
   )
