@@ -3,7 +3,7 @@
 // donna), una per marca e una per le offerte, più sitemap.xml e robots.txt.
 // Ogni prodotto porta all'app (#/p/<id>) e al negozio con link affiliato.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { CATEGORY_GROUPS } from '../src/config/categories.ts'
+import { groupsOf, universeOf, type Universe } from '../src/config/categories.ts'
 import { productUrl, STORES } from '../src/config/stores.ts'
 import type { Product } from '../src/types/product.ts'
 
@@ -50,6 +50,7 @@ function pick(list: Product[]) {
 }
 
 interface Page {
+  section: Universe
   slug: string
   title: string
   h1: string
@@ -62,8 +63,10 @@ const add = (page: Omit<Page, 'items'>, list: Product[]) => {
   if (list.length >= MIN_PRODUCTS) pages.push({ ...page, items: pick(list) })
 }
 const forGender = (list: Product[], g: 'uomo' | 'donna') => list.filter((p) => p.gender === g || p.gender === 'unisex')
+const pathOf = (pg: Pick<Page, 'section' | 'slug'>) => `/${pg.section}/${pg.slug}/`
 
-for (const group of CATEGORY_GROUPS) {
+// --- Moda: categorie (anche per uomo e donna), marche, offerte ---
+for (const group of groupsOf('moda')) {
   for (const item of group.items) {
     const list = products.filter((p) => p.category === item.id)
     const label = item.label
@@ -71,6 +74,7 @@ for (const group of CATEGORY_GROUPS) {
     const slug = slugify(label)
     add(
       {
+        section: 'moda',
         slug,
         group: group.label,
         title: `${label} di marca: offerte e novità | Swipe Shopping`,
@@ -82,6 +86,7 @@ for (const group of CATEGORY_GROUPS) {
     for (const g of ['donna', 'uomo'] as const) {
       add(
         {
+          section: 'moda',
           slug: `${slug}-${g}`,
           group: group.label,
           title: `${label} da ${g} di marca: offerte | Swipe Shopping`,
@@ -94,24 +99,34 @@ for (const group of CATEGORY_GROUPS) {
   }
 }
 
-const brands = new Map<string, Product[]>()
-for (const p of products) if (p.brand) brands.set(p.brand, [...(brands.get(p.brand) ?? []), p])
-for (const [brand, list] of brands) {
+const moda = products.filter((p) => universeOf(p.category) === 'moda')
+const tech = products.filter((p) => universeOf(p.category) === 'tech')
+const byBrand = (list: Product[]) => {
+  const map = new Map<string, Product[]>()
+  for (const p of list) if (p.brand) map.set(p.brand, [...(map.get(p.brand) ?? []), p])
+  return map
+}
+
+for (const [brand, list] of byBrand(moda)) {
+  // Marche di soli profumi (Dior, Lancôme…): il testo parla di profumi, non di abbigliamento.
+  const what = list.every((p) => p.category === 'profumi') ? 'profumi' : 'abbigliamento, scarpe e accessori'
   add(
     {
+      section: 'moda',
       slug: `marca-${slugify(brand)}`,
       group: 'Marche',
-      title: `${brand}: abbigliamento, scarpe e accessori in offerta | Swipe Shopping`,
+      title: `${brand}: ${what} in offerta | Swipe Shopping`,
       h1: `${brand} in offerta`,
-      intro: `Tutti i prodotti ${brand} che trovi su Swipe Shopping: abbigliamento, scarpe e accessori con prezzi aggiornati.`,
+      intro: `Tutti i prodotti ${brand} che trovi su Swipe Shopping: ${what} con prezzi aggiornati.`,
     },
     list,
   )
 }
 
-const deals = products.filter((p) => (price(p)?.off ?? 0) > 0)
+const deals = moda.filter((p) => (price(p)?.off ?? 0) > 0)
 add(
   {
+    section: 'moda',
     slug: 'offerte',
     group: 'Offerte',
     title: 'Offerte moda di oggi: abbigliamento e scarpe scontati | Swipe Shopping',
@@ -123,6 +138,7 @@ add(
 for (const g of ['donna', 'uomo'] as const) {
   add(
     {
+      section: 'moda',
       slug: `offerte-${g}`,
       group: 'Offerte',
       title: `Offerte moda ${g}: abbigliamento e scarpe scontati | Swipe Shopping`,
@@ -132,6 +148,48 @@ for (const g of ['donna', 'uomo'] as const) {
     forGender(deals, g),
   )
 }
+
+// --- Tech: categorie, marche, offerte (niente uomo/donna) ---
+for (const group of groupsOf('tech')) {
+  for (const item of group.items) {
+    const label = item.label
+    add(
+      {
+        section: 'tech',
+        slug: slugify(label),
+        group: group.label,
+        title: `${label} in offerta: i migliori modelli | Swipe Shopping`,
+        h1: `${label} in offerta`,
+        intro: `${label} delle migliori marche con prezzi aggiornati e sconti in evidenza. Salva quelli che ti piacciono e confrontali con calma.`,
+      },
+      products.filter((p) => p.category === item.id),
+    )
+  }
+}
+for (const [brand, list] of byBrand(tech)) {
+  add(
+    {
+      section: 'tech',
+      slug: `marca-${slugify(brand)}`,
+      group: 'Marche',
+      title: `${brand} in offerta: prodotti tech | Swipe Shopping`,
+      h1: `${brand} tech in offerta`,
+      intro: `I prodotti ${brand} che trovi su Swipe Shopping, con prezzi aggiornati e sconti.`,
+    },
+    list,
+  )
+}
+add(
+  {
+    section: 'tech',
+    slug: 'offerte',
+    group: 'Offerte',
+    title: 'Offerte tech di oggi: cuffie, smartphone, gaming | Swipe Shopping',
+    h1: 'Offerte tech di oggi',
+    intro: 'Cuffie, smartphone, smartwatch, console e videogiochi scontati almeno del 5%, aggiornati più volte al giorno.',
+  },
+  tech.filter((p) => (price(p)?.off ?? 0) > 0),
+)
 
 const CSS = `
 :root{color-scheme:light dark;--bg:#fafafa;--card:#fff;--text:#171717;--muted:#737373;--line:#e5e5e5;--accent:#f43f5e}
@@ -154,7 +212,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 32px}h1{font-size:28px;line-h
 .links a{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;text-decoration:none}
 footer{max-width:1100px;margin:0 auto;padding:16px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}`
 
-function layout(opts: { title: string; description: string; path: string; body: string; jsonLd?: object }) {
+function layout(opts: { title: string; description: string; path: string; body: string; jsonLd?: object; tech?: boolean }) {
   return `<!doctype html>
 <html lang="it">
 <head>
@@ -170,11 +228,11 @@ function layout(opts: { title: string; description: string; path: string; body: 
 <meta property="og:description" content="${esc(opts.description)}">
 <meta property="og:url" content="${SITE}${opts.path}">
 <meta property="og:image" content="${SITE}/icons/og-image.png">
-<style>${CSS}</style>
+<style>${CSS}${opts.tech ? ':root{--accent:#f97316}' : ''}</style>
 ${opts.jsonLd ? `<script type="application/ld+json">${JSON.stringify(opts.jsonLd).replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
-<header><a class="logo" href="/">Swipe<span>Shopping</span></a><a class="cta" href="/#/scopri">Apri l'app</a></header>
+<header><a class="logo" href="/">Swipe<span>Shopping</span></a><a class="cta" href="/#/scopri${opts.tech ? '?sezione=tech' : ''}">Apri l'app</a></header>
 <main>${opts.body}</main>
 <footer>I link verso i negozi sono link di affiliazione: se acquisti, potremmo ricevere una commissione senza costi aggiuntivi per te. In qualità di Affiliato Amazon, ricevo un guadagno dagli acquisti idonei. Prezzi e disponibilità sono indicativi e possono cambiare: fa fede quello mostrato dal negozio al momento dell'acquisto. · <a href="/#/privacy">Privacy e termini</a></footer>
 </body>
@@ -189,30 +247,37 @@ function card(p: Product) {
   return `<li class="card"><a class="img" href="${app}" title="Apri nell'app"><img src="${esc(p.imageUrl!)}" alt="${esc(p.title)}" loading="lazy" decoding="async" width="300" height="300">${pr?.off ? `<span class="off">-${pr.off}%</span>` : ''}</a><div class="body"><span class="brand">${esc(p.brand ?? '')}</span><h3 class="title"><a href="${app}" style="text-decoration:none">${esc(p.title)}</a></h3>${pr ? `<span class="price">${pr.text}</span>` : ''}${url ? `<a class="buy" href="${esc(url)}" rel="sponsored nofollow noopener" target="_blank">Vedi su ${STORES[p.store].name}</a>` : ''}</div></li>`
 }
 
-function linksSection(current: string) {
+function linksSection(section: Universe, current: string) {
   const groups = new Map<string, Page[]>()
-  for (const pg of pages) if (pg.slug !== current && !/-(uomo|donna)$/.test(pg.slug)) groups.set(pg.group, [...(groups.get(pg.group) ?? []), pg])
+  for (const pg of pages)
+    if (pg.section === section && pg.slug !== current && !/-(uomo|donna)$/.test(pg.slug)) groups.set(pg.group, [...(groups.get(pg.group) ?? []), pg])
   return `<nav class="links">${[...groups]
-    .map(([g, list]) => `<h2>${esc(g)}</h2><ul>${list.map((pg) => `<li><a href="/moda/${pg.slug}/">${esc(pg.h1)}</a></li>`).join('')}</ul>`)
-    .join('')}</nav>`
+    .map(([g, list]) => `<h2>${esc(g)}</h2><ul>${list.map((pg) => `<li><a href="${pathOf(pg)}">${esc(pg.h1)}</a></li>`).join('')}</ul>`)
+    .join('')}${otherSection(section)}</nav>`
 }
 
+const otherSection = (section: Universe) =>
+  section === 'moda'
+    ? `<h2>Tech</h2><ul><li><a href="/tech/">Cuffie, smartphone, gaming e altro</a></li></ul>`
+    : `<h2>Moda</h2><ul><li><a href="/moda/">Abbigliamento, scarpe, borse e profumi</a></li></ul>`
+
 for (const pg of pages) {
-  const genderLinks = pages.filter((x) => x.slug === `${pg.slug}-donna` || x.slug === `${pg.slug}-uomo`)
+  const genderLinks = pages.filter((x) => x.section === pg.section && (x.slug === `${pg.slug}-donna` || x.slug === `${pg.slug}-uomo`))
   const body = `<h1>${esc(pg.h1)}</h1><p class="intro">${esc(pg.intro)}</p>
 <p class="note">${pg.items.length} prodotti · prezzi aggiornati il ${builtLabel}${
-    genderLinks.length ? ` · ${genderLinks.map((x) => `<a href="/moda/${x.slug}/">${x.slug.endsWith('donna') ? 'Donna' : 'Uomo'}</a>`).join(' · ')}` : ''
+    genderLinks.length ? ` · ${genderLinks.map((x) => `<a href="${pathOf(x)}">${x.slug.endsWith('donna') ? 'Donna' : 'Uomo'}</a>`).join(' · ')}` : ''
   }</p>
-<ul class="grid">${pg.items.map(card).join('')}</ul>${linksSection(pg.slug)}`
-  const dir = new URL(`moda/${pg.slug}/`, dist)
+<ul class="grid">${pg.items.map(card).join('')}</ul>${linksSection(pg.section, pg.slug)}`
+  const dir = new URL(`${pg.section}/${pg.slug}/`, dist)
   mkdirSync(dir, { recursive: true })
   writeFileSync(
     new URL('index.html', dir),
     layout({
       title: pg.title,
       description: pg.intro,
-      path: `/moda/${pg.slug}/`,
+      path: pathOf(pg),
       body,
+      tech: pg.section === 'tech',
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
@@ -223,19 +288,35 @@ for (const pg of pages) {
   )
 }
 
-// Indice di tutte le pagine
-mkdirSync(new URL('moda/', dist), { recursive: true })
-writeFileSync(
-  new URL('moda/index.html', dist),
-  layout({
+// Indice di ogni sezione
+const INDEX = {
+  moda: {
     title: 'Moda di marca: categorie, marche e offerte | Swipe Shopping',
-    description: 'Abbigliamento, scarpe, borse e accessori dei migliori marchi, divisi per categoria e marca, con le offerte del giorno.',
-    path: '/moda/',
-    body: `<h1>Moda di marca</h1><p class="intro">Scegli una categoria, una marca o le offerte del giorno. Oppure apri l'app e scopri i prodotti uno alla volta con uno swipe.</p>${linksSection('')}`,
-  }),
-)
+    description: 'Abbigliamento, scarpe, borse, accessori e profumi dei migliori marchi, divisi per categoria e marca, con le offerte del giorno.',
+    h1: 'Moda di marca',
+  },
+  tech: {
+    title: 'Tech in offerta: cuffie, smartphone, smartwatch, gaming | Swipe Shopping',
+    description: 'Cuffie, auricolari, casse, smartphone, smartwatch, tablet, fotocamere, console e videogiochi delle migliori marche, con le offerte del giorno.',
+    h1: 'Tech in offerta',
+  },
+} as const
+for (const section of ['moda', 'tech'] as const) {
+  const ix = INDEX[section]
+  mkdirSync(new URL(`${section}/`, dist), { recursive: true })
+  writeFileSync(
+    new URL(`${section}/index.html`, dist),
+    layout({
+      title: ix.title,
+      description: ix.description,
+      path: `/${section}/`,
+      tech: section === 'tech',
+      body: `<h1>${ix.h1}</h1><p class="intro">Scegli una categoria, una marca o le offerte del giorno. Oppure apri l'app e scopri i prodotti uno alla volta con uno swipe.</p>${linksSection(section, '')}`,
+    }),
+  )
+}
 
-const urls = ['/', '/moda/', ...pages.map((pg) => `/moda/${pg.slug}/`)]
+const urls = ['/', '/moda/', '/tech/', ...pages.map(pathOf)]
 const lastmod = builtAt.toISOString().slice(0, 10)
 writeFileSync(
   new URL('sitemap.xml', dist),

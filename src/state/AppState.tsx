@@ -128,7 +128,8 @@ function reducer(state: State, action: Action): State {
 function useAppStore() {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     catalog: { status: 'loading' },
-    mode: load<Universe>('mode', 'moda') === 'tech' ? 'tech' : 'moda',
+    // ?sezione=tech arriva dalle pagine Google del tech ("Apri l'app").
+    mode: new URLSearchParams(window.location.search).get('sezione') === 'tech' || load<Universe>('mode', 'moda') === 'tech' ? 'tech' : 'moda',
     filters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) }),
     techFilters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('techFilters', {}) }),
     wishlist: stripPrices(load<WishItem[]>('wishlist', [])),
