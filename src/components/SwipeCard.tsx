@@ -63,7 +63,19 @@ export function SwipeCard({
       aria-label={isTop ? product.title : undefined}
     >
       <div className="relative min-h-0 flex-1">
-        <ProductImage product={product} eager={index < 2} className="size-full" />
+        {isTop ? (
+          <StoreLink
+            product={product}
+            icon={false}
+            ariaLabel={`Apri ${product.title} su ${storeName(product.store)}`}
+            className="block size-full"
+            onClickCapture={(e) => dragged.current && e.preventDefault()}
+          >
+            <ProductImage product={product} eager className="size-full" />
+          </StoreLink>
+        ) : (
+          <ProductImage product={product} eager={index < 2} className="size-full" />
+        )}
         {isTop && (
           <>
             <motion.span

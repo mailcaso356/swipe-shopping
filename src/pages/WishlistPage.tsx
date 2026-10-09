@@ -38,9 +38,16 @@ export function WishlistPage() {
           return (
             <li key={product.id} className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
               <div className="relative aspect-square">
-                <ProductImage product={product} className="size-full" />
+                <StoreLink
+                  product={product}
+                  icon={false}
+                  ariaLabel={`Apri ${product.title} su ${storeName(product.store)}`}
+                  className="block size-full"
+                >
+                  <ProductImage product={product} className="size-full" />
+                </StoreLink>
                 {unavailable && (
-                  <span className="absolute top-2 left-2 rounded-full bg-neutral-900/80 px-2 py-0.5 text-xs text-white">
+                  <span className="pointer-events-none absolute top-2 left-2 rounded-full bg-neutral-900/80 px-2 py-0.5 text-xs text-white">
                     Non disponibile
                   </span>
                 )}

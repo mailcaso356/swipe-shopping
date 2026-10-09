@@ -14,11 +14,16 @@ export function StoreLink({
   className,
   children,
   onClickCapture,
+  icon = true,
+  ariaLabel,
 }: {
   product: Product
   className?: string
   children?: ReactNode
   onClickCapture?: (e: MouseEvent<HTMLAnchorElement>) => void
+  /** Icona "apri esternamente" dopo il testo */
+  icon?: boolean
+  ariaLabel?: string
 }) {
   const url = productUrl(product)
   const label = children ?? storeLinkLabel(product)
@@ -37,9 +42,13 @@ export function StoreLink({
       className={className}
       onClickCapture={onClickCapture}
       onClick={() => track('click', product)}
+      aria-label={ariaLabel}
+      // Il trascinamento nativo dei link interferirebbe con lo swipe.
+      draggable={false}
+      onDragStart={(e) => e.preventDefault()}
     >
       {label}
-      <ExternalLink className="size-4 shrink-0" aria-hidden />
+      {icon && <ExternalLink className="size-4 shrink-0" aria-hidden />}
     </a>
   )
 }

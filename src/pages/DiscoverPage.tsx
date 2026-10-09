@@ -1,5 +1,6 @@
 import { RefreshCw, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { SwipeDeck } from '../components/SwipeDeck'
+import { SwipeHint } from '../components/SwipeHint'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 
@@ -34,7 +35,10 @@ export function DiscoverPage() {
         </p>
       )}
       {deck.length > 0 ? (
-        <SwipeDeck />
+        <>
+          <SwipeHint />
+          <SwipeDeck />
+        </>
       ) : (
         <Empty title="Hai visto tutto!" text="Non ci sono altri prodotti con questi filtri.">
           <a href={routeHref('filtri')} className={primaryBtn}>

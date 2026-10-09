@@ -95,7 +95,7 @@ export function SwipeDeck() {
       {top && (
         <StoreLink
           product={top}
-          className="mx-auto flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-full bg-neutral-900 font-semibold text-white shadow-md transition active:scale-95"
+          className="mx-auto flex h-11 w-full max-w-[17rem] items-center justify-center gap-2 rounded-full bg-neutral-900 text-sm font-semibold text-white shadow-md transition active:scale-95"
         >
           {storeLinkLabel(top).toUpperCase()}
         </StoreLink>
