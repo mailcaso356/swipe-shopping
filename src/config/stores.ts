@@ -32,11 +32,6 @@ export const STORES = {
         ? `https://www.amazon.it/dp/${p.externalId}?tag=${AMAZON_TAG}`
         : null
     },
-    // Lo stesso link immagine generato dalla barra SiteStripe di Amazon Affiliati.
-    buildImageUrl: (p) =>
-      !p.searchQuery && /^[A-Z0-9]{10}$/.test(p.externalId)
-        ? `https://ws-eu.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=${p.externalId}&Format=_SL500_&ID=AsinImage&MarketPlace=IT&ServiceVersion=20070822&WS=1&tag=${AMAZON_TAG}&language=it_IT`
-        : null,
   },
   // Negozi predisposti: si attivano quando c'è un programma di affiliazione
   // approvato (es. tramite Awin) e i prodotti hanno `affiliateUrl`.
