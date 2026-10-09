@@ -25,7 +25,9 @@ export function validateProduct(raw: unknown): string[] {
   if (typeof p.title !== 'string' || p.title.trim().length < 3) errors.push('titolo mancante')
   if (typeof p.gender !== 'string' || !GENDERS.includes(p.gender)) errors.push(`genere non valido: ${String(p.gender)}`)
   if (typeof p.category !== 'string' || !isCategoryId(p.category)) errors.push(`categoria sconosciuta: ${String(p.category)}`)
-  if (typeof p.imageUrl !== 'string' || !p.imageUrl.startsWith('https://')) errors.push('imageUrl https mancante')
+  if (p.imageUrl !== undefined && (typeof p.imageUrl !== 'string' || !p.imageUrl.startsWith('https://'))) {
+    errors.push('imageUrl deve essere un URL https')
+  }
   if (typeof p.availability !== 'string' || !AVAILABILITY.includes(p.availability)) errors.push('availability non valida')
   if (!isIsoDate(p.addedAt)) errors.push('addedAt mancante o non è una data ISO')
   if (p.price !== undefined && !isPositive(p.price)) errors.push('price deve essere un numero > 0')

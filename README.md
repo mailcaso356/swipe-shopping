@@ -68,7 +68,7 @@ Scelte principali:
 }
 ```
 
-Facoltativi: `price`, `originalPrice` e `priceCheckedAt` (senza `priceCheckedAt` recente il prezzo non appare).
+Facoltativi: `imageUrl` (senza immagine la card mostra un segnaposto), `price`, `originalPrice` e `priceCheckedAt` (senza `priceCheckedAt` recente il prezzo non appare).
 Valori di `gender`: `uomo`, `donna`, `unisex`. Le categorie valide sono gli `id` in `src/config/categories.ts`.
 
 4. Esegui `npm run check:catalog`: deve dire 0 da correggere e stampa il link affiliato da provare nel browser.

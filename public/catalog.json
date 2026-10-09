@@ -1,1 +1,312 @@
-[]
+[
+ {
+  "id": "amazon:B0CLJJHN7P",
+  "store": "amazon",
+  "externalId": "B0CLJJHN7P",
+  "title": "adidas Grand Court Base 2.0, Sneakers Uomo",
+  "brand": "adidas",
+  "gender": "uomo",
+  "category": "sneakers",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:59:00Z"
+ },
+ {
+  "id": "amazon:B0CT71ZD1C",
+  "store": "amazon",
+  "externalId": "B0CT71ZD1C",
+  "title": "Nike W Court Vision Alta, Scarpe da Ginnastica Donna",
+  "brand": "Nike",
+  "gender": "donna",
+  "category": "sneakers",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:58:00Z"
+ },
+ {
+  "id": "amazon:B00GLQR5G4",
+  "store": "amazon",
+  "externalId": "B00GLQR5G4",
+  "title": "Ray-Ban New Wayfarer, Occhiali da sole unisex",
+  "brand": "Ray-Ban",
+  "gender": "unisex",
+  "category": "occhiali",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:57:00Z"
+ },
+ {
+  "id": "amazon:B01EYJMS0C",
+  "store": "amazon",
+  "externalId": "B01EYJMS0C",
+  "title": "Levi's 501 Original Fit, Jeans Uomo",
+  "brand": "Levi's",
+  "gender": "uomo",
+  "category": "jeans",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:56:00Z"
+ },
+ {
+  "id": "amazon:B07FCGNQB6",
+  "store": "amazon",
+  "externalId": "B07FCGNQB6",
+  "title": "GUESS Lola, Borsa a Spalla Donna",
+  "brand": "GUESS",
+  "gender": "donna",
+  "category": "borse",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:55:00Z"
+ },
+ {
+  "id": "amazon:B09W9NN238",
+  "store": "amazon",
+  "externalId": "B09W9NN238",
+  "title": "Casio Vintage A171WEMB-1AEF, orologio digitale unisex in acciaio",
+  "brand": "Casio",
+  "gender": "unisex",
+  "category": "orologi",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:54:00Z"
+ },
+ {
+  "id": "amazon:B09L8Y3YTW",
+  "store": "amazon",
+  "externalId": "B09L8Y3YTW",
+  "title": "Champion College, Felpa con cappuccio Uomo",
+  "brand": "Champion",
+  "gender": "uomo",
+  "category": "felpe",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:53:00Z"
+ },
+ {
+  "id": "amazon:B0BFVHR6YC",
+  "store": "amazon",
+  "externalId": "B0BFVHR6YC",
+  "title": "Dr. Martens 1460, Anfibi Donna",
+  "brand": "Dr. Martens",
+  "gender": "donna",
+  "category": "stivali",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:52:00Z"
+ },
+ {
+  "id": "amazon:B0B5N69PC7",
+  "store": "amazon",
+  "externalId": "B0B5N69PC7",
+  "title": "Eastpak Padded Pak'R Zaino Casual, Viola",
+  "brand": "Eastpak",
+  "gender": "unisex",
+  "category": "zaini",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:51:00Z",
+  "colors": [
+   "Viola"
+  ]
+ },
+ {
+  "id": "amazon:B07MH5P2TN",
+  "store": "amazon",
+  "externalId": "B07MH5P2TN",
+  "title": "The North Face 1996 Retro Nuptse, Piumino Donna",
+  "brand": "The North Face",
+  "gender": "donna",
+  "category": "giacche",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:50:00Z",
+  "colors": [
+   "Grigio"
+  ]
+ },
+ {
+  "id": "amazon:B0CYTYSYRB",
+  "store": "amazon",
+  "externalId": "B0CYTYSYRB",
+  "title": "Calvin Klein Jeans T-Shirt Uomo con Monogram",
+  "brand": "Calvin Klein",
+  "gender": "uomo",
+  "category": "tshirt",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:49:00Z"
+ },
+ {
+  "id": "amazon:B01JQRPZDO",
+  "store": "amazon",
+  "externalId": "B01JQRPZDO",
+  "title": "New Era 9FORTY League Essential New York Yankees, cappellino regolabile",
+  "brand": "New Era",
+  "gender": "unisex",
+  "category": "cappellini",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:48:00Z"
+ },
+ {
+  "id": "amazon:B07V5VBCWR",
+  "store": "amazon",
+  "externalId": "B07V5VBCWR",
+  "title": "Tommy Hilfiger Portafoglio uomo bi-fold in pelle nera",
+  "brand": "Tommy Hilfiger",
+  "gender": "uomo",
+  "category": "portafogli",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:47:00Z",
+  "colors": [
+   "Nero"
+  ]
+ },
+ {
+  "id": "amazon:B0DLLG1ZN5",
+  "store": "amazon",
+  "externalId": "B0DLLG1ZN5",
+  "title": "Nike Court Vision Low Next Nature, Sneaker Donna",
+  "brand": "Nike",
+  "gender": "donna",
+  "category": "sneakers",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:46:00Z"
+ },
+ {
+  "id": "amazon:B083ZGSV53",
+  "store": "amazon",
+  "externalId": "B083ZGSV53",
+  "title": "Ray-Ban Wayfarer Folding Classic 4105, occhiali da sole unisex",
+  "brand": "Ray-Ban",
+  "gender": "unisex",
+  "category": "occhiali",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:45:00Z"
+ },
+ {
+  "id": "amazon:B073SZWTRQ",
+  "store": "amazon",
+  "externalId": "B073SZWTRQ",
+  "title": "Levi's 501 Slim Taper Jeans Uomo",
+  "brand": "Levi's",
+  "gender": "uomo",
+  "category": "jeans",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:44:00Z"
+ },
+ {
+  "id": "amazon:B01KABCWT0",
+  "store": "amazon",
+  "externalId": "B01KABCWT0",
+  "title": "Guess Delaney Medium Classic Tote, Borsa a Spalla Donna, Nero",
+  "brand": "GUESS",
+  "gender": "donna",
+  "category": "borse",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:43:00Z",
+  "colors": [
+   "Nero"
+  ]
+ },
+ {
+  "id": "amazon:B004KPKU9M",
+  "store": "amazon",
+  "externalId": "B004KPKU9M",
+  "title": "Casio LA670WEGA-1EF, orologio digitale donna",
+  "brand": "Casio",
+  "gender": "donna",
+  "category": "orologi",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:42:00Z"
+ },
+ {
+  "id": "amazon:B09L8ZT5TV",
+  "store": "amazon",
+  "externalId": "B09L8ZT5TV",
+  "title": "Champion Eco Future Fleece Full Zip, Felpa con Cappuccio Uomo",
+  "brand": "Champion",
+  "gender": "uomo",
+  "category": "felpe",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:41:00Z"
+ },
+ {
+  "id": "amazon:B09YYYGMLP",
+  "store": "amazon",
+  "externalId": "B09YYYGMLP",
+  "title": "Dr. Martens 1460 Pascal Suede, Stivali Donna",
+  "brand": "Dr. Martens",
+  "gender": "donna",
+  "category": "stivali",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:40:00Z"
+ },
+ {
+  "id": "amazon:B000CRBEJW",
+  "store": "amazon",
+  "externalId": "B000CRBEJW",
+  "title": "Eastpak Padded Pak'r Zaino unisex 24 L, Blu (Midnight)",
+  "brand": "Eastpak",
+  "gender": "unisex",
+  "category": "zaini",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:39:00Z",
+  "colors": [
+   "Blu"
+  ]
+ },
+ {
+  "id": "amazon:B0DK9GWZNY",
+  "store": "amazon",
+  "externalId": "B0DK9GWZNY",
+  "title": "The North Face Hyalite, Piumino Donna",
+  "brand": "The North Face",
+  "gender": "donna",
+  "category": "giacche",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:38:00Z"
+ },
+ {
+  "id": "amazon:B0BZ14BCBC",
+  "store": "amazon",
+  "externalId": "B0BZ14BCBC",
+  "title": "Calvin Klein T-Shirt Uomo J30J322879, Nero",
+  "brand": "Calvin Klein",
+  "gender": "uomo",
+  "category": "tshirt",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:37:00Z",
+  "colors": [
+   "Nero"
+  ]
+ },
+ {
+  "id": "amazon:B00JAK1PMI",
+  "store": "amazon",
+  "externalId": "B00JAK1PMI",
+  "title": "Casio Vintage A168WA-1WDF, orologio digitale",
+  "brand": "Casio",
+  "gender": "unisex",
+  "category": "orologi",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:36:00Z"
+ },
+ {
+  "id": "amazon:B00EBGH55C",
+  "store": "amazon",
+  "externalId": "B00EBGH55C",
+  "title": "Tommy Hilfiger Eton Mini, portafoglio uomo piccolo, Marrone",
+  "brand": "Tommy Hilfiger",
+  "gender": "uomo",
+  "category": "portafogli",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:35:00Z",
+  "colors": [
+   "Marrone"
+  ]
+ },
+ {
+  "id": "amazon:B07DBJ3LZ6",
+  "store": "amazon",
+  "externalId": "B07DBJ3LZ6",
+  "title": "adidas Grand Court, Scarpe da ginnastica uomo, Bianco",
+  "brand": "adidas",
+  "gender": "uomo",
+  "category": "sneakers",
+  "availability": "unknown",
+  "addedAt": "2026-10-09T08:34:00Z",
+  "colors": [
+   "Bianco"
+  ]
+ }
+]
