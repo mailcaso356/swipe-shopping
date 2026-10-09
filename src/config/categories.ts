@@ -88,6 +88,7 @@ export const TECH_GROUPS = [
       { id: 'smartphone', label: 'Smartphone' },
       { id: 'smartwatch', label: 'Smartwatch' },
       { id: 'tablet', label: 'Tablet' },
+      { id: 'ereader', label: 'E-reader' },
     ],
   },
   {
@@ -104,7 +105,19 @@ export const TECH_GROUPS = [
     id: 'foto',
     label: 'Foto e video',
     emoji: '📷',
-    items: [{ id: 'fotocamere', label: 'Fotocamere e action cam' }],
+    items: [
+      { id: 'fotocamere', label: 'Fotocamere e action cam' },
+      { id: 'droni', label: 'Droni' },
+    ],
+  },
+  {
+    id: 'pc',
+    label: 'PC e accessori',
+    emoji: '💻',
+    items: [
+      { id: 'monitor', label: 'Monitor' },
+      { id: 'tastiere_mouse', label: 'Tastiere e mouse' },
+    ],
   },
 ] as const
 
