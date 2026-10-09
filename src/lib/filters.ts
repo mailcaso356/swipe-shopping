@@ -1,4 +1,4 @@
-import { categoryIdsOf, isCategoryId, universeOf } from '../config/categories'
+import { NO_CATEGORY, categoryIdsOf, isCategoryId, universeOf } from '../config/categories'
 import { COLOR_ORDER } from '../config/colors'
 import type { Filters, Product } from '../types/product'
 import { discountBadge, freshPrice } from './price'
@@ -9,7 +9,12 @@ export function matchesFilters(p: Product, f: Filters) {
   if (f.brands.length && (!p.brand || !f.brands.includes(p.brand))) return false
   if (f.stores.length && !f.stores.includes(p.store)) return false
   if (f.sizes.length && !p.sizes?.some((s) => f.sizes.includes(s))) return false
-  if (f.colors.length && !p.colors?.some((c) => f.colors.includes(c))) return false
+  if (f.colors.length) {
+    // Prodotti senza colore riconosciuto: restano se l'utente ha escluso solo pochi colori (più verdi che rossi).
+    if (!p.colors?.length) {
+      if (f.colors.length * 2 <= COLOR_ORDER.length) return false
+    } else if (!p.colors.some((c) => f.colors.includes(c))) return false
+  }
   if (f.onlyDeals && discountBadge(p) === null) return false
   if (f.priceMin !== undefined || f.priceMax !== undefined) {
     // Con un filtro prezzo attivo escludiamo i prodotti senza prezzo verificato.
@@ -48,11 +53,12 @@ export function activeFilterCount(f: Filters) {
   return (
     (f.gender !== 'tutti' ? 1 : 0) +
     (f.onlyDeals ? 1 : 0) +
-    f.categories.length +
-    f.brands.length +
-    f.stores.length +
-    f.sizes.length +
-    f.colors.length +
+    // Ogni gruppo di chip conta 1: con il verde/rosso la lista può essere lunga.
+    (f.categories.length ? 1 : 0) +
+    (f.brands.length ? 1 : 0) +
+    (f.stores.length ? 1 : 0) +
+    (f.sizes.length ? 1 : 0) +
+    (f.colors.length ? 1 : 0) +
     (f.priceMin !== undefined ? 1 : 0) +
     (f.priceMax !== undefined ? 1 : 0)
   )
@@ -82,10 +88,16 @@ export function facetValues(products: Product[]) {
  * come per le marche: il filtro conta solo quando restringe davvero.
  */
 export function normalizeFilters(f: Filters): Filters {
+  // "Deseleziona tutto": nessuna categoria inclusa, resta così finché l'utente non ne riaccende una.
+  if (f.categories.includes(NO_CATEGORY)) return { ...stripOld(f), categories: [NO_CATEGORY] }
   const unique = [...new Set(f.categories.filter(isCategoryId))]
   // Tutte le categorie della sezione (moda o tech) = nessun filtro.
   const all = unique.length > 0 && unique.length >= categoryIdsOf(universeOf(unique[0])).length
-  // "Solo novità" e le vecchie "sezioni extra" non esistono più: le togliamo dai filtri salvati.
+  return { ...stripOld(f), categories: all ? [] : unique }
+}
+
+/** "Solo novità" e le vecchie "sezioni extra" non esistono più: le togliamo dai filtri salvati. */
+function stripOld(f: Filters): Filters {
   const { onlyNew: _n, extras: _e, ...rest } = f as Filters & { onlyNew?: boolean; extras?: string[] }
-  return { ...rest, categories: all ? [] : unique }
+  return rest
 }

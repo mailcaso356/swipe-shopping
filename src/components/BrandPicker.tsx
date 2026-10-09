@@ -1,4 +1,4 @@
-import { Search, X } from 'lucide-react'
+import { Check, Search, X } from 'lucide-react'
 import { useState } from 'react'
 
 /** Marche: cerca per nome; senza ricerca mostra le selezionate e le più presenti nel catalogo. */
@@ -17,9 +17,14 @@ export function BrandPicker({
   const [query, setQuery] = useState('')
   const [showAll, setShowAll] = useState(false)
   const q = query.trim().toLowerCase()
+  // Verde = inclusa, rosso = esclusa; nessuna in lista = tutte verdi.
+  const isIn = (b: string) => selected.length === 0 || selected.includes(b)
+  // In cima le marche "diverse" dalla maggioranza (le poche verdi o le poche rosse), così si vedono subito.
+  const fewIn = selected.length > 0 && selected.length <= brands.length / 2
+  const first = selected.length === 0 ? [] : brands.filter((b) => isIn(b) === fewIn)
   const list = q
     ? brands.filter((b) => b.toLowerCase().includes(q))
-    : [...selected, ...brands.filter((b) => !selected.includes(b))].slice(0, showAll ? undefined : 16)
+    : [...first, ...brands.filter((b) => !first.includes(b))].slice(0, showAll ? undefined : 16)
 
   return (
     <div className="space-y-3">
@@ -35,17 +40,18 @@ export function BrandPicker({
       </label>
       <div className="flex flex-wrap gap-2">
         {list.map((b) => {
-          const active = selected.includes(b)
+          const active = isIn(b)
           return (
             <button
               key={b}
               type="button"
               onClick={() => onToggle(b)}
               aria-pressed={active}
-              className={`rounded-full px-3.5 py-1.5 text-sm font-medium ring-1 transition active:scale-95 ${
-                active ? 'bg-neutral-900 text-white ring-neutral-900' : 'bg-white text-neutral-700 ring-neutral-200'
+              className={`inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium ring-1 transition active:scale-95 ${
+                active ? 'bg-[#dcfce7] text-[#166534] ring-[#22c55e]' : 'bg-[#fee2e2] text-[#991b1b] ring-[#ef4444]'
               }`}
             >
+              {active ? <Check className="size-3.5" /> : <X className="size-3.5" />}
               {b}
             </button>
           )

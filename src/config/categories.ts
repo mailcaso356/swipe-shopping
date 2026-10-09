@@ -131,3 +131,6 @@ export const groupsOf = (u: Universe): readonly CategoryGroup[] => (u === 'tech'
 export const categoryIdsOf = (u: Universe) => groupsOf(u).flatMap((g) => g.items.map((i) => i.id)) as CategoryId[]
 /** Tutte le categorie della moda (la sezione principale) */
 export const ALL_CATEGORY_IDS = categoryIdsOf('moda')
+
+/** Valore speciale dei filtri: "Deseleziona tutto", nessuna categoria inclusa (nessun prodotto ha questa categoria). */
+export const NO_CATEGORY = 'nessuna' as CategoryId

@@ -1,6 +1,6 @@
-import { Check } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { categoryIdsOf, groupsOf, type CategoryId } from '../config/categories'
+import { NO_CATEGORY, categoryIdsOf, groupsOf, type CategoryId } from '../config/categories'
 import { colorSwatch } from '../config/colors'
 import { BrandPicker } from '../components/BrandPicker'
 import { PriceRange } from '../components/PriceRange'
@@ -9,7 +9,15 @@ import { activeFilterCount, facetValues, matchesFilters } from '../lib/filters'
 import { useApp } from '../state/AppState'
 import { DEFAULT_FILTERS, type Filters } from '../types/product'
 
-const toggle = <T,>(list: T[], value: T) => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
+/** Verde/rosso: lista vuota = tutto incluso (tutto verde). */
+const isIn = <T,>(list: T[], value: T) => list.length === 0 || list.includes(value)
+
+/** Passa un valore da verde a rosso o viceversa; tutto verde torna a lista vuota. */
+function flip<T>(list: T[], value: T, all: T[]): T[] {
+  const base = list.length === 0 ? all : list.filter((v) => all.includes(v))
+  const next = base.includes(value) ? base.filter((v) => v !== value) : [...base, value]
+  return next.length >= all.length ? [] : next
+}
 
 export function FiltersPage() {
   const { state, products, actions } = useApp()
@@ -19,8 +27,23 @@ export function FiltersPage() {
   const facets = facetValues(products)
   const matching = products.filter((p) => p.availability !== 'out_of_stock' && matchesFilters(p, f)).length
   // Come per le marche: nessuna selezionata (o tutte) = tutte le categorie.
-  const setStores = (list: StoreId[]) => set({ stores: list.length === facets.stores.length ? [] : list })
-  const setCategories = (list: CategoryId[]) => set({ categories: list.length === categoryIdsOf(state.mode).length ? [] : list })
+  const allCategories = categoryIdsOf(state.mode)
+  const setCategories = (list: CategoryId[]) => {
+    const real = list.filter((c) => c !== NO_CATEGORY)
+    // Tutte spente = "Deseleziona tutto"; tutte accese = nessun filtro.
+    set({ categories: real.length === 0 ? (list.length ? [NO_CATEGORY] : []) : real.length >= allCategories.length ? [] : real })
+  }
+  const flipCategory = (id: CategoryId) => {
+    const base = f.categories.includes(NO_CATEGORY) ? [] : f.categories.length === 0 ? allCategories : f.categories
+    const next = base.includes(id) ? base.filter((c) => c !== id) : [...base, id]
+    setCategories(next.length ? next : [NO_CATEGORY])
+  }
+  const categoryIn = (id: CategoryId) => !f.categories.includes(NO_CATEGORY) && isIn(f.categories, id)
+  // Negozi e colori: almeno uno resta verde (tutti rossi non mostrerebbe niente).
+  const flipKeepOne = <T,>(list: T[], value: T, all: T[]) => {
+    const next = flip(list, value, all)
+    return next.length === 0 && list.length === 1 && list[0] === value ? list : next
+  }
 
   return (
     <div className="space-y-6 pb-8">
@@ -31,6 +54,17 @@ export function FiltersPage() {
             Azzera filtri
           </button>
         )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-2xl bg-white p-3 text-sm ring-1 ring-neutral-200">
+        <span className="text-neutral-600">Nella home vedi solo i prodotti verdi.</span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#dcfce7] px-2.5 py-0.5 font-medium text-[#166534] ring-1 ring-[#22c55e]">
+          <Check className="size-3.5" /> incluso
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#fee2e2] px-2.5 py-0.5 font-medium text-[#991b1b] ring-1 ring-[#ef4444]">
+          <X className="size-3.5" /> escluso
+        </span>
+        <span className="text-neutral-600">Tocca un filtro per cambiarlo.</span>
       </div>
 
       {matching === 0 && products.length > 0 && (
@@ -62,10 +96,10 @@ export function FiltersPage() {
       )}
 
       {facets.stores.length > 1 && (
-        <Section title="Negozi" hint="Nessuno selezionato = tutti i negozi">
+        <Section title="Negozi">
           <div className="flex flex-wrap gap-2">
             {facets.stores.map((id) => (
-              <Chip key={id} active={f.stores.includes(id)} onClick={() => setStores(toggle(f.stores, id))}>
+              <Chip key={id} active={isIn(f.stores, id)} onClick={() => set({ stores: flipKeepOne(f.stores, id, facets.stores as StoreId[]) })}>
                 {STORES[id].name}
               </Chip>
             ))}
@@ -88,18 +122,27 @@ export function FiltersPage() {
         <PriceRange min={f.priceMin} max={f.priceMax} onChange={(priceMin, priceMax) => set({ priceMin, priceMax })} />
       </Section>
 
-      <Section title="Categorie" hint="Nessuna selezionata = tutte le categorie">
+      <Section title="Categorie">
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setCategories([])} className="flex-1 rounded-full bg-emerald-600 py-2 text-sm font-semibold text-[#fff] active:scale-95">
+            Seleziona tutto
+          </button>
+          <button type="button" onClick={() => setCategories([NO_CATEGORY])} className="flex-1 rounded-full bg-red-600 py-2 text-sm font-semibold text-[#fff] active:scale-95">
+            Deseleziona tutto
+          </button>
+        </div>
         <div className="space-y-4">
           {groupsOf(state.mode).map((group) => {
             const ids = group.items.map((i) => i.id) as CategoryId[]
-            const all = ids.every((id) => f.categories.includes(id))
+            const all = ids.every(categoryIn)
+            const current = f.categories.includes(NO_CATEGORY) ? [] : f.categories.length === 0 ? allCategories : f.categories
             return (
               <div key={group.id} className="space-y-2">
                 {ids.length > 1 ? (
                   <button
                     type="button"
                     onClick={() =>
-                      setCategories(all ? f.categories.filter((c) => !ids.includes(c)) : [...new Set([...f.categories, ...ids])])
+                      setCategories(all ? (current.filter((c) => !ids.includes(c)).length ? current.filter((c) => !ids.includes(c)) : [NO_CATEGORY]) : [...new Set([...current, ...ids])])
                     }
                     className="flex items-center gap-2 text-sm font-semibold"
                   >
@@ -116,8 +159,8 @@ export function FiltersPage() {
                   {group.items.map((item) => (
                     <Chip
                       key={item.id}
-                      active={f.categories.includes(item.id)}
-                      onClick={() => setCategories(toggle(f.categories, item.id as CategoryId))}
+                      active={categoryIn(item.id as CategoryId)}
+                      onClick={() => flipCategory(item.id as CategoryId)}
                     >
                       {item.label}
                     </Chip>
@@ -130,23 +173,23 @@ export function FiltersPage() {
       </Section>
 
       {facets.brands.length > 0 && (
-        <Section title="Marca" hint="Nessuna selezionata = tutte le marche">
+        <Section title="Marca">
           <BrandPicker
             brands={facets.brands}
             selected={f.brands}
-            onToggle={(v) => set({ brands: toggle(f.brands, v) })}
+            onToggle={(v) => set({ brands: flipKeepOne(f.brands, v, facets.brands) })}
             onClear={() => set({ brands: [] })}
           />
         </Section>
       )}
       {facets.sizes.length > 0 && (
-        <ChipSection title="Taglia" values={facets.sizes} selected={f.sizes} onToggle={(v) => set({ sizes: toggle(f.sizes, v) })} />
+        <ChipSection title="Taglia" values={facets.sizes} selected={f.sizes} onToggle={(v) => set({ sizes: flipKeepOne(f.sizes, v, facets.sizes) })} />
       )}
       {!tech && facets.colors.length > 0 && (
-        <Section title="Colore" hint="Nessuno selezionato = tutti i colori">
+        <Section title="Colore">
           <div className="flex flex-wrap gap-2">
             {facets.colors.map((c) => (
-              <Chip key={c} active={f.colors.includes(c)} onClick={() => set({ colors: toggle(f.colors, c) })}>
+              <Chip key={c} active={isIn(f.colors, c)} onClick={() => set({ colors: flipKeepOne(f.colors, c, facets.colors) })}>
                 {colorSwatch(c) && (
                   <span
                     aria-hidden
@@ -208,11 +251,12 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       type="button"
       onClick={onClick}
       aria-pressed={active}
+      // Verde = incluso nella ricerca, rosso = escluso. Colori fissi, uguali in tema chiaro e scuro.
       className={`inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium ring-1 transition active:scale-95 ${
-        active ? 'bg-neutral-900 text-white ring-neutral-900' : 'bg-white text-neutral-700 ring-neutral-200'
+        active ? 'bg-[#dcfce7] text-[#166534] ring-[#22c55e]' : 'bg-[#fee2e2] text-[#991b1b] ring-[#ef4444]'
       }`}
     >
-      {active && <Check className="size-3.5" />}
+      {active ? <Check className="size-3.5" /> : <X className="size-3.5" />}
       {children}
     </button>
   )
@@ -229,7 +273,7 @@ function ChipSection(props: {
     <Section title={props.title}>
       <div className="flex flex-wrap gap-2">
         {props.values.map((v) => (
-          <Chip key={v} active={props.selected.includes(v)} onClick={() => props.onToggle(v)}>
+          <Chip key={v} active={isIn(props.selected, v)} onClick={() => props.onToggle(v)}>
             {props.label?.(v) ?? v}
           </Chip>
         ))}
