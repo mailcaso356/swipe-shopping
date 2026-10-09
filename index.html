@@ -17,8 +17,15 @@
       } catch (e) {}
     </script>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <!-- Il catalogo inizia a scaricarsi subito, in parallelo al codice dell'app -->
-    <link rel="preload" href="./catalog.json" as="fetch" crossorigin="anonymous" />
+    <script>
+      // Il catalogo della sezione aperta inizia a scaricarsi subito, in parallelo al codice dell'app.
+      var l = document.createElement('link')
+      l.rel = 'preload'
+      l.as = 'fetch'
+      l.crossOrigin = 'anonymous'
+      l.href = './catalog-' + (document.documentElement.classList.contains('tech') ? 'tech' : 'moda') + '.json'
+      document.head.appendChild(l)
+    </script>
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />

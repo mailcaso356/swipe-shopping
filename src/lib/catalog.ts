@@ -1,3 +1,4 @@
+import type { Universe } from '../config/categories'
 import { buildExploreCards } from '../data/exploreCards'
 import type { Product } from '../types/product'
 import { checkCatalog } from './validate'
@@ -7,18 +8,33 @@ export interface CatalogResult {
   /** true se il catalogo verificato è vuoto e mostriamo le card "esplora" */
   exploreMode: boolean
   skipped: number
+  /** Sezioni contenute: il build divide il catalogo in moda e tech per aprire l'app prima. */
+  sections: Universe[]
 }
 
 /**
- * Sorgente del catalogo. Oggi legge `public/catalog.json` (modificabile senza
- * ricompilare l'app); domani potrà chiamare un'API/backend con la stessa firma.
+ * Sorgente del catalogo. Il build scrive `catalog-moda.json` e `catalog-tech.json` (compatti):
+ * si scarica prima la sezione aperta, poi l'altra. In sviluppo c'è solo `catalog.json` (tutto).
  */
-export async function loadCatalog(signal?: AbortSignal): Promise<CatalogResult> {
-  const res = await fetch(`${import.meta.env.BASE_URL}catalog.json`, { signal })
+export async function loadCatalog(section: Universe, signal?: AbortSignal): Promise<CatalogResult> {
+  let res = await fetch(`${import.meta.env.BASE_URL}catalog-${section}.json`, { signal })
+  let sections: Universe[] = [section]
+  if (!res.ok) {
+    res = await fetch(`${import.meta.env.BASE_URL}catalog.json`, { signal })
+    sections = ['moda', 'tech']
+  }
   if (!res.ok) throw new Error(`Catalogo non disponibile (HTTP ${res.status})`)
-  const { valid, invalid } = checkCatalog(await res.json())
+  const { valid, invalid } = checkCatalog((await res.json()).map(expand))
   if (invalid.length) console.warn('Prodotti scartati dal catalogo:', invalid)
   const available = valid.filter((p) => p.availability !== 'out_of_stock')
-  if (available.length === 0) return { products: buildExploreCards(), exploreMode: true, skipped: invalid.length }
-  return { products: valid, exploreMode: false, skipped: invalid.length }
+  if (available.length === 0 && sections.length === 2) return { products: buildExploreCards(), exploreMode: true, skipped: invalid.length, sections }
+  return { products: valid, exploreMode: false, skipped: invalid.length, sections }
+}
+
+/** Ricostruisce i campi tolti dal build per risparmiare peso (vedi scripts/build-catalog.ts). */
+function expand(raw: Record<string, unknown>) {
+  const p = { ...raw }
+  if (p.externalId === undefined && typeof p.id === 'string') p.externalId = p.id.slice(p.id.indexOf(':') + 1)
+  if (p.availability === undefined) p.availability = 'in_stock'
+  return p
 }

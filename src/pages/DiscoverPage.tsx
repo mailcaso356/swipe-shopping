@@ -8,7 +8,8 @@ export function DiscoverPage() {
   const { state, deck, products, actions } = useApp()
   const { catalog } = state
 
-  if (catalog.status === 'loading') {
+  // Anche quando la sezione aperta non è ancora arrivata (si scarica dopo l'altra).
+  if (catalog.status === 'loading' || (catalog.status === 'ready' && !catalog.sections.includes(state.mode))) {
     return (
       <div className="flex flex-1 flex-col gap-4" aria-busy="true" aria-label="Caricamento prodotti">
         <div className="flex-1 animate-pulse rounded-3xl bg-neutral-200/70" />

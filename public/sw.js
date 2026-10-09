@@ -1,7 +1,7 @@
 // Service worker: l'app si apre subito anche con rete lenta e funziona offline con l'ultimo catalogo.
 // - pagina e catalogo: prima la rete (per avere prezzi aggiornati), se manca si usa la copia salvata
 // - file del build (nomi con hash, non cambiano mai): prima la copia salvata
-const CACHE = 'swipeshop-v4'
+const CACHE = 'swipeshop-v5'
 
 self.addEventListener('install', () => self.skipWaiting())
 
@@ -21,7 +21,7 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET' || url.origin !== self.location.origin) return
 
   const immutable = url.pathname.includes('/assets/') || url.pathname.includes('/icons/')
-  if (url.pathname.endsWith('/catalog.json')) event.respondWith(networkWithTimeout(event, req))
+  if (/\/catalog(-\w+)?\.json$/.test(url.pathname)) event.respondWith(networkWithTimeout(event, req))
   else event.respondWith(immutable ? cacheFirst(req) : networkFirst(req))
 })
 

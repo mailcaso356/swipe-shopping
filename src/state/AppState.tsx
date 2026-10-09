@@ -22,7 +22,7 @@ export interface WishItem {
 type CatalogState =
   | { status: 'loading' }
   | { status: 'error'; error: string }
-  | { status: 'ready'; products: Product[]; exploreMode: boolean }
+  | { status: 'ready'; products: Product[]; exploreMode: boolean; sections: Universe[] }
 
 interface State {
   catalog: CatalogState
@@ -148,12 +148,25 @@ function useAppStore() {
 
   const sync = useCloudSync(state, dispatch)
 
+  // Prima la sezione aperta (si vede subito), poi l'altra in sottofondo (preferiti, link condivisi, cambio sezione).
+  const modeRef = useRef(state.mode)
+  useEffect(() => {
+    modeRef.current = state.mode
+  }, [state.mode])
   const reloadCatalog = useCallback((signal?: AbortSignal) => {
     dispatch({ type: 'catalog', catalog: { status: 'loading' } })
-    loadCatalog(signal)
-      .then((r) => {
+    const first = modeRef.current
+    loadCatalog(first, signal)
+      .then(async (r) => {
         setNewBaseline(r.products)
-        dispatch({ type: 'catalog', catalog: { status: 'ready', products: r.products, exploreMode: r.exploreMode } })
+        dispatch({ type: 'catalog', catalog: { status: 'ready', products: r.products, exploreMode: r.exploreMode, sections: r.sections } })
+        if (r.sections.length === 2) return
+        const other = first === 'moda' ? 'tech' : 'moda'
+        const rest = await loadCatalog(other, signal).catch(() => null)
+        if (signal?.aborted) return
+        const products = rest ? [...r.products, ...rest.products] : r.products
+        setNewBaseline(products)
+        dispatch({ type: 'catalog', catalog: { status: 'ready', products, exploreMode: false, sections: ['moda', 'tech'] } })
       })
       .catch((e: unknown) => {
         if (signal?.aborted) return
