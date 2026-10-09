@@ -31,25 +31,6 @@ export function FiltersPage() {
         )}
       </div>
 
-      <Section title="Offerte">
-        <label className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-neutral-200">
-          <span>
-            <span className="block font-medium">Solo prodotti in offerta</span>
-            <span className="text-xs text-neutral-500">Mostra solo quelli scontati almeno del 5%</span>
-          </span>
-          <input
-            type="checkbox"
-            checked={!!f.onlyDeals}
-            onChange={(e) => set({ onlyDeals: e.target.checked || undefined })}
-            className="size-6 accent-rose-500"
-          />
-        </label>
-      </Section>
-
-      <Section title="Prezzo" hint="Con un limite di prezzo vedi solo prodotti con prezzo aggiornato">
-        <PriceRange min={f.priceMin} max={f.priceMax} onChange={(priceMin, priceMax) => set({ priceMin, priceMax })} />
-      </Section>
-
       <Section title="Genere">
         <div className="grid grid-cols-3 gap-1 rounded-2xl bg-neutral-100 p-1">
           {(
@@ -70,6 +51,25 @@ export function FiltersPage() {
             </button>
           ))}
         </div>
+      </Section>
+
+      <Section title="Offerte">
+        <label className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 ring-1 ring-neutral-200">
+          <span>
+            <span className="block font-medium">Solo prodotti in offerta</span>
+            <span className="text-xs text-neutral-500">Mostra solo quelli scontati almeno del 5%</span>
+          </span>
+          <input
+            type="checkbox"
+            checked={!!f.onlyDeals}
+            onChange={(e) => set({ onlyDeals: e.target.checked || undefined })}
+            className="size-6 accent-rose-500"
+          />
+        </label>
+      </Section>
+
+      <Section title="Prezzo" hint="Con un limite di prezzo vedi solo prodotti con prezzo aggiornato">
+        <PriceRange min={f.priceMin} max={f.priceMax} onChange={(priceMin, priceMax) => set({ priceMin, priceMax })} />
       </Section>
 
       <Section title="Categorie" hint="Nessuna selezionata = tutte le categorie">
