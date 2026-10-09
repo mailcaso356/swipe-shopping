@@ -5,7 +5,6 @@ import { BrandPicker } from '../components/BrandPicker'
 import { PriceRange } from '../components/PriceRange'
 import { STORES, type StoreId } from '../config/stores'
 import { activeFilterCount, facetValues, matchesFilters } from '../lib/filters'
-import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 import { DEFAULT_FILTERS, type Filters } from '../types/product'
 
@@ -21,15 +20,19 @@ export function FiltersPage() {
   const setCategories = (list: CategoryId[]) => set({ categories: list.length === ALL_CATEGORY_IDS.length ? [] : list })
 
   return (
-    <div className="space-y-6 pb-28">
-      <div className="flex items-baseline justify-between">
+    <div className="space-y-6 pb-8">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Filtri</h1>
         {activeFilterCount(f) > 0 && (
-          <button type="button" onClick={() => actions.setFilters(DEFAULT_FILTERS)} className="text-sm font-medium text-rose-600">
-            Azzera
+          <button type="button" onClick={() => actions.setFilters(DEFAULT_FILTERS)} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm active:scale-95">
+            Azzera filtri
           </button>
         )}
       </div>
+
+      {matching === 0 && (
+        <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Nessun prodotto con questi filtri: prova ad allargarli.</p>
+      )}
 
       <Section title="Genere">
         <div className="grid grid-cols-3 gap-1 rounded-2xl bg-neutral-100 p-1">
@@ -140,14 +143,6 @@ export function FiltersPage() {
         </select>
       </Section>
 
-      <div className="fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 px-4">
-        <a
-          href={routeHref('scopri')}
-          className="mx-auto flex h-12 max-w-md items-center justify-center rounded-full bg-neutral-900 font-semibold text-white shadow-lg"
-        >
-          {matching > 0 ? 'Applica filtri' : 'Nessun prodotto con questi filtri'}
-        </a>
-      </div>
     </div>
   )
 }
