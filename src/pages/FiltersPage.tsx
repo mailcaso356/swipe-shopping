@@ -140,7 +140,7 @@ export function FiltersPage() {
           href={routeHref('scopri')}
           className="mx-auto flex h-12 max-w-md items-center justify-center rounded-full bg-neutral-900 font-semibold text-white shadow-lg"
         >
-          Mostra {matching} {matching === 1 ? 'prodotto' : 'prodotti'}
+          {matching > 0 ? 'Applica filtri' : 'Nessun prodotto con questi filtri'}
         </a>
       </div>
     </div>
