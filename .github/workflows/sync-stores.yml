@@ -39,6 +39,7 @@ jobs:
         run: npm run sync:stores -- ${{ inputs.dry && '--dry' || '' }}
         env:
           CALZEDONIA_MAX_PAGES: ${{ inputs.pages || '420' }}
+          STORES_DEBUG: ${{ inputs.dry && '1' || '' }}
       - run: npm run check:catalog
       - name: Salva il catalogo aggiornato
         if: ${{ !inputs.dry }}

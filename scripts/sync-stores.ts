@@ -10,6 +10,7 @@ import { detectColors } from '../src/config/colors.ts'
 import { DETAIL_SHARDS, detailShard, type ProductDetails } from '../src/lib/details.ts'
 
 const DRY = process.argv.includes('--dry')
+const DEBUG = !!process.env.STORES_DEBUG
 const ONLY = process.argv.find((a) => a.startsWith('--store='))?.slice(8)
 const UA = 'Mozilla/5.0 (compatible; SwipeShoppingBot/1.0; +https://swipeshopping.app)'
 
@@ -177,6 +178,7 @@ async function syncBenetton(): Promise<Found[]> {
         annotate('warning', `Benetton ${handle}: ${e instanceof Error ? e.message : String(e)}`)
         break
       }
+      if (DEBUG && page === 1) console.log(`debug benetton ${handle}: ${list.length} prodotti`, JSON.stringify(list[0] ?? null).slice(0, 600))
       for (const item of list) {
         const id = `benetton:${item.id}`
         const known = found.get(id)
@@ -285,6 +287,7 @@ async function syncCalzedonia(): Promise<Found[]> {
     const reviews = Number(ld?.aggregateRating?.reviewCount)
     // Articoli con recensioni scarse (almeno 5 recensioni e media sotto 3,5) non li proponiamo.
     const poor = reviews >= 5 && rating < 3.5
+    if (DEBUG) console.log(`debug calzedonia ${url}: ${JSON.stringify({ ...ld, review: undefined, description: undefined }).slice(0, 700)}`)
     if (!ld?.name || !ld?.sku || !gender || /kid|girl|boy|baby/.test(path) || !(price > 0) || !images.length || poor) {
       rejected++
       continue
