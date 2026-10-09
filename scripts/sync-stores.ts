@@ -111,115 +111,144 @@ function makeProduct(base: {
 }
 
 // ---------------------------------------------------------------- Benetton (Shopify)
+// Il negozio italiano dà i prodotti (titoli, prezzi in euro, foto) ma non le collezioni a chi si collega
+// da fuori Italia. Genere e categoria li prendiamo dalle collezioni del negozio internazionale
+// (world.benetton.com), che usa gli stessi codici articolo: il codice è la prima parte dello SKU.
 
-/** Collezioni del sito → categoria e genere dell'app. Solo adulti, solo categorie che l'app conosce. */
+/** Collezioni del negozio internazionale → categoria e genere dell'app. Solo adulti, solo categorie che l'app conosce. */
 const BENETTON: [handle: string, category: string, gender: 'donna' | 'uomo'][] = [
-  ['felpe-con-cappuccio-donna', 'felpe', 'donna'],
-  ['felpe-senza-cappuccio-donna', 'felpe', 'donna'],
-  ['maglie-donna-girocollo', 'maglioni', 'donna'],
-  ['maglie-donna-collo-alto', 'maglioni', 'donna'],
-  ['cardigan-donna', 'maglioni', 'donna'],
-  ['cashmere-maglie-donna', 'maglioni', 'donna'],
-  ['bluse-donna', 'camicie', 'donna'],
-  ['t-shirt-donna-manica-lunga', 'tshirt', 'donna'],
-  ['jeans-donna', 'jeans', 'donna'],
-  ['chino-donna', 'pantaloni', 'donna'],
-  ['joggers-donna', 'pantaloni', 'donna'],
-  ['vestiti-donna', 'vestiti', 'donna'],
-  ['cappotti-donna', 'cappotti', 'donna'],
-  ['giacche-donna', 'giacche', 'donna'],
-  ['giubbini-donna', 'giacche', 'donna'],
-  ['blazer-donna', 'giacche', 'donna'],
-  ['borse-zaini-donna', 'borse', 'donna'],
-  ['zainetti-donna', 'zaini', 'donna'],
-  ['cinture-donna', 'cinture', 'donna'],
-  ['cappelli-donna', 'cappellini', 'donna'],
-  ['stivali-stivaletti-donna', 'stivali', 'donna'],
-  ['ballerine-scarpe-basse-donna', 'scarpe_eleganti', 'donna'],
-  ['felpe-con-cappuccio-uomo', 'felpe', 'uomo'],
-  ['felpe-girocollo-uomo', 'felpe', 'uomo'],
-  ['maglioni-girocollo-uomo', 'maglioni', 'uomo'],
-  ['maglioni-collo-alto-uomo', 'maglioni', 'uomo'],
-  ['cardigan-uomo', 'maglioni', 'uomo'],
-  ['maglie-cashmere-uomo', 'maglioni', 'uomo'],
-  ['camicia-uomo-a-quadri', 'camicie', 'uomo'],
-  ['camicia-uomo-button-down', 'camicie', 'uomo'],
-  ['camicia-uomo-collo-coreana', 'camicie', 'uomo'],
-  ['t-shirt-uomo-manica-lunga', 'tshirt', 'uomo'],
-  ['polo-uomo-new', 'tshirt', 'uomo'],
-  ['jeans-uomo', 'jeans', 'uomo'],
-  ['chino-uomo', 'pantaloni', 'uomo'],
-  ['pantaloni-cargo-uomo', 'pantaloni', 'uomo'],
-  ['pantaloni-eleganti-uomo', 'pantaloni', 'uomo'],
-  ['pantaloni-loose-uomo', 'pantaloni', 'uomo'],
-  ['cappotti-uomo', 'cappotti', 'uomo'],
-  ['giacche-uomo', 'giacche', 'uomo'],
-  ['giubbini-uomo', 'giacche', 'uomo'],
-  ['blazer-uomo', 'giacche', 'uomo'],
-  ['borse-uomo-zaino', 'zaini', 'uomo'],
-  ['marsupio-uomo', 'borselli', 'uomo'],
-  ['cinture-uomo', 'cinture', 'uomo'],
-  ['cappelli-uomo', 'cappellini', 'uomo'],
-  ['scarpe-basse-uomo', 'scarpe_eleganti', 'uomo'],
-  ['stringate-uomo', 'scarpe_eleganti', 'uomo'],
+  ['hoodies-women', 'felpe', 'donna'],
+  ['sweatshirts-without-hood-women', 'felpe', 'donna'],
+  ['sweaters-women-crew-neck', 'maglioni', 'donna'],
+  ['sweaters-women-high-neck', 'maglioni', 'donna'],
+  ['cardigans-women', 'maglioni', 'donna'],
+  ['cashmere-knitwear-women', 'maglioni', 'donna'],
+  ['blouses-women', 'camicie', 'donna'],
+  ['tops-t-shirts-women-new', 'tshirt', 'donna'],
+  ['polos-women', 'tshirt', 'donna'],
+  ['jeans-women', 'jeans', 'donna'],
+  ['chinos-women', 'pantaloni', 'donna'],
+  ['trousers-women-new', 'pantaloni', 'donna'],
+  ['dresses-women', 'vestiti', 'donna'],
+  ['coats-women', 'cappotti', 'donna'],
+  ['parka-women', 'cappotti', 'donna'],
+  ['light-jackets-women', 'giacche', 'donna'],
+  ['padded-jackets-women', 'giacche', 'donna'],
+  ['puffer-jackets-women', 'giacche', 'donna'],
+  ['blazers-women', 'giacche', 'donna'],
+  ['bags-backpacks-women', 'borse', 'donna'],
+  ['backpacks-women', 'zaini', 'donna'],
+  ['belts-women', 'cinture', 'donna'],
+  ['hats-caps-women', 'cappellini', 'donna'],
+  ['boots-ankle-boots-women', 'stivali', 'donna'],
+  ['flats-low-top-shoes-women', 'scarpe_eleganti', 'donna'],
+  ['hoodies-men', 'felpe', 'uomo'],
+  ['crew-neck-sweatshirts-men', 'felpe', 'uomo'],
+  ['crew-neck-sweaters-men', 'maglioni', 'uomo'],
+  ['high-neck-sweaters-men', 'maglioni', 'uomo'],
+  ['cardigans-men', 'maglioni', 'uomo'],
+  ['cashmere-knitwear-men', 'maglioni', 'uomo'],
+  ['shirts-men-check', 'camicie', 'uomo'],
+  ['shirts-men-button-down', 'camicie', 'uomo'],
+  ['shirts-men-patterned', 'camicie', 'uomo'],
+  ['t-shirts-men-new', 'tshirt', 'uomo'],
+  ['polos-men', 'tshirt', 'uomo'],
+  ['jeans-men', 'jeans', 'uomo'],
+  ['chinos-men', 'pantaloni', 'uomo'],
+  ['cargo-trousers-men', 'pantaloni', 'uomo'],
+  ['elegant-trousers-men', 'pantaloni', 'uomo'],
+  ['coats-men', 'cappotti', 'uomo'],
+  ['parkas-men', 'cappotti', 'uomo'],
+  ['light-jackets-men', 'giacche', 'uomo'],
+  ['padded-jackets-men', 'giacche', 'uomo'],
+  ['puffer-jackets-men', 'giacche', 'uomo'],
+  ['blazers-men', 'giacche', 'uomo'],
+  ['bags-men-backpacks', 'zaini', 'uomo'],
+  ['bum-bags-men', 'borselli', 'uomo'],
+  ['belts-men', 'cinture', 'uomo'],
+  ['hats-caps-men', 'cappellini', 'uomo'],
+  ['flat-shoes-men', 'scarpe_eleganti', 'uomo'],
 ]
 const BENETTON_BRANDS: Record<string, string> = { UCB: 'Benetton', SISLEY: 'Sisley' }
+/** Codice articolo: "1VCPG101D_00V_82" → "1VCPG101D" */
+const styleOf = (sku: unknown) => String(sku ?? '').split('_')[0].toUpperCase()
+
+async function shopifyPages(base: string, onPage: (products: any[]) => void) {
+  for (let page = 1; page <= 60; page++) {
+    const list: any[] = JSON.parse(await get(`${base}${base.includes('?') ? '&' : '?'}limit=250&page=${page}`, 1000)).products ?? []
+    onPage(list)
+    if (list.length < 250) return
+  }
+}
 
 async function syncBenetton(): Promise<Found[]> {
-  const found = new Map<string, Found>()
+  // 1. Codice articolo → genere e categoria, dalle collezioni internazionali
+  const kinds = new Map<string, { category: string; gender: string }>()
   let missing = 0
   for (const [handle, category, gender] of BENETTON) {
-    for (let page = 1; page <= 20; page++) {
-      let list: any[]
-      try {
-        list = JSON.parse(await get(`https://it.benetton.com/collections/${handle}/products.json?limit=250&page=${page}`, 1000)).products ?? []
-      } catch (e) {
-        missing++
-        annotate('warning', `Benetton ${handle}: ${e instanceof Error ? e.message : String(e)}`)
-        break
-      }
-      if (DEBUG && page === 1) console.log(`debug benetton ${handle}: ${list.length} prodotti`, JSON.stringify(list[0] ?? null).slice(0, 600))
-      for (const item of list) {
-        const id = `benetton:${item.id}`
-        const known = found.get(id)
-        if (known) {
-          if (known.product.gender !== gender) known.product.gender = 'unisex'
-          continue
+    let count = 0
+    try {
+      await shopifyPages(`https://world.benetton.com/collections/${handle}/products.json`, (list) => {
+        count += list.length
+        for (const item of list) {
+          for (const style of new Set((item.variants ?? []).map((v: any) => styleOf(v.sku)))) {
+            if (!style) continue
+            const known = kinds.get(style)
+            if (!known) kinds.set(style, { category, gender })
+            else if (known.gender !== gender) known.gender = 'unisex'
+          }
         }
-        const brand = BENETTON_BRANDS[String(item.vendor).toUpperCase()]
-        const variants = (item.variants ?? []).filter((v: any) => v.available && Number(v.price) > 0)
-        const images = (item.images ?? []).map((i: any) => String(i.src)).filter((s: string) => s.startsWith('https://'))
-        if (!brand || !variants.length || !images.length || !item.handle) continue
-        const prices = variants.map((v: any) => Number(v.price))
-        const price = Math.min(...prices)
-        const cheapest = variants.find((v: any) => Number(v.price) === price)
-        const sized = (src: string) => `${src}${src.includes('?') ? '&' : '?'}width=900`
-        const product = makeProduct({
-          store: 'benetton',
-          externalId: String(item.id),
-          title: decode(String(item.title)),
-          brand,
-          gender,
-          category,
-          imageUrl: sized(images[0]),
-          url: `https://it.benetton.com/products/${item.handle}`,
-          price,
-          originalPrice: Number(cheapest?.compare_at_price) || undefined,
-          priceFrom: new Set(prices).size > 1,
-          // Il colore è nel nome della pagina (es. "...-bianco-panna-1vcpg101d_00v")
-          colorText: String(item.handle).replace(/-/g, ' '),
-        })
-        const f = features(String(item.body_html ?? ''))
-        const more = images.slice(1, 7).map(sized)
-        found.set(id, {
-          product,
-          details: more.length || f.length ? { ...(more.length ? { images: more } : {}), ...(f.length ? { features: f } : {}) } : undefined,
-        })
-      }
-      if (list.length < 250) break
+      })
+    } catch (e) {
+      annotate('warning', `Benetton ${handle}: ${e instanceof Error ? e.message : String(e)}`)
     }
+    if (count === 0) missing++
+    if (DEBUG) console.log(`debug benetton ${handle}: ${count} prodotti`)
   }
-  annotate('notice', `Benetton: ${found.size} prodotti da ${BENETTON.length - missing}/${BENETTON.length} collezioni.`)
+
+  // 2. Prodotti del negozio italiano: titolo, prezzo in euro, foto
+  const found = new Map<string, Found>()
+  let total = 0
+  await shopifyPages('https://it.benetton.com/products.json', (list) => {
+    total += list.length
+    for (const item of list) {
+      const id = `benetton:${item.id}`
+      const brand = BENETTON_BRANDS[String(item.vendor).toUpperCase()]
+      const kind = (item.variants ?? []).map((v: any) => kinds.get(styleOf(v.sku))).find(Boolean)
+      const variants = (item.variants ?? []).filter((v: any) => v.available && Number(v.price) > 0)
+      const images = (item.images ?? []).map((i: any) => String(i.src)).filter((s: string) => s.startsWith('https://'))
+      if (found.has(id) || !brand || !kind || !variants.length || !images.length || !item.handle) continue
+      const prices = variants.map((v: any) => Number(v.price))
+      const price = Math.min(...prices)
+      const cheapest = variants.find((v: any) => Number(v.price) === price)
+      const sized = (src: string) => `${src}${src.includes('?') ? '&' : '?'}width=900`
+      const product = makeProduct({
+        store: 'benetton',
+        externalId: String(item.id),
+        title: decode(String(item.title)),
+        brand,
+        gender: kind.gender,
+        category: kind.category,
+        imageUrl: sized(images[0]),
+        url: `https://it.benetton.com/products/${item.handle}`,
+        price,
+        originalPrice: Number(cheapest?.compare_at_price) || undefined,
+        priceFrom: new Set(prices).size > 1,
+        // Il colore è nel nome della pagina (es. "...-bianco-panna-1vcpg101d_00v")
+        colorText: String(item.handle).replace(/-/g, ' '),
+      })
+      const f = features(String(item.body_html ?? ''))
+      const more = images.slice(1, 7).map(sized)
+      found.set(id, {
+        product,
+        details: more.length || f.length ? { ...(more.length ? { images: more } : {}), ...(f.length ? { features: f } : {}) } : undefined,
+      })
+    }
+  })
+  annotate(
+    'notice',
+    `Benetton: ${kinds.size} codici da ${BENETTON.length - missing}/${BENETTON.length} collezioni, ${total} prodotti sul sito italiano, ${found.size} tenuti.`,
+  )
   return [...found.values()]
 }
 
@@ -277,17 +306,18 @@ async function syncCalzedonia(): Promise<Found[]> {
       annotate('warning', `Calzedonia: ${e instanceof Error ? e.message : String(e)}`)
       continue
     }
-    const path = String(ld?.category ?? '').toLowerCase()
+    // La categoria può essere un percorso ("int_woman/...") o un elenco (["Donna", "Calze", ...]).
+    const path = [ld?.category].flat(3).join('/').toLowerCase()
     const gender = /(^|[_/])(woman|women|donna)/.test(path) ? 'donna' : /(^|[_/])(man|men|uomo)/.test(path) ? 'uomo' : null
-    const offers = [ld?.offers].flat().filter(Boolean)
-    const offer = offers.find((o: any) => /InStock/i.test(String(o.availability))) ?? null
+    const offers = [ld?.offers].flat(3).filter(Boolean)
+    const offer = offers.find((o: any) => !/OutOfStock|SoldOut|Discontinued/i.test(String(o.availability ?? ''))) ?? null
     const price = Number(offer?.price ?? offer?.lowPrice)
-    const images = [ld?.image].flat().filter((s: unknown) => typeof s === 'string' && s.startsWith('https://')) as string[]
+    const images = [ld?.image].flat(3).filter((s: unknown) => typeof s === 'string' && s.startsWith('https://')) as string[]
     const rating = Number(ld?.aggregateRating?.ratingValue)
     const reviews = Number(ld?.aggregateRating?.reviewCount)
     // Articoli con recensioni scarse (almeno 5 recensioni e media sotto 3,5) non li proponiamo.
     const poor = reviews >= 5 && rating < 3.5
-    if (DEBUG) console.log(`debug calzedonia ${url}: ${JSON.stringify({ ...ld, review: undefined, description: undefined }).slice(0, 700)}`)
+    if (DEBUG) console.log(`debug calzedonia ${url}: ${JSON.stringify({ ...ld, review: undefined, description: undefined, image: undefined }).slice(0, 900)}`)
     if (!ld?.name || !ld?.sku || !gender || /kid|girl|boy|baby/.test(path) || !(price > 0) || !images.length || poor) {
       rejected++
       continue
