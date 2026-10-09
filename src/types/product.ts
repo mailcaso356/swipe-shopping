@@ -58,6 +58,8 @@ export interface Filters {
   sort: SortOrder
   /** Solo prodotti scontati */
   onlyDeals?: boolean
+  /** Sezioni extra attivate (es. profumi): di base nessuna */
+  extras?: string[]
 }
 
 export const DEFAULT_FILTERS: Filters = {

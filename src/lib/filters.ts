@@ -1,11 +1,15 @@
-import { ALL_CATEGORY_IDS } from '../config/categories'
+import { ALL_CATEGORY_IDS, extraSectionOf } from '../config/categories'
 import { COLOR_ORDER } from '../config/colors'
 import type { Filters, Product } from '../types/product'
 import { discountBadge, freshPrice } from './price'
 
 export function matchesFilters(p: Product, f: Filters) {
   if (f.gender !== 'tutti' && p.gender !== f.gender && p.gender !== 'unisex') return false
-  if (f.categories.length && !f.categories.includes(p.category)) return false
+  // Le sezioni extra si vedono solo se attivate; le categorie scelte valgono per la moda di base.
+  const extra = extraSectionOf(p.category)
+  if (extra) {
+    if (!f.extras?.includes(extra)) return false
+  } else if (f.categories.length && !f.categories.includes(p.category)) return false
   if (f.brands.length && (!p.brand || !f.brands.includes(p.brand))) return false
   if (f.stores.length && !f.stores.includes(p.store)) return false
   if (f.sizes.length && !p.sizes?.some((s) => f.sizes.includes(s))) return false

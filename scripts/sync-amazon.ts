@@ -237,7 +237,7 @@ async function searchCatalog(token: string) {
               callApi('searchItems', token, {
                 keywords: `${plan.keywords} ${gender}`,
                 brand,
-                searchIndex: 'Fashion',
+                searchIndex: plan.searchIndex ?? 'Fashion',
                 itemCount: 10,
                 itemPage: page,
                 minPrice: plan.minPrice * 100,
@@ -293,7 +293,8 @@ async function searchCatalog(token: string) {
               addedAt: previousAddedAt.get(id) ?? now,
               source: 'ricerca',
             }
-            const colors = detectColors(title)
+            // Il colore ha senso per i capi, non per i profumi ("Black Opium" non è nero).
+            const colors = plan.searchIndex ? [] : detectColors(title)
             if (colors.length) p.colors = colors
             applyOffer(p, offer)
             found.set(id, p)

@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { ALL_CATEGORY_IDS, CATEGORY_GROUPS, type CategoryId } from '../config/categories'
+import { ALL_CATEGORY_IDS, CATEGORY_GROUPS, EXTRA_SECTIONS, extraSectionOf, type CategoryId } from '../config/categories'
 import { colorSwatch } from '../config/colors'
 import { BrandPicker } from '../components/BrandPicker'
 import { PriceRange } from '../components/PriceRange'
@@ -15,7 +15,8 @@ export function FiltersPage() {
   const { state, products, actions } = useApp()
   const f = state.filters
   const set = (patch: Partial<Filters>) => actions.setFilters({ ...f, ...patch })
-  const facets = facetValues(products)
+  // Marche, colori ecc. solo dei prodotti che l'utente può vedere (sezioni extra spente escluse).
+  const facets = facetValues(products.filter((p) => { const x = extraSectionOf(p.category); return !x || !!f.extras?.includes(x) }))
   const matching = products.filter((p) => p.availability !== 'out_of_stock' && matchesFilters(p, f)).length
   // Come per le marche: nessuna selezionata (o tutte) = tutte le categorie.
   const setStores = (list: StoreId[]) => set({ stores: list.length === facets.stores.length ? [] : list })
@@ -26,7 +27,7 @@ export function FiltersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Filtri</h1>
         {activeFilterCount(f) > 0 && (
-          <button type="button" onClick={() => actions.setFilters(DEFAULT_FILTERS)} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-[#fff] shadow-sm active:scale-95">
+          <button type="button" onClick={() => actions.setFilters({ ...DEFAULT_FILTERS, extras: f.extras })} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-[#fff] shadow-sm active:scale-95">
             Azzera filtri
           </button>
         )}
@@ -116,6 +117,20 @@ export function FiltersPage() {
               </div>
             )
           })}
+        </div>
+      </Section>
+
+      <Section title="Sezioni extra" hint="Oltre alla moda: attivale per vederle anche in Scopri">
+        <div className="divide-y divide-neutral-100 rounded-2xl bg-white ring-1 ring-neutral-200">
+          {EXTRA_SECTIONS.map((s) => (
+            <Toggle
+              key={s.id}
+              label={`${s.emoji} ${s.label}`}
+              hint={s.hint}
+              checked={!!f.extras?.includes(s.id)}
+              onChange={(on) => set({ extras: on ? [...(f.extras ?? []), s.id] : (f.extras ?? []).filter((x) => x !== s.id) })}
+            />
+          ))}
         </div>
       </Section>
 

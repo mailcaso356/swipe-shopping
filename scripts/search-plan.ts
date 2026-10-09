@@ -11,6 +11,8 @@ export interface CategoryPlan {
   genders: SearchGender[]
   /** Prezzo minimo in euro: esclude articoli sospetti o di bassa qualità */
   minPrice: number
+  /** Reparto Amazon in cui cercare (di base Fashion) */
+  searchIndex?: string
 }
 
 const BOTH: SearchGender[] = ['uomo', 'donna']
@@ -72,7 +74,16 @@ export const SEARCH_PLAN: CategoryPlan[] = [
     brands: ['Calvin Klein', 'Tommy Hilfiger', 'Eastpak', 'The North Face', 'Guess', 'Lacoste', 'Nike', 'Napapijri'] },
   { category: 'borse_viaggio', keywords: 'borsa da viaggio', minPrice: 30, genders: BOTH,
     brands: ['Samsonite', 'American Tourister', 'Eastpak', 'The North Face', 'adidas', 'Nike', 'Herschel', 'Delsey'] },
+  // Sezioni extra (spente di base nell'app): prezzo minimo alto per evitare tester e imitazioni
+  { category: 'profumi', keywords: 'eau de parfum', searchIndex: 'Beauty', minPrice: 30, genders: BOTH,
+    brands: ['Dior', 'Armani', 'Yves Saint Laurent', 'Hugo Boss', 'Lancome', 'Dolce & Gabbana', 'Rabanne', 'Versace',
+      'Calvin Klein', 'Prada', 'Valentino', 'Jean Paul Gaultier'] },
 ]
 
 /** Confronto tollerante tra marche ("TOMMY HILFIGER" = "Tommy Hilfiger", "Levi's" = "Levis"). */
-export const normalizeBrand = (b: string) => b.toLowerCase().replace(/[^a-z0-9]/g, '')
+export const normalizeBrand = (b: string) =>
+  b
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
