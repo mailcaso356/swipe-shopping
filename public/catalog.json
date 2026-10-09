@@ -102,20 +102,6 @@
   ]
  },
  {
-  "id": "amazon:B07MH5P2TN",
-  "store": "amazon",
-  "externalId": "B07MH5P2TN",
-  "title": "The North Face 1996 Retro Nuptse, Piumino Donna",
-  "brand": "The North Face",
-  "gender": "donna",
-  "category": "giacche",
-  "availability": "unknown",
-  "addedAt": "2026-10-09T08:50:00Z",
-  "colors": [
-   "Grigio"
-  ]
- },
- {
   "id": "amazon:B0CYTYSYRB",
   "store": "amazon",
   "externalId": "B0CYTYSYRB",
@@ -125,17 +111,6 @@
   "category": "tshirt",
   "availability": "unknown",
   "addedAt": "2026-10-09T08:49:00Z"
- },
- {
-  "id": "amazon:B01JQRPZDO",
-  "store": "amazon",
-  "externalId": "B01JQRPZDO",
-  "title": "New Era 9FORTY League Essential New York Yankees, cappellino regolabile",
-  "brand": "New Era",
-  "gender": "unisex",
-  "category": "cappellini",
-  "availability": "unknown",
-  "addedAt": "2026-10-09T08:48:00Z"
  },
  {
   "id": "amazon:B07V5VBCWR",
@@ -172,17 +147,6 @@
   "category": "occhiali",
   "availability": "unknown",
   "addedAt": "2026-10-09T08:45:00Z"
- },
- {
-  "id": "amazon:B073SZWTRQ",
-  "store": "amazon",
-  "externalId": "B073SZWTRQ",
-  "title": "Levi's 501 Slim Taper Jeans Uomo",
-  "brand": "Levi's",
-  "gender": "uomo",
-  "category": "jeans",
-  "availability": "unknown",
-  "addedAt": "2026-10-09T08:44:00Z"
  },
  {
   "id": "amazon:B01KABCWT0",
@@ -244,17 +208,6 @@
   "colors": [
    "Blu"
   ]
- },
- {
-  "id": "amazon:B0DK9GWZNY",
-  "store": "amazon",
-  "externalId": "B0DK9GWZNY",
-  "title": "The North Face Hyalite, Piumino Donna",
-  "brand": "The North Face",
-  "gender": "donna",
-  "category": "giacche",
-  "availability": "unknown",
-  "addedAt": "2026-10-09T08:38:00Z"
  },
  {
   "id": "amazon:B0BZ14BCBC",
