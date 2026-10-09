@@ -17,6 +17,17 @@ export interface StoreConfig {
 
 const fromAffiliateUrl = (p: Product) => (p.affiliateUrl?.startsWith('https://') ? p.affiliateUrl : null)
 
+/**
+ * Link affiliati per negozio (es. deep link Awin). Finché un negozio non è qui il link
+ * resta quello normale della pagina prodotto, salvato in `affiliateUrl` dalla sincronizzazione.
+ */
+const AFFILIATE_LINKS: Partial<Record<string, (url: string) => string>> = {}
+const affiliate = (store: string, p: Product) => {
+  const url = fromAffiliateUrl(p)
+  const wrap = AFFILIATE_LINKS[store]
+  return url && wrap ? wrap(url) : url
+}
+
 export const STORES = {
   amazon: {
     id: 'amazon',
@@ -33,8 +44,14 @@ export const STORES = {
         : null
     },
   },
+  // Negozi letti ogni giorno dal loro sito (scripts/sync-stores.ts). Per ora link normali:
+  // con l'affiliazione Awin basterà avvolgere il link in `affiliate` qui sotto.
+  benetton: { id: 'benetton', name: 'Benetton', enabled: true, priceMaxAgeHours: 48, buildUrl: (p) => affiliate('benetton', p) },
+  calzedonia: { id: 'calzedonia', name: 'Calzedonia', enabled: true, priceMaxAgeHours: 48, buildUrl: (p) => affiliate('calzedonia', p) },
   // Negozi predisposti: si attivano quando c'è un programma di affiliazione
   // approvato (es. tramite Awin) e i prodotti hanno `affiliateUrl`.
+  shein: { id: 'shein', name: 'SHEIN', enabled: false, priceMaxAgeHours: 48, buildUrl: fromAffiliateUrl },
+  decathlon: { id: 'decathlon', name: 'Decathlon', enabled: false, priceMaxAgeHours: 48, buildUrl: fromAffiliateUrl },
   zalando: { id: 'zalando', name: 'Zalando', enabled: false, priceMaxAgeHours: 72, buildUrl: fromAffiliateUrl },
   asos: { id: 'asos', name: 'ASOS', enabled: false, priceMaxAgeHours: 72, buildUrl: fromAffiliateUrl },
   aboutyou: { id: 'aboutyou', name: 'ABOUT YOU', enabled: false, priceMaxAgeHours: 72, buildUrl: fromAffiliateUrl },

@@ -11,6 +11,7 @@
     "check:catalog": "node scripts/validate-catalog.ts",
     "typecheck": "tsc -b",
     "sync:amazon": "node scripts/sync-amazon.ts",
+    "sync:stores": "node scripts/sync-stores.ts",
     "alerts:price": "node scripts/price-alerts.ts"
   },
   "dependencies": {

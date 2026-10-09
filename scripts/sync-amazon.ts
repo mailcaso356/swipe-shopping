@@ -203,7 +203,14 @@ function readDetails(item: any): ProductDetails | null {
 function writeDetails() {
   const dir = new URL('../public/details/', import.meta.url)
   mkdirSync(dir, { recursive: true })
-  const shards: Record<string, ProductDetails>[] = Array.from({ length: DETAIL_SHARDS }, () => ({}))
+  // I dettagli degli altri negozi (scritti da sync-stores) restano com'erano.
+  const shards: Record<string, ProductDetails>[] = Array.from({ length: DETAIL_SHARDS }, (_, n) => {
+    let old: Record<string, ProductDetails> = {}
+    try {
+      old = JSON.parse(readFileSync(new URL(`${n}.json`, dir), 'utf8'))
+    } catch {}
+    return Object.fromEntries(Object.entries(old).filter(([id]) => !id.startsWith('amazon:')))
+  })
   for (const [id, d] of details) shards[detailShard(id)][id] = d
   shards.forEach((s, n) => writeFileSync(new URL(`${n}.json`, dir), JSON.stringify(s)))
   annotate('notice', `Dettagli: ${details.size} prodotti con foto o caratteristiche.`)
