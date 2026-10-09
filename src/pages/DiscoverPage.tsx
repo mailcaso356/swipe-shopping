@@ -2,11 +2,19 @@ import { RefreshCw, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { SwipeDeck } from '../components/SwipeDeck'
 import { DeckTabs } from '../components/DeckTabs'
 import { routeHref } from '../lib/useHashRoute'
+import { widenSuggestions } from '../lib/widen'
+import { useMemo } from 'react'
 import { useApp } from '../state/AppState'
 
 export function DiscoverPage() {
-  const { state, deck, products, actions } = useApp()
+  const { state, deck, products, wishlist, actions } = useApp()
   const { catalog } = state
+  // Mazzo finito: proposte per allargare i filtri, con quanti prodotti nuovi si vedrebbero.
+  const widen = useMemo(() => {
+    if (deck.length > 0 || products.length === 0) return []
+    const seen = new Set([...state.disliked, ...wishlist.map((w) => w.product.id)])
+    return widenSuggestions(state.filters, products.filter((p) => p.availability !== 'out_of_stock' && !seen.has(p.id)))
+  }, [deck.length, products, state.disliked, state.filters, wishlist])
 
   // Anche quando la sezione aperta non è ancora arrivata (si scarica dopo l'altra).
   if (catalog.status === 'loading' || (catalog.status === 'ready' && !catalog.sections.includes(state.mode))) {
@@ -46,7 +54,12 @@ export function DiscoverPage() {
         </Empty>
       ) : (
         <Empty title="Hai visto tutto!" text="Non ci sono altri prodotti con questi filtri.">
-          <a href={routeHref('filtri')} className={primaryBtn}>
+          {widen.map((w) => (
+            <button key={w.label} type="button" onClick={() => actions.setFilters({ ...state.filters, ...w.patch })} className={primaryBtn}>
+              {w.label} <span className="font-normal opacity-70">+{w.count.toLocaleString('it-IT')}</span>
+            </button>
+          ))}
+          <a href={routeHref('filtri')} className={widen.length ? secondaryBtn : primaryBtn}>
             <SlidersHorizontal className="size-4" /> Modifica i filtri
           </a>
           {state.disliked.length > 0 && (
