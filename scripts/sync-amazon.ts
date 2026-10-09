@@ -66,7 +66,7 @@ function readListing(item: any) {
 
 // Gli errori diventano annotazioni GitHub (visibili nel riepilogo) e non bloccano la pubblicazione.
 const annotate = (level: "error" | "warning" | "notice", msg: string) =>
-  console.log(`::${level}::${msg.replace(/\r?\n/g, " ").slice(0, 900)}`);
+  console.log(`::${level}::${msg.replace(/\r?\n/g, " ").slice(0, 4000)}`);
 
 try {
   const token = await getToken();
@@ -74,6 +74,7 @@ try {
   const amazon = catalog.filter((p) => p.store === "amazon");
   let updated = 0;
   let printedSample = false;
+  const summary: string[] = [];
 
   for (let i = 0; i < amazon.length; i += 10) {
     const batch = amazon.slice(i, i + 10);
@@ -107,19 +108,21 @@ try {
       // Una risposta di esempio aiuta a verificare la struttura dei dati.
       annotate(
         "notice",
-        `Esempio risposta: ${JSON.stringify(body?.itemResults?.items?.[0] ?? body)}`,
+        `Esempio risposta: ${JSON.stringify((body?.itemsResult ?? body?.itemResults)?.items?.[1] ?? body)}`,
       );
       printedSample = true;
     }
     for (const err of body?.errors ?? [])
       annotate("warning", `Amazon: ${err.code} ${err.message}`);
 
-    const items: any[] = body?.itemResults?.items ?? [];
+    const items: any[] = (body?.itemsResult ?? body?.itemResults)?.items ?? []
+    summary.push(...items.map((it) => `${it?.asin}:${JSON.stringify(it?.offersV2?.listings?.[0]?.price ?? null)}:${it?.offersV2?.listings?.[0]?.availability?.type ?? '-'}`));
     for (const p of batch) {
       const item = items.find((it) => it?.asin === p.externalId);
       if (!item) {
-        // Non più disponibile tramite API: lo togliamo dallo swipe.
-        p.availability = "out_of_stock";
+        // Amazon segnala l'ASIN come non accessibile o non valido: lo togliamo dallo swipe.
+        const rejected = (body?.errors ?? []).some((e: any) => String(e?.message).includes(p.externalId));
+        if (rejected) p.availability = "out_of_stock";
         continue;
       }
       const image = item?.images?.primary?.large?.url;
@@ -147,6 +150,7 @@ try {
   }
 
   writeFileSync(file, JSON.stringify(catalog, null, 1) + "\n");
+  annotate("notice", `Riepilogo: ${summary.join(' | ')}`);
   annotate("notice", `Aggiornati ${updated} prodotti su ${amazon.length}.`);
 } catch (e) {
   annotate(
