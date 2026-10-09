@@ -13,8 +13,9 @@
           document.documentElement.classList.add('dark')
           document.querySelector('meta[name=theme-color]').content = '#0e0e10'
         }
-        var m = (/[?&]sezione=(tech|gadget)\b/.exec(location.search) || [])[1] || JSON.parse(localStorage.getItem('swipeshop:v1:mode') || 'null')
-        if (m === 'tech' || m === 'gadget') document.documentElement.classList.add(m)
+        // Sezioni oltre la moda: tenere allineato con SECTIONS in src/config/categories.ts.
+        var m = (/[?&]sezione=(\w+)/.exec(location.search) || [])[1] || JSON.parse(localStorage.getItem('swipeshop:v1:mode') || 'null')
+        if (['tech', 'gadget', 'snack'].indexOf(m) >= 0) document.documentElement.classList.add(m)
       } catch (e) {}
     </script>
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -25,7 +26,7 @@
       l.as = 'fetch'
       l.crossOrigin = 'anonymous'
       var c = document.documentElement.classList
-      l.href = './catalog-' + (c.contains('tech') ? 'tech' : c.contains('gadget') ? 'gadget' : 'moda') + '.json'
+      l.href = './catalog-' + (['tech', 'gadget', 'snack'].filter(function (x) { return c.contains(x) })[0] || 'moda') + '.json'
       document.head.appendChild(l)
     </script>
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />

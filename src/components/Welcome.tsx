@@ -10,12 +10,13 @@ import { useAuth } from '../state/AuthState'
 import type { Filters } from '../types/product'
 import { AuthForm } from './AccountCard'
 
-type GroupId = (typeof CATEGORY_GROUPS)[number]['id'] | 'tech' | 'gadget'
+type GroupId = (typeof CATEGORY_GROUPS)[number]['id'] | 'tech' | 'gadget' | 'snack'
 
 /** Le altre sezioni: qui non filtrano la moda, decidono solo da dove si parte. */
 const EXTRA_SECTIONS = [
   { id: 'tech', emoji: '🎧', label: 'Tech', hint: 'cuffie, smartphone, gaming', bg: 'bg-[#fff7ed] ring-[#f97316]' },
   { id: 'gadget', emoji: '🎁', label: 'Gadget', hint: 'idee regalo, oggetti curiosi', bg: 'bg-[#f5f3ff] ring-[#8b5cf6]' },
+  { id: 'snack', emoji: '🍫', label: 'Snack', hint: 'dolci, salati, caffè', bg: 'bg-[#f0fdfa] ring-[#0d9488]' },
 ] as const
 
 const GENDERS: { value: Filters['gender']; label: string }[] = [
@@ -50,7 +51,7 @@ export function Welcome() {
       g.items.map((i) => i.id as CategoryId),
     )
     actions.setFilters({ ...state.filters, gender, categories })
-    // Si parte dalla moda; chi sceglie soprattutto tech o gadget (al massimo una categoria moda) parte da lì.
+    // Si parte dalla moda; chi sceglie soprattutto un'altra sezione (al massimo una categoria moda) parte da lì.
     const extra = EXTRA_SECTIONS.find((s) => groups.includes(s.id))
     const modaPicked = groups.filter((g) => !EXTRA_SECTIONS.some((s) => s.id === g)).length
     actions.setMode(extra && modaPicked <= 1 ? extra.id : 'moda')
@@ -107,7 +108,7 @@ export function Welcome() {
                 <img src="./icons/icon-192.png" alt="" className="mx-auto size-24 rounded-3xl shadow-lg ring-1 ring-black/5" />
                 <div className="space-y-2 text-center">
                   <h1 className="text-3xl font-black tracking-tight">Benvenuto su {APP_NAME}</h1>
-                  <p className="text-neutral-600">Moda, tech e gadget dai migliori marchi e negozi, un prodotto alla volta.</p>
+                  <p className="text-neutral-600">Moda, tech, gadget e snack dai migliori marchi e negozi, un prodotto alla volta.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-center text-sm">
                   <div className="rounded-2xl bg-neutral-100 p-4">
@@ -124,7 +125,7 @@ export function Welcome() {
                 <p className="text-center text-sm text-neutral-500">Tocca il prodotto per vedere foto e dettagli.</p>
                 <p className="flex items-center justify-center gap-1.5 text-center text-sm text-neutral-500">
                   <Cpu className="size-4 shrink-0 text-[#f97316]" />
-                  Dal menu in alto a sinistra passi alle sezioni Tech e Gadget.
+                  Dal menu in alto a sinistra passi alle sezioni Tech, Gadget e Snack.
                 </p>
               </>
             )}

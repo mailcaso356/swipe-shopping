@@ -157,19 +157,53 @@ export const GADGET_GROUPS = [
   },
 ] as const
 
-export type Universe = 'moda' | 'tech' | 'gadget'
+/** La sezione Snack: dolci, salati, proteici e caffè, solo marche note (acquisti d'impulso). */
+export const SNACK_GROUPS = [
+  {
+    id: 'dolci',
+    label: 'Dolci',
+    emoji: '🍫',
+    items: [
+      { id: 'cioccolato', label: 'Cioccolato' },
+      { id: 'caramelle', label: 'Caramelle e gommose' },
+      { id: 'biscotti', label: 'Biscotti e merendine' },
+    ],
+  },
+  {
+    id: 'salati',
+    label: 'Salati',
+    emoji: '🥨',
+    items: [
+      { id: 'patatine', label: 'Patatine e salatini' },
+      { id: 'frutta_secca', label: 'Frutta secca' },
+    ],
+  },
+  {
+    id: 'energia',
+    label: 'Proteici e bevande',
+    emoji: '☕',
+    items: [
+      { id: 'snack_proteici', label: 'Snack proteici' },
+      { id: 'caffe_te', label: 'Caffè e tè' },
+    ],
+  },
+] as const
+
+export type Universe = 'moda' | 'tech' | 'gadget' | 'snack'
 
 /** Le sezioni dell'app, come app separate: ognuna con categorie, filtri e preferiti suoi. */
 export const SECTIONS: { id: Universe; label: string; hint: string; color: string }[] = [
   { id: 'moda', label: 'Moda', hint: 'Vestiti, scarpe, borse, profumi', color: '#f43f5e' },
   { id: 'tech', label: 'Tech', hint: 'Cuffie, smartphone, gaming', color: '#f97316' },
   { id: 'gadget', label: 'Gadget', hint: 'Idee regalo e oggetti curiosi', color: '#8b5cf6' },
+  { id: 'snack', label: 'Snack', hint: 'Dolci, salati, proteici, caffè', color: '#0d9488' },
 ]
 export const UNIVERSES = SECTIONS.map((s) => s.id)
 export const isUniverse = (v: unknown): v is Universe => UNIVERSES.includes(v as Universe)
 export const sectionOf = (u: Universe) => SECTIONS.find((s) => s.id === u)!
 
 export type CategoryGroup = (typeof CATEGORY_GROUPS)[number] | (typeof TECH_GROUPS)[number] | (typeof GADGET_GROUPS)[number]
+  | (typeof SNACK_GROUPS)[number]
 export type CategoryId = CategoryGroup['items'][number]['id']
 
 const byId = new Map<string, { label: string; group: CategoryGroup; universe: Universe }>()
@@ -182,15 +216,23 @@ for (const group of TECH_GROUPS) {
 for (const group of GADGET_GROUPS) {
   for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'gadget' })
 }
+for (const group of SNACK_GROUPS) {
+  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'snack' })
+}
 
 export const isCategoryId = (id: string): id is CategoryId => byId.has(id)
 export const categoryLabel = (id: CategoryId) => byId.get(id)?.label ?? id
 export const categoryGroupOf = (id: CategoryId) => byId.get(id)?.group
-/** Sezione della categoria (moda, tech o gadget) */
+/** Sezione della categoria (moda, tech, gadget, snack) */
 export const universeOf = (id: CategoryId): Universe => byId.get(id)?.universe ?? 'moda'
 /** Gruppi di categorie della sezione */
-export const groupsOf = (u: Universe): readonly CategoryGroup[] =>
-  u === 'tech' ? TECH_GROUPS : u === 'gadget' ? GADGET_GROUPS : CATEGORY_GROUPS
+const GROUPS: Record<Universe, readonly CategoryGroup[]> = {
+  moda: CATEGORY_GROUPS,
+  tech: TECH_GROUPS,
+  gadget: GADGET_GROUPS,
+  snack: SNACK_GROUPS,
+}
+export const groupsOf = (u: Universe): readonly CategoryGroup[] => GROUPS[u]
 /** Tutte le categorie della sezione */
 export const categoryIdsOf = (u: Universe) => groupsOf(u).flatMap((g) => g.items.map((i) => i.id)) as CategoryId[]
 /** Tutte le categorie della moda (la sezione principale) */

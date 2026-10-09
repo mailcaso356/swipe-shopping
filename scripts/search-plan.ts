@@ -23,6 +23,8 @@ const BOTH: SearchGender[] = ['uomo', 'donna']
 const TECH: SearchGender[] = ['unisex']
 /** Gadget: per tutti, con almeno 4 stelle e 50 recensioni quando Amazon le fornisce */
 const GADGET = { genders: TECH, minRating: 4, minReviews: 50 }
+/** Snack: come i gadget, nel reparto Alimentari */
+const SNACK = { ...GADGET, searchIndex: 'GroceryAndGourmetFood' }
 
 export const SEARCH_PLAN: CategoryPlan[] = [
   // Abbigliamento
@@ -142,6 +144,23 @@ export const SEARCH_PLAN: CategoryPlan[] = [
     brands: ['Apple', 'Tile', 'Samsung', 'Chipolo'] },
   { category: 'gadget_tech', keywords: 'mini proiettore', searchIndex: 'Electronics', minPrice: 100, ...GADGET,
     brands: ['XGIMI', 'Samsung', 'Anker', 'Nebula', 'Philips'] },
+  // Sezione Snack: solo marche note
+  { category: 'cioccolato', keywords: 'cioccolato', minPrice: 5, ...SNACK,
+    brands: ['Lindt', 'Ferrero', 'Milka', 'Kinder', 'Novi', 'Venchi', 'Toblerone', 'Ritter Sport'] },
+  { category: 'caramelle', keywords: 'caramelle', minPrice: 5, ...SNACK,
+    brands: ['Haribo', 'Chupa Chups', 'Golia', 'Fini', 'Rossana', 'Mentos', 'Jelly Belly', 'Morositas'] },
+  { category: 'biscotti', keywords: 'biscotti', minPrice: 5, ...SNACK,
+    brands: ['Loacker', 'Mulino Bianco', 'Oreo', 'Lotus', 'Balocco', 'Gentilini', 'Galbusera', 'Pan di Stelle'] },
+  { category: 'patatine', keywords: 'patatine', minPrice: 5, ...SNACK,
+    brands: ['Pringles', 'San Carlo', 'Amica Chips', "Lay's", 'Doritos', 'Tyrrells', 'Pai', 'Crik Crok'] },
+  { category: 'frutta_secca', keywords: 'frutta secca', minPrice: 5, ...SNACK,
+    brands: ['Noberasco', 'Ventura', 'KoRo', 'Planters', 'Euro Company', 'Life'] },
+  { category: 'snack_proteici', keywords: 'barretta proteica', minPrice: 10, ...SNACK,
+    brands: ['Myprotein', 'Prozis', 'foodspring', 'Barebells', 'Grenade', 'Enervit', 'Quest', 'PROTEIN WORKS'] },
+  { category: 'caffe_te', keywords: 'caffè', minPrice: 5, ...SNACK,
+    brands: ['Lavazza', 'illy', 'Kimbo', 'Borbone', 'Segafredo', 'Starbucks', 'Nescafé'] },
+  { category: 'caffe_te', keywords: 'tè', minPrice: 5, ...SNACK,
+    brands: ['Twinings', 'Pompadour', 'Lipton', 'Yogi Tea', 'Sonnentor'] },
 ]
 
 /** Confronto tollerante tra marche ("TOMMY HILFIGER" = "Tommy Hilfiger", "Levi's" = "Levis"). */

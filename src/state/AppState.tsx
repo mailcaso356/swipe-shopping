@@ -26,7 +26,7 @@ type CatalogState =
 
 interface State {
   catalog: CatalogState
-  /** Sezione aperta: moda (principale), tech o gadget */
+  /** Sezione aperta: moda (principale) o una delle altre (vedi SECTIONS) */
   mode: Universe
   /** Filtri della moda (sincronizzati con l'account) */
   filters: Filters
@@ -53,6 +53,10 @@ type Action =
 const MAX_DISLIKED = 5000
 
 type OtherSection = Exclude<Universe, 'moda'>
+
+/** Filtri di ogni sezione tranne la moda (salvati come techFilters, gadgetFilters…). */
+const otherSectionFilters = (make: (u: OtherSection) => Filters) =>
+  Object.fromEntries(UNIVERSES.filter((u) => u !== 'moda').map((u) => [u, make(u as OtherSection)])) as Record<OtherSection, Filters>
 
 /** ?sezione=tech arriva dalle pagine Google ("Apri l'app"); altrimenti l'ultima sezione aperta. */
 function initialMode(): Universe {
@@ -113,7 +117,7 @@ function reducer(state: State, action: Action): State {
     case 'resetSeen':
       return { ...state, disliked: [], lastAction: null }
     case 'clearAll':
-      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, sectionFilters: { tech: DEFAULT_FILTERS, gadget: DEFAULT_FILTERS }, lastAction: null }
+      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, sectionFilters: otherSectionFilters(() => DEFAULT_FILTERS), lastAction: null }
     case 'folder':
       return {
         ...state,
@@ -140,18 +144,16 @@ function useAppStore() {
     catalog: { status: 'loading' },
     mode: initialMode(),
     filters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) }),
-    sectionFilters: {
-      tech: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('techFilters', {}) }),
-      gadget: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('gadgetFilters', {}) }),
-    },
+    sectionFilters: otherSectionFilters((u) => normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>(`${u}Filters`, {}) })),
     wishlist: stripPrices(load<WishItem[]>('wishlist', [])),
     disliked: load<string[]>('disliked', []),
     lastAction: null,
   }))
 
   useEffect(() => save('filters:v2', state.filters), [state.filters])
-  useEffect(() => save('techFilters', state.sectionFilters.tech), [state.sectionFilters.tech])
-  useEffect(() => save('gadgetFilters', state.sectionFilters.gadget), [state.sectionFilters.gadget])
+  useEffect(() => {
+    for (const [u, f] of Object.entries(state.sectionFilters)) save(`${u}Filters`, f)
+  }, [state.sectionFilters])
   useEffect(() => {
     save('mode', state.mode)
     // Classe per i colori della sezione (vedi src/index.css).
@@ -268,7 +270,7 @@ function useAppStore() {
         dispatch({ type: 'remove', id: product.id })
       },
       setFilters: (filters: Filters) => dispatch({ type: 'filters', filters }),
-      /** Cambia sezione (moda, tech, gadget) */
+      /** Cambia sezione (moda, tech, gadget…) */
       setMode: (mode: Universe) => dispatch({ type: 'mode', mode }),
       resetSeen: () => dispatch({ type: 'resetSeen' }),
       clearAll: () => dispatch({ type: 'clearAll' }),

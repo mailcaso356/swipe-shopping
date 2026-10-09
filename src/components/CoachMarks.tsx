@@ -25,7 +25,7 @@ export function CoachMarks() {
     {/* Freccia fuori dalla card, sotto il menu delle sezioni in alto a sinistra. */}
     <div className="pointer-events-none fixed top-[calc(env(safe-area-inset-top)+3.4rem)] left-[max(0.5rem,calc(50%_-_14rem_+_0.5rem))] z-40 flex flex-col items-start sm:left-[calc(50%_-_21rem_+_0.5rem)]">
       <ArrowUp className="ml-9 size-7 animate-bounce text-[#f97316]" strokeWidth={3} />
-      <span className="rounded-2xl bg-[#f97316] px-3 py-1.5 text-sm font-semibold text-[#fff] shadow-lg">Qui trovi Tech e Gadget</span>
+      <span className="rounded-2xl bg-[#f97316] px-3 py-1.5 text-sm font-semibold text-[#fff] shadow-lg">Qui trovi le altre sezioni</span>
     </div>
     <div className="absolute inset-0 z-30 flex items-center justify-center rounded-3xl bg-black/65 p-5 backdrop-blur-[2px]" onClick={close}>
       <div role="dialog" aria-label="Come funziona" className="w-full space-y-4 text-[#fff]" onClick={(e) => e.stopPropagation()}>
@@ -45,7 +45,7 @@ export function CoachMarks() {
           <strong>Tocca il centro</strong> o il nome per aprire la scheda con caratteristiche e prezzo.
         </Tip>
         <Tip icon={<ArrowUp className="size-5" />}>
-          <strong>Il menu in alto a sinistra</strong> apre le altre sezioni: Moda, Tech e Gadget, ognuna con preferiti e filtri suoi.
+          <strong>Il menu in alto a sinistra</strong> apre le altre sezioni: Moda, Tech, Gadget e Snack, ognuna con preferiti e filtri suoi.
         </Tip>
         <button type="button" onClick={close} className="h-12 w-full rounded-full bg-rose-500 font-semibold text-[#fff]">
           Ho capito

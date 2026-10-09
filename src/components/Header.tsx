@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Cpu, Gift, Moon, Shirt, Sun } from 'lucide-react'
+import { Check, ChevronDown, Cookie, Cpu, Gift, Moon, Shirt, Sun } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { APP_NAME } from '../config/app'
 import { SECTIONS, sectionOf, type Universe } from '../config/categories'
@@ -36,7 +36,7 @@ export function Header() {
   )
 }
 
-const ICONS: Record<Universe, typeof Shirt> = { moda: Shirt, tech: Cpu, gadget: Gift }
+const ICONS: Record<Universe, typeof Shirt> = { moda: Shirt, tech: Cpu, gadget: Gift, snack: Cookie }
 
 /** Menu delle sezioni: ognuna è come un'app a sé, con filtri e preferiti suoi. */
 function SectionMenu() {
@@ -78,7 +78,7 @@ function SectionMenu() {
         <ChevronDown className={`size-3.5 shrink-0 transition ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div role="menu" className="absolute top-12 left-0 z-30 w-64 overflow-hidden rounded-2xl bg-white p-1.5 shadow-xl ring-1 ring-neutral-200">
+        <div role="menu" className="absolute top-12 left-0 z-30 w-72 overflow-hidden rounded-2xl bg-white p-1.5 shadow-xl ring-1 ring-neutral-200">
           {SECTIONS.map((s) => {
             const SIcon = ICONS[s.id]
             const active = s.id === state.mode
