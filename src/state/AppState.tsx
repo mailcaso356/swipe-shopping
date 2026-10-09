@@ -35,6 +35,15 @@ type Action =
 
 const MAX_DISLIKED = 5000
 
+/** Seme personale per l'ordine "Consigliati": stabile tra una visita e l'altra. */
+const MIX_SEED = (() => {
+  const existing = load<string>('mixSeed', '')
+  if (existing) return existing
+  const seed = Math.random().toString(36).slice(2)
+  save('mixSeed', seed)
+  return seed
+})()
+
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'catalog':
@@ -76,13 +85,13 @@ function reducer(state: State, action: Action): State {
 function useAppStore() {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     catalog: { status: 'loading' },
-    filters: { ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters', {}) },
+    filters: { ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) },
     wishlist: load<WishItem[]>('wishlist', []),
     disliked: load<string[]>('disliked', []),
     lastAction: null,
   }))
 
-  useEffect(() => save('filters', state.filters), [state.filters])
+  useEffect(() => save('filters:v2', state.filters), [state.filters])
   useEffect(() => save('wishlist', state.wishlist), [state.wishlist])
   useEffect(() => save('disliked', state.disliked), [state.disliked])
 
@@ -107,7 +116,7 @@ function useAppStore() {
   const deck = useMemo(() => {
     const seen = new Set([...state.disliked, ...state.wishlist.map((w) => w.product.id)])
     const list = products.filter((p) => p.availability !== 'out_of_stock' && !seen.has(p.id) && matchesFilters(p, state.filters))
-    return sortProducts(list, state.filters.sort)
+    return sortProducts(list, state.filters.sort, MIX_SEED)
   }, [products, state.disliked, state.wishlist, state.filters])
 
   /** Preferiti con i dati aggiornati dal catalogo quando il prodotto è ancora presente */

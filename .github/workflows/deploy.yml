@@ -4,9 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # Ogni 6 ore: foto, prezzi e disponibilità restano aggiornati (Amazon vuole prezzi con meno di 24 ore).
-  schedule:
-    - cron: '17 */6 * * *'
+  # Richiamato da "Aggiorna catalogo Amazon" dopo aver salvato il catalogo nuovo.
+  workflow_call:
 
 permissions:
   contents: read
@@ -22,17 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Aggiorna catalogo da Amazon Creators API
-        run: npm run sync:amazon
-        env:
-          AMAZON_CREDENTIAL_ID: ${{ secrets.AMAZON_CREDENTIAL_ID }}
-          AMAZON_CREDENTIAL_SECRET: ${{ secrets.AMAZON_CREDENTIAL_SECRET }}
-          AMAZON_CREDENTIAL_VERSION: ${{ secrets.AMAZON_CREDENTIAL_VERSION }}
       - run: npm run check:catalog
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3

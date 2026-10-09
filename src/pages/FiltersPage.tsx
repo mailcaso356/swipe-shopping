@@ -128,6 +128,7 @@ export function FiltersPage() {
           onChange={(e) => set({ sort: e.target.value as Filters['sort'] })}
           className="w-full rounded-xl bg-white px-4 py-2.5 ring-1 ring-neutral-200"
         >
+          <option value="mix">Consigliati</option>
           <option value="novita">Novità</option>
           <option value="prezzo_asc">Prezzo crescente</option>
           <option value="prezzo_desc">Prezzo decrescente</option>

@@ -1,0 +1,47 @@
+name: Aggiorna catalogo Amazon
+
+on:
+  # Due volte al giorno: prezzi sempre con meno di 24 ore, come richiede Amazon.
+  schedule:
+    - cron: '17 4,16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sync-amazon
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Scarica foto, prezzi e nuovi prodotti da Amazon
+        run: npm run sync:amazon
+        env:
+          AMAZON_CREDENTIAL_ID: ${{ secrets.AMAZON_CREDENTIAL_ID }}
+          AMAZON_CREDENTIAL_SECRET: ${{ secrets.AMAZON_CREDENTIAL_SECRET }}
+          AMAZON_CREDENTIAL_VERSION: ${{ secrets.AMAZON_CREDENTIAL_VERSION }}
+      - run: npm run check:catalog
+      - name: Salva il catalogo aggiornato
+        run: |
+          git config user.name "catalog-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/catalog.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Catalogo aggiornato da Amazon"
+          git pull --rebase origin main
+          git push origin HEAD:main
+  deploy:
+    needs: sync
+    uses: ./.github/workflows/deploy.yml

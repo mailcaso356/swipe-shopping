@@ -40,9 +40,11 @@ export interface Product {
    * Usate solo finché il catalogo verificato è vuoto.
    */
   searchQuery?: string
+  /** 'ricerca' = aggiunto in automatico dalla ricerca Amazon; assente = inserito a mano */
+  source?: 'ricerca'
 }
 
-export type SortOrder = 'novita' | 'prezzo_asc' | 'prezzo_desc'
+export type SortOrder = 'mix' | 'novita' | 'prezzo_asc' | 'prezzo_desc'
 
 export interface Filters {
   gender: 'tutti' | 'uomo' | 'donna'
@@ -63,5 +65,5 @@ export const DEFAULT_FILTERS: Filters = {
   stores: [],
   sizes: [],
   colors: [],
-  sort: 'novita',
+  sort: 'mix',
 }

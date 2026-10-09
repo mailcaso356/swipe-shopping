@@ -2,6 +2,7 @@
 // Gira su GitHub Actions prima di ogni build: le credenziali restano nei Secrets del repository
 // e non finiscono mai nel sito. Uso: `npm run sync:amazon` con le variabili d'ambiente impostate.
 import { readFileSync, writeFileSync } from 'node:fs'
+import { SEARCH_PLAN, normalizeBrand } from './search-plan.ts'
 
 const { AMAZON_CREDENTIAL_ID, AMAZON_CREDENTIAL_SECRET, AMAZON_CREDENTIAL_VERSION, AMAZON_TOKEN_URL } = process.env
 const PARTNER_TAG = process.env.VITE_AMAZON_TAG || 'mrofferta09-21'
@@ -52,6 +53,7 @@ async function callApi(op: string, token: string, payload: Record<string, unknow
   for (let attempt = 0; ; attempt++) {
     await sleep(Math.max(0, lastCall + MIN_GAP_MS - Date.now()))
     lastCall = Date.now()
+    requests++
     const res = await fetch(`${API_BASE}/${op}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'x-marketplace': MARKETPLACE },
@@ -66,6 +68,10 @@ async function callApi(op: string, token: string, payload: Record<string, unknow
     return body
   }
 }
+
+/** Tetto di richieste per esecuzione: Amazon concede 8640 richieste al giorno. */
+const MAX_REQUESTS = Number(process.env.AMAZON_MAX_REQUESTS ?? 1500)
+let requests = 0
 
 const OFFER_RESOURCES = ['offersV2.listings.price', 'offersV2.listings.availability', 'offersV2.listings.isBuyBoxWinner']
 
@@ -111,15 +117,13 @@ async function bestVariant(token: string, asin: string) {
   return best
 }
 
-try {
-  const token = await getToken()
-  const now = new Date().toISOString()
-  const amazon = catalog.filter((p) => p.store === 'amazon')
-  const summary: string[] = []
-  let updated = 0
+const now = new Date().toISOString()
+const previousAddedAt = new Map(catalog.map((p) => [p.id, p.addedAt]))
 
-  for (let i = 0; i < amazon.length; i += 10) {
-    const batch = amazon.slice(i, i + 10)
+/** Prodotti inseriti a mano: aggiorna foto, prezzi e disponibilità. */
+async function refreshCurated(token: string, curated: Record<string, any>[], summary: string[]) {
+  for (let i = 0; i < curated.length; i += 10) {
+    const batch = curated.slice(i, i + 10)
     const body = await callApi('getItems', token, {
       itemIds: batch.map((p) => p.externalId),
       itemIdType: 'ASIN',
@@ -154,27 +158,125 @@ try {
           annotate('warning', `Varianti ${p.externalId}: ${e instanceof Error ? e.message : String(e)}`)
         }
       }
-
-      if (isUsable(offer)) {
-        p.price = offer.price
-        p.priceCheckedAt = now
-        if (offer.basis > offer.price) p.originalPrice = offer.basis
-        else delete p.originalPrice
-        p.availability = 'in_stock'
-      } else {
-        delete p.price
-        delete p.originalPrice
-        delete p.priceCheckedAt
-        p.availability = offer?.availability.includes('OUT') ? 'out_of_stock' : 'unknown'
-      }
+      applyOffer(p, offer)
       summary.push(`${p.externalId}:${p.price ?? '-'}${p.priceFrom ? '(da)' : ''}:${p.availability}`)
-      updated++
     }
   }
+}
 
-  writeFileSync(file, JSON.stringify(catalog, null, 1) + '\n')
-  annotate('notice', `Riepilogo: ${summary.join(' | ')}`)
-  annotate('notice', `Aggiornati ${updated} prodotti su ${amazon.length}.`)
+function applyOffer(p: Record<string, any>, offer: Offer | null) {
+  if (isUsable(offer)) {
+    p.price = offer.price
+    p.priceCheckedAt = now
+    if (offer.basis > offer.price) p.originalPrice = offer.basis
+    else delete p.originalPrice
+    p.availability = 'in_stock'
+  } else {
+    delete p.price
+    delete p.originalPrice
+    delete p.priceCheckedAt
+    p.availability = offer?.availability.includes('OUT') ? 'out_of_stock' : 'unknown'
+  }
+}
+
+/** Cerca su Amazon i prodotti delle marche ammesse, categoria per categoria. */
+async function searchCatalog(token: string) {
+  const found = new Map<string, Record<string, any>>()
+  const pages = Number(process.env.AMAZON_SEARCH_PAGES ?? 2)
+  let rejectedBrand = 0
+  let rejectedPrice = 0
+
+  outer: for (const plan of SEARCH_PLAN) {
+    for (const gender of plan.genders) {
+      for (const brand of plan.brands) {
+        for (let page = 1; page <= pages; page++) {
+          if (requests >= MAX_REQUESTS) {
+            annotate('warning', `Raggiunto il tetto di ${MAX_REQUESTS} richieste: ricerca interrotta a ${plan.category}.`)
+            break outer
+          }
+          let body: any
+          try {
+            body = await callApi('searchItems', token, {
+              keywords: `${plan.keywords} ${gender}`,
+              brand,
+              searchIndex: 'Fashion',
+              itemCount: 10,
+              itemPage: page,
+              minPrice: plan.minPrice * 100,
+              availability: 'Available',
+              resources: ['images.primary.large', 'itemInfo.title', 'itemInfo.byLineInfo', ...OFFER_RESOURCES],
+            })
+          } catch (e) {
+            annotate('warning', `Ricerca ${plan.category}/${gender}/${brand}: ${e instanceof Error ? e.message : String(e)}`)
+            break
+          }
+          const items: any[] = body?.searchResult?.items ?? []
+          for (const item of items) {
+            const asin = item?.asin
+            const title = item?.itemInfo?.title?.displayValue
+            const itemBrand = item?.itemInfo?.byLineInfo?.brand?.displayValue ?? ''
+            const image = item?.images?.primary?.large?.url
+            const offer = readListing(item)
+            if (!asin || !title || typeof image !== 'string' || !image.startsWith('https://')) continue
+            // Solo la marca cercata: Amazon a volte restituisce marche simili o sconosciute.
+            if (!normalizeBrand(itemBrand).includes(normalizeBrand(brand))) {
+              rejectedBrand++
+              continue
+            }
+            if (!isUsable(offer) || offer.price < plan.minPrice || offer.price > 3000) {
+              rejectedPrice++
+              continue
+            }
+            const id = `amazon:${asin}`
+            const existing = found.get(id)
+            if (existing) {
+              // Lo stesso articolo trovato per uomo e per donna è unisex.
+              if (existing.gender !== gender) existing.gender = 'unisex'
+              continue
+            }
+            const p: Record<string, any> = {
+              id,
+              store: 'amazon',
+              externalId: asin,
+              title,
+              brand,
+              gender,
+              category: plan.category,
+              imageUrl: image,
+              availability: 'in_stock',
+              addedAt: previousAddedAt.get(id) ?? now,
+              source: 'ricerca',
+            }
+            applyOffer(p, offer)
+            found.set(id, p)
+          }
+          if (items.length < 10) break
+        }
+      }
+    }
+  }
+  annotate('notice', `Ricerca: ${found.size} prodotti trovati, ${rejectedBrand} scartati per marca, ${rejectedPrice} per prezzo/disponibilità.`)
+  return [...found.values()]
+}
+
+try {
+  const token = await getToken()
+  const curated = catalog.filter((p) => p.store === 'amazon' && p.source !== 'ricerca')
+  const summary: string[] = []
+  await refreshCurated(token, curated, summary)
+  annotate('notice', `Prodotti inseriti a mano: ${summary.join(' | ')}`)
+
+  const curatedIds = new Set(curated.map((p) => p.id))
+  let searched = (await searchCatalog(token)).filter((p) => !curatedIds.has(p.id))
+  if (searched.length === 0) {
+    // Ricerca fallita: teniamo i risultati precedenti invece di svuotare il catalogo.
+    searched = catalog.filter((p) => p.source === 'ricerca')
+    annotate('warning', 'Nessun risultato dalla ricerca: mantengo il catalogo precedente.')
+  }
+  const others = catalog.filter((p) => p.store !== 'amazon')
+  const next = [...curated, ...others, ...searched]
+  writeFileSync(file, JSON.stringify(next, null, 1) + '\n')
+  annotate('notice', `Catalogo: ${next.length} prodotti (${searched.length} dalla ricerca), ${requests} richieste ad Amazon.`)
 } catch (e) {
   annotate('error', `Sincronizzazione Amazon non riuscita: ${e instanceof Error ? e.message : String(e)}`)
 }

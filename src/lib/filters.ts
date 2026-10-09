@@ -18,8 +18,17 @@ export function matchesFilters(p: Product, f: Filters) {
   return true
 }
 
-export function sortProducts(list: Product[], sort: Filters['sort']) {
+/** Hash veloce e stabile: serve a mescolare i prodotti sempre nello stesso modo per ogni utente. */
+function hash(text: string) {
+  let h = 2166136261
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619)
+  return h >>> 0
+}
+
+export function sortProducts(list: Product[], sort: Filters['sort'], seed = '') {
   const sorted = [...list]
+  // Mix: categorie e marche alternate, così lo swipe non mostra 50 t-shirt di fila.
+  if (sort === 'mix') return sorted.sort((a, b) => hash(seed + a.id) - hash(seed + b.id))
   if (sort === 'novita') return sorted.sort((a, b) => b.addedAt.localeCompare(a.addedAt))
   const dir = sort === 'prezzo_asc' ? 1 : -1
   // I prodotti senza prezzo vanno in fondo.
