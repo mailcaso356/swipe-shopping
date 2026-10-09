@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
+import { universeOf, type Universe } from '../config/categories'
 import { track } from '../lib/analytics'
 import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
@@ -25,7 +26,12 @@ type CatalogState =
 
 interface State {
   catalog: CatalogState
+  /** Sezione aperta: moda (principale) o tech */
+  mode: Universe
+  /** Filtri della moda (sincronizzati con l'account) */
   filters: Filters
+  /** Filtri della sezione tech (solo su questo dispositivo) */
+  techFilters: Filters
   wishlist: WishItem[]
   disliked: string[]
   lastAction: { type: 'like' | 'dislike'; product: Product } | null
@@ -37,6 +43,7 @@ type Action =
   | { type: 'undo' }
   | { type: 'remove'; id: string }
   | { type: 'filters'; filters: Filters }
+  | { type: 'mode'; mode: Universe }
   | { type: 'resetSeen' }
   | { type: 'clearAll' }
   | { type: 'hydrate'; wishlist: WishItem[]; disliked: string[]; filters: Filters }
@@ -88,11 +95,15 @@ function reducer(state: State, action: Action): State {
     case 'remove':
       return { ...state, wishlist: state.wishlist.filter((w) => w.product.id !== action.id), lastAction: null }
     case 'filters':
-      return { ...state, filters: normalizeFilters(action.filters) }
+      return state.mode === 'tech'
+        ? { ...state, techFilters: normalizeFilters(action.filters) }
+        : { ...state, filters: normalizeFilters(action.filters) }
+    case 'mode':
+      return { ...state, mode: action.mode, lastAction: null }
     case 'resetSeen':
       return { ...state, disliked: [], lastAction: null }
     case 'clearAll':
-      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, lastAction: null }
+      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, techFilters: DEFAULT_FILTERS, lastAction: null }
     case 'folder':
       return {
         ...state,
@@ -117,13 +128,18 @@ function reducer(state: State, action: Action): State {
 function useAppStore() {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     catalog: { status: 'loading' },
+    mode: load<Universe>('mode', 'moda') === 'tech' ? 'tech' : 'moda',
     filters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) }),
+    techFilters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('techFilters', {}) }),
     wishlist: stripPrices(load<WishItem[]>('wishlist', [])),
     disliked: load<string[]>('disliked', []),
     lastAction: null,
   }))
 
   useEffect(() => save('filters:v2', state.filters), [state.filters])
+  useEffect(() => save('techFilters', state.techFilters), [state.techFilters])
+  useEffect(() => save('mode', state.mode), [state.mode])
+  const activeFilters = state.mode === 'tech' ? state.techFilters : state.filters
   useEffect(() => save('wishlist', state.wishlist), [state.wishlist])
   useEffect(() => save('disliked', state.disliked), [state.disliked])
 
@@ -155,14 +171,25 @@ function useAppStore() {
   useEffect(() => {
     if (sharedId) window.history.replaceState(null, '', '#/scopri')
   }, [sharedId])
+  // Link condiviso a un prodotto dell'altra sezione: si apre la sua sezione.
+  const sharedProduct = sharedId ? products.find((p) => p.id === sharedId) : undefined
+  useEffect(() => {
+    if (sharedProduct) dispatch({ type: 'mode', mode: universeOf(sharedProduct.category) })
+  }, [sharedProduct])
 
   const deck = useMemo(() => {
     const seen = new Set([...state.disliked, ...state.wishlist.map((w) => w.product.id)])
-    const list = products.filter((p) => p.availability !== 'out_of_stock' && !seen.has(p.id) && matchesFilters(p, state.filters))
-    const sorted = sortProducts(list, state.filters.sort, MIX_SEED)
+    const list = products.filter(
+      (p) =>
+        p.availability !== 'out_of_stock' &&
+        !seen.has(p.id) &&
+        universeOf(p.category) === state.mode &&
+        matchesFilters(p, activeFilters),
+    )
+    const sorted = sortProducts(list, activeFilters.sort, MIX_SEED)
     const shared = sharedId ? products.find((p) => p.id === sharedId) : undefined
     return shared ? [shared, ...sorted.filter((p) => p.id !== shared.id)] : sorted
-  }, [products, state.disliked, state.wishlist, state.filters, sharedId])
+  }, [products, state.disliked, state.wishlist, state.mode, activeFilters, sharedId])
 
   /** Preferiti con i dati aggiornati dal catalogo quando il prodotto è ancora presente */
   const wishlist = useMemo(() => {
@@ -210,6 +237,8 @@ function useAppStore() {
         dispatch({ type: 'remove', id: product.id })
       },
       setFilters: (filters: Filters) => dispatch({ type: 'filters', filters }),
+      /** Passa dalla moda al tech e viceversa */
+      setMode: (mode: Universe) => dispatch({ type: 'mode', mode }),
       resetSeen: () => dispatch({ type: 'resetSeen' }),
       clearAll: () => dispatch({ type: 'clearAll' }),
       reloadCatalog: () => reloadCatalog(),
@@ -221,7 +250,11 @@ function useAppStore() {
     [reloadCatalog],
   )
 
-  return { state, products, deck, wishlist, actions, sync, unseenDeals, markDealsSeen }
+  // Per il resto dell'app `state.filters` sono i filtri della sezione aperta.
+  const view = useMemo(() => ({ ...state, filters: activeFilters }), [state, activeFilters])
+  /** Prodotti della sezione aperta (per i filtri) */
+  const sectionProducts = useMemo(() => products.filter((p) => universeOf(p.category) === state.mode), [products, state.mode])
+  return { state: view, products: sectionProducts, allProducts: products, deck, wishlist, actions, sync, unseenDeals, markDealsSeen }
 }
 
 export type SyncStatus = 'off' | 'loading' | 'synced' | 'saving' | 'error'

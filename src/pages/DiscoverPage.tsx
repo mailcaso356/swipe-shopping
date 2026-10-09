@@ -5,7 +5,7 @@ import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 
 export function DiscoverPage() {
-  const { state, deck, actions } = useApp()
+  const { state, deck, products, actions } = useApp()
   const { catalog } = state
 
   if (catalog.status === 'loading') {
@@ -37,6 +37,12 @@ export function DiscoverPage() {
       <DeckTabs />
       {deck.length > 0 ? (
         <SwipeDeck />
+      ) : products.length === 0 ? (
+        <Empty title="Sezione in arrivo" text="Stiamo preparando i prodotti di questa sezione: torna tra qualche ora.">
+          <button type="button" onClick={() => actions.setMode('moda')} className={primaryBtn}>
+            Torna alla moda
+          </button>
+        </Empty>
       ) : (
         <Empty title="Hai visto tutto!" text="Non ci sono altri prodotti con questi filtri.">
           <a href={routeHref('filtri')} className={primaryBtn}>

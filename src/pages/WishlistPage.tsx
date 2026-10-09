@@ -8,6 +8,7 @@ import { PriceTag } from '../components/PriceTag'
 import { ProductImage } from '../components/ProductImage'
 import { StoreLink } from '../components/StoreLink'
 import { AMAZON_DISCLOSURE } from '../config/app'
+import { universeOf } from '../config/categories'
 import { brandAndStore } from '../config/stores'
 import { discountBadge, freshPrice } from '../lib/price'
 import { openProduct } from '../lib/productSheet'
@@ -20,7 +21,9 @@ type WishSort = 'recenti' | 'prezzo_asc' | 'prezzo_desc' | 'sconto'
 const priceOf = (p: Product) => freshPrice(p)?.price
 
 export function WishlistPage() {
-  const { wishlist, actions, markDealsSeen } = useApp()
+  const { wishlist: all, state, actions, markDealsSeen } = useApp()
+  // Preferiti della sezione aperta (moda o tech)
+  const wishlist = useMemo(() => all.filter((w) => universeOf(w.product.category) === state.mode), [all, state.mode])
   const deals = wishlist.filter((w) => w.deal !== null).length
   const [folder, setFolder] = useState<string | null>(null)
   const [sort, setSort] = useState<WishSort>('recenti')

@@ -49,7 +49,7 @@ export function AdminPage() {
 }
 
 function AdminStatsView() {
-  const { products } = useApp()
+  const { allProducts: products } = useApp()
   const [days, setDays] = useState<(typeof PERIODS)[number]>(30)
   const [result, setResult] = useState<{ days: number; stats?: AdminStats; error?: string } | null>(null)
 

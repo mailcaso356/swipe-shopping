@@ -12,7 +12,7 @@ import { useApp } from '../state/AppState'
 import { useAuth } from '../state/AuthState'
 
 export function ProfilePage() {
-  const { state, wishlist, products, actions } = useApp()
+  const { state, wishlist, allProducts: products, actions } = useApp()
   const consent = useConsent()
   const { user } = useAuth()
   const [confirmClear, setConfirmClear] = useState(false)

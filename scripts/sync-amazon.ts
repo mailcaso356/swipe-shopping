@@ -235,7 +235,7 @@ async function searchCatalog(token: string) {
           try {
             const search = () =>
               callApi('searchItems', token, {
-                keywords: `${plan.keywords} ${gender}`,
+                keywords: gender === 'unisex' ? plan.keywords : `${plan.keywords} ${gender}`,
                 brand,
                 searchIndex: plan.searchIndex ?? 'Fashion',
                 itemCount: 10,

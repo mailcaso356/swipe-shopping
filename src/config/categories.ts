@@ -57,38 +57,77 @@ export const CATEGORY_GROUPS = [
       { id: 'borse_viaggio', label: 'Borse da viaggio' },
     ],
   },
-] as const
-
-/**
- * Sezioni extra, fuori dalla moda di base: spente finché l'utente non le attiva nei Filtri.
- * Per aggiungerne una (es. videogiochi) basta inserirla qui e nel piano di ricerca Amazon.
- */
-export const EXTRA_SECTIONS = [
   {
     id: 'profumi',
     label: 'Profumi',
     emoji: '🌸',
-    hint: 'Profumi uomo e donna delle grandi marche',
     items: [{ id: 'profumi', label: 'Profumi' }],
   },
 ] as const
 
-export type CategoryGroup = (typeof CATEGORY_GROUPS)[number] | (typeof EXTRA_SECTIONS)[number]
-export type CategoryId = CategoryGroup['items'][number]['id']
-export type ExtraSectionId = (typeof EXTRA_SECTIONS)[number]['id']
+/**
+ * La sezione Tech: un'app gemella con le sue categorie, aperta dal pulsante in alto a sinistra.
+ * I prodotti tech sono unisex e arrivano da Amazon (vedi scripts/search-plan.ts).
+ */
+export const TECH_GROUPS = [
+  {
+    id: 'audio',
+    label: 'Audio',
+    emoji: '🎧',
+    items: [
+      { id: 'cuffie', label: 'Cuffie' },
+      { id: 'auricolari', label: 'Auricolari' },
+      { id: 'casse', label: 'Casse bluetooth' },
+    ],
+  },
+  {
+    id: 'smart',
+    label: 'Smartphone e smartwatch',
+    emoji: '📱',
+    items: [
+      { id: 'smartphone', label: 'Smartphone' },
+      { id: 'smartwatch', label: 'Smartwatch' },
+      { id: 'tablet', label: 'Tablet' },
+    ],
+  },
+  {
+    id: 'gaming',
+    label: 'Gaming',
+    emoji: '🎮',
+    items: [
+      { id: 'videogiochi', label: 'Videogiochi' },
+      { id: 'console', label: 'Console' },
+      { id: 'accessori_gaming', label: 'Accessori gaming' },
+    ],
+  },
+  {
+    id: 'foto',
+    label: 'Foto e video',
+    emoji: '📷',
+    items: [{ id: 'fotocamere', label: 'Fotocamere e action cam' }],
+  },
+] as const
 
-const byId = new Map<string, { label: string; group: CategoryGroup; extra?: ExtraSectionId }>()
+export type Universe = 'moda' | 'tech'
+export type CategoryGroup = (typeof CATEGORY_GROUPS)[number] | (typeof TECH_GROUPS)[number]
+export type CategoryId = CategoryGroup['items'][number]['id']
+
+const byId = new Map<string, { label: string; group: CategoryGroup; universe: Universe }>()
 for (const group of CATEGORY_GROUPS) {
-  for (const item of group.items) byId.set(item.id, { label: item.label, group })
+  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'moda' })
 }
-for (const section of EXTRA_SECTIONS) {
-  for (const item of section.items) byId.set(item.id, { label: item.label, group: section, extra: section.id })
+for (const group of TECH_GROUPS) {
+  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'tech' })
 }
 
 export const isCategoryId = (id: string): id is CategoryId => byId.has(id)
 export const categoryLabel = (id: CategoryId) => byId.get(id)?.label ?? id
 export const categoryGroupOf = (id: CategoryId) => byId.get(id)?.group
-/** Sezione extra a cui appartiene la categoria (undefined = moda di base) */
-export const extraSectionOf = (id: CategoryId) => byId.get(id)?.extra
-/** Categorie della moda di base (quelle scelte nella sezione Categorie dei filtri) */
-export const ALL_CATEGORY_IDS = CATEGORY_GROUPS.flatMap((g) => g.items.map((i) => i.id)) as CategoryId[]
+/** Moda o tech, in base alla categoria */
+export const universeOf = (id: CategoryId): Universe => byId.get(id)?.universe ?? 'moda'
+/** Gruppi di categorie della sezione */
+export const groupsOf = (u: Universe): readonly CategoryGroup[] => (u === 'tech' ? TECH_GROUPS : CATEGORY_GROUPS)
+/** Tutte le categorie della sezione */
+export const categoryIdsOf = (u: Universe) => groupsOf(u).flatMap((g) => g.items.map((i) => i.id)) as CategoryId[]
+/** Tutte le categorie della moda (la sezione principale) */
+export const ALL_CATEGORY_IDS = categoryIdsOf('moda')

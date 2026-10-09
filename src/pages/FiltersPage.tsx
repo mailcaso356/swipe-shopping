@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { ALL_CATEGORY_IDS, CATEGORY_GROUPS, EXTRA_SECTIONS, extraSectionOf, type CategoryId } from '../config/categories'
+import { categoryIdsOf, groupsOf, type CategoryId } from '../config/categories'
 import { colorSwatch } from '../config/colors'
 import { BrandPicker } from '../components/BrandPicker'
 import { PriceRange } from '../components/PriceRange'
@@ -15,19 +15,19 @@ export function FiltersPage() {
   const { state, products, actions } = useApp()
   const f = state.filters
   const set = (patch: Partial<Filters>) => actions.setFilters({ ...f, ...patch })
-  // Marche, colori ecc. solo dei prodotti che l'utente può vedere (sezioni extra spente escluse).
-  const facets = facetValues(products.filter((p) => { const x = extraSectionOf(p.category); return !x || !!f.extras?.includes(x) }))
+  const tech = state.mode === 'tech'
+  const facets = facetValues(products)
   const matching = products.filter((p) => p.availability !== 'out_of_stock' && matchesFilters(p, f)).length
   // Come per le marche: nessuna selezionata (o tutte) = tutte le categorie.
   const setStores = (list: StoreId[]) => set({ stores: list.length === facets.stores.length ? [] : list })
-  const setCategories = (list: CategoryId[]) => set({ categories: list.length === ALL_CATEGORY_IDS.length ? [] : list })
+  const setCategories = (list: CategoryId[]) => set({ categories: list.length === categoryIdsOf(state.mode).length ? [] : list })
 
   return (
     <div className="space-y-6 pb-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Filtri</h1>
+        <h1 className="text-2xl font-bold">Filtri{tech ? ' Tech' : ''}</h1>
         {activeFilterCount(f) > 0 && (
-          <button type="button" onClick={() => actions.setFilters({ ...DEFAULT_FILTERS, extras: f.extras })} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-[#fff] shadow-sm active:scale-95">
+          <button type="button" onClick={() => actions.setFilters(DEFAULT_FILTERS)} className="rounded-full bg-rose-600 px-4 py-1.5 text-sm font-semibold text-[#fff] shadow-sm active:scale-95">
             Azzera filtri
           </button>
         )}
@@ -37,27 +37,29 @@ export function FiltersPage() {
         <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Nessun prodotto con questi filtri: prova ad allargarli.</p>
       )}
 
-      <Section title="Genere">
-        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-neutral-100 p-1">
-          {(
-            [
-              ['tutti', 'Tutti'],
-              ['donna', 'Donna'],
-              ['uomo', 'Uomo'],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => set({ gender: value })}
-              aria-pressed={f.gender === value}
-              className={`rounded-xl py-2 text-sm font-semibold transition ${f.gender === value ? 'bg-white shadow-sm' : 'text-neutral-500'}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </Section>
+      {!tech && (
+        <Section title="Genere">
+          <div className="grid grid-cols-3 gap-1 rounded-2xl bg-neutral-100 p-1">
+            {(
+              [
+                ['tutti', 'Tutti'],
+                ['donna', 'Donna'],
+                ['uomo', 'Uomo'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => set({ gender: value })}
+                aria-pressed={f.gender === value}
+                className={`rounded-xl py-2 text-sm font-semibold transition ${f.gender === value ? 'bg-white shadow-sm' : 'text-neutral-500'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {facets.stores.length > 1 && (
         <Section title="Negozi" hint="Nessuno selezionato = tutti i negozi">
@@ -88,7 +90,7 @@ export function FiltersPage() {
 
       <Section title="Categorie" hint="Nessuna selezionata = tutte le categorie">
         <div className="space-y-4">
-          {CATEGORY_GROUPS.map((group) => {
+          {groupsOf(state.mode).map((group) => {
             const ids = group.items.map((i) => i.id) as CategoryId[]
             const all = ids.every((id) => f.categories.includes(id))
             return (
@@ -120,20 +122,6 @@ export function FiltersPage() {
         </div>
       </Section>
 
-      <Section title="Sezioni extra" hint="Oltre alla moda: attivale per vederle anche in Scopri">
-        <div className="divide-y divide-neutral-100 rounded-2xl bg-white ring-1 ring-neutral-200">
-          {EXTRA_SECTIONS.map((s) => (
-            <Toggle
-              key={s.id}
-              label={`${s.emoji} ${s.label}`}
-              hint={s.hint}
-              checked={!!f.extras?.includes(s.id)}
-              onChange={(on) => set({ extras: on ? [...(f.extras ?? []), s.id] : (f.extras ?? []).filter((x) => x !== s.id) })}
-            />
-          ))}
-        </div>
-      </Section>
-
       {facets.brands.length > 0 && (
         <Section title="Marca" hint="Nessuna selezionata = tutte le marche">
           <BrandPicker
@@ -147,7 +135,7 @@ export function FiltersPage() {
       {facets.sizes.length > 0 && (
         <ChipSection title="Taglia" values={facets.sizes} selected={f.sizes} onToggle={(v) => set({ sizes: toggle(f.sizes, v) })} />
       )}
-      {facets.colors.length > 0 && (
+      {!tech && facets.colors.length > 0 && (
         <Section title="Colore" hint="Nessuno selezionato = tutti i colori">
           <div className="flex flex-wrap gap-2">
             {facets.colors.map((c) => (

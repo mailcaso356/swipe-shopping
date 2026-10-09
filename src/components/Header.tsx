@@ -1,18 +1,32 @@
-import { Moon, Sun } from 'lucide-react'
+import { Cpu, Moon, Shirt, Sun } from 'lucide-react'
 import { APP_NAME } from '../config/app'
 import { useTheme } from '../lib/theme'
+import { useApp } from '../state/AppState'
 
-/** Barra in alto: logo al centro, tema chiaro/scuro a destra. */
+/** Barra in alto: passaggio moda/tech a sinistra, logo al centro, tema chiaro/scuro a destra. */
 export function Header() {
   const { theme, toggle } = useTheme()
+  const { state, actions } = useApp()
+  const tech = state.mode === 'tech'
   return (
     <header className="shrink-0 pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-14 max-w-md items-center gap-2 px-2 sm:max-w-2xl">
-        <span className="size-10" aria-hidden />
+        <button
+          type="button"
+          onClick={() => actions.setMode(tech ? 'moda' : 'tech')}
+          aria-label={tech ? 'Torna alla moda' : 'Passa alla sezione tech'}
+          className={`flex h-9 w-20 items-center justify-center gap-1 rounded-full text-sm font-semibold ring-1 transition active:scale-95 ${
+            tech ? 'bg-rose-500 text-[#fff] ring-rose-500' : 'bg-neutral-900 text-white ring-neutral-900'
+          }`}
+        >
+          {tech ? <Shirt className="size-4" /> : <Cpu className="size-4" />}
+          {tech ? 'Moda' : 'Tech'}
+        </button>
         <a href="#/scopri" className="flex-1 text-center text-lg font-black tracking-tight">
           {APP_NAME.split(' ')[0]}
           <span className="text-rose-500">{APP_NAME.split(' ').slice(1).join(' ')}</span>
         </a>
+        <span className="w-10" aria-hidden />
         <button
           type="button"
           onClick={toggle}

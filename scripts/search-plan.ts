@@ -1,7 +1,7 @@
 // Cosa cercare su Amazon per riempire il catalogo: per ogni sottocategoria le parole chiave
 // e le marche note ammesse. Per aggiungere una marca o una categoria basta modificare qui.
 
-export type SearchGender = 'uomo' | 'donna'
+export type SearchGender = 'uomo' | 'donna' | 'unisex'
 
 export interface CategoryPlan {
   /** id in src/config/categories.ts */
@@ -16,6 +16,8 @@ export interface CategoryPlan {
 }
 
 const BOTH: SearchGender[] = ['uomo', 'donna']
+/** Prodotti per tutti: una sola ricerca, senza uomo/donna */
+const TECH: SearchGender[] = ['unisex']
 
 export const SEARCH_PLAN: CategoryPlan[] = [
   // Abbigliamento
@@ -74,10 +76,31 @@ export const SEARCH_PLAN: CategoryPlan[] = [
     brands: ['Calvin Klein', 'Tommy Hilfiger', 'Eastpak', 'The North Face', 'Guess', 'Lacoste', 'Nike', 'Napapijri'] },
   { category: 'borse_viaggio', keywords: 'borsa da viaggio', minPrice: 30, genders: BOTH,
     brands: ['Samsonite', 'American Tourister', 'Eastpak', 'The North Face', 'adidas', 'Nike', 'Herschel', 'Delsey'] },
-  // Sezioni extra (spente di base nell'app): prezzo minimo alto per evitare tester e imitazioni
+  // Profumi (reparto Bellezza): prezzo minimo alto per evitare tester e imitazioni
   { category: 'profumi', keywords: 'eau de parfum', searchIndex: 'Beauty', minPrice: 30, genders: BOTH,
     brands: ['Dior', 'Armani', 'Yves Saint Laurent', 'Hugo Boss', 'Lancome', 'Dolce & Gabbana', 'Rabanne', 'Versace',
       'Calvin Klein', 'Prada', 'Valentino', 'Jean Paul Gaultier'] },
+  // Sezione Tech: prodotti unisex
+  { category: 'cuffie', keywords: 'cuffie wireless', searchIndex: 'Electronics', minPrice: 40, genders: TECH,
+    brands: ['Sony', 'Bose', 'JBL', 'Sennheiser', 'Beats', 'Marshall'] },
+  { category: 'auricolari', keywords: 'auricolari bluetooth', searchIndex: 'Electronics', minPrice: 30, genders: TECH,
+    brands: ['Apple', 'Samsung', 'Sony', 'JBL', 'Bose', 'Jabra'] },
+  { category: 'casse', keywords: 'cassa bluetooth', searchIndex: 'Electronics', minPrice: 30, genders: TECH,
+    brands: ['JBL', 'Bose', 'Marshall', 'Ultimate Ears', 'Sony', 'Anker'] },
+  { category: 'smartphone', keywords: 'smartphone', searchIndex: 'Electronics', minPrice: 150, genders: TECH,
+    brands: ['Apple', 'Samsung', 'Xiaomi', 'Google', 'Motorola', 'OnePlus'] },
+  { category: 'smartwatch', keywords: 'smartwatch', searchIndex: 'Electronics', minPrice: 50, genders: TECH,
+    brands: ['Apple', 'Samsung', 'Garmin', 'Huawei', 'Amazfit', 'Xiaomi'] },
+  { category: 'tablet', keywords: 'tablet', searchIndex: 'Electronics', minPrice: 100, genders: TECH,
+    brands: ['Apple', 'Samsung', 'Lenovo', 'Xiaomi', 'Amazon'] },
+  { category: 'videogiochi', keywords: 'videogioco', searchIndex: 'VideoGames', minPrice: 15, genders: TECH,
+    brands: ['Nintendo', 'Sony', 'Electronic Arts', 'Ubisoft', 'Bandai Namco', 'Activision', 'Microsoft', 'Take-Two'] },
+  { category: 'console', keywords: 'console', searchIndex: 'VideoGames', minPrice: 150, genders: TECH,
+    brands: ['Nintendo', 'Sony', 'Microsoft', 'Valve'] },
+  { category: 'accessori_gaming', keywords: 'gaming', searchIndex: 'Electronics', minPrice: 25, genders: TECH,
+    brands: ['Logitech', 'Razer', 'Corsair', 'SteelSeries', 'HyperX', 'Turtle Beach'] },
+  { category: 'fotocamere', keywords: 'fotocamera', searchIndex: 'Electronics', minPrice: 80, genders: TECH,
+    brands: ['GoPro', 'DJI', 'Canon', 'Sony', 'Fujifilm', 'Insta360'] },
 ]
 
 /** Confronto tollerante tra marche ("TOMMY HILFIGER" = "Tommy Hilfiger", "Levi's" = "Levis"). */
