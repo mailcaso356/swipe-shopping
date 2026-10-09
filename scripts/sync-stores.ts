@@ -429,7 +429,9 @@ await Promise.all(
     }),
 )
 
-const fresh = dropAmazonDuplicates([...results.values()].flat())
+// Lo stesso articolo può avere più pagine (es. colori diversi con lo stesso codice): ne teniamo una.
+const unique = [...new Map([...results.values()].flat().map((f) => [f.product.id, f])).values()]
+const fresh = dropAmazonDuplicates(unique)
 const synced = new Set(results.keys())
 const next = [...catalog.filter((p) => !synced.has(p.store)), ...fresh.map((f) => f.product)]
 
