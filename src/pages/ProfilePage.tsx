@@ -1,5 +1,6 @@
-import { BarChart3, Info, ShieldCheck, Trash2, Undo2 } from 'lucide-react'
+import { BarChart3, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+import { AccountCard } from '../components/AccountCard'
 import { AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
@@ -17,14 +18,13 @@ export function ProfilePage() {
     <div className="space-y-5 pb-6">
       <h1 className="text-2xl font-bold">Profilo</h1>
 
-      <Card icon={<Info className="size-5" />} title="Il tuo account">
-        <p className="text-sm text-neutral-600">
-          Per ora preferiti e filtri restano salvati su questo dispositivo. Account e sincronizzazione arriveranno presto.
-        </p>
-        <div className="mt-3 grid grid-cols-2 gap-2 text-center">
-          <Stat label="Preferiti" value={wishlist.length} />
-          <Stat label="Scartati" value={state.disliked.length} />
-        </div>
+      <Card icon={<UserRound className="size-5" />} title="Il tuo account">
+        <AccountCard>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-center">
+            <Stat label="Preferiti" value={wishlist.length} />
+            <Stat label="Scartati" value={state.disliked.length} />
+          </div>
+        </AccountCard>
       </Card>
 
       <Card icon={<BarChart3 className="size-5" />} title="Statistiche">

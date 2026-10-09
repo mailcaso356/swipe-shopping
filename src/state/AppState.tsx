@@ -1,9 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
 import { track } from '../lib/analytics'
 import { loadCatalog } from '../lib/catalog'
+import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
 import { matchesFilters, sortProducts } from '../lib/filters'
 import { load, save } from '../lib/storage'
 import { DEFAULT_FILTERS, type Filters, type Product } from '../types/product'
+import { useAuth } from './AuthState'
 
 export interface WishItem {
   /** Copia del prodotto al momento del salvataggio: resta visibile anche se esce dal catalogo */
@@ -32,6 +34,7 @@ type Action =
   | { type: 'filters'; filters: Filters }
   | { type: 'resetSeen' }
   | { type: 'clearAll' }
+  | { type: 'hydrate'; wishlist: WishItem[]; disliked: string[]; filters: Filters }
 
 const MAX_DISLIKED = 5000
 
@@ -79,6 +82,14 @@ function reducer(state: State, action: Action): State {
       return { ...state, disliked: [], lastAction: null }
     case 'clearAll':
       return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, lastAction: null }
+    case 'hydrate':
+      return {
+        ...state,
+        wishlist: action.wishlist,
+        disliked: action.disliked.slice(-MAX_DISLIKED),
+        filters: { ...DEFAULT_FILTERS, ...action.filters },
+        lastAction: null,
+      }
   }
 }
 
@@ -94,6 +105,8 @@ function useAppStore() {
   useEffect(() => save('filters:v2', state.filters), [state.filters])
   useEffect(() => save('wishlist', state.wishlist), [state.wishlist])
   useEffect(() => save('disliked', state.disliked), [state.disliked])
+
+  const sync = useCloudSync(state, dispatch)
 
   const reloadCatalog = useCallback((signal?: AbortSignal) => {
     dispatch({ type: 'catalog', catalog: { status: 'loading' } })
@@ -148,7 +161,58 @@ function useAppStore() {
     [reloadCatalog],
   )
 
-  return { state, products, deck, wishlist, actions }
+  return { state, products, deck, wishlist, actions, sync }
+}
+
+export type SyncStatus = 'off' | 'loading' | 'synced' | 'saving' | 'error'
+
+/**
+ * Con un account: all'accesso unisce i dati del dispositivo a quelli salvati online,
+ * poi salva ogni modifica (con un piccolo ritardo per raggruppare gli swipe).
+ */
+function useCloudSync(state: State, dispatch: (a: Action) => void): SyncStatus {
+  const { user } = useAuth()
+  const userId = user?.id ?? null
+  const [status, setStatus] = useState<SyncStatus>('loading')
+  const hydratedFor = useRef<string | null>(null)
+  const stateRef = useRef(state)
+  useEffect(() => {
+    stateRef.current = state
+  })
+
+  useEffect(() => {
+    hydratedFor.current = null
+    if (!userId) return
+    let cancelled = false
+    fetchUserData(userId)
+      .then(async (remote) => {
+        if (cancelled) return
+        const { wishlist, disliked, filters } = stateRef.current
+        const merged = mergeUserData({ wishlist, disliked, filters }, remote)
+        dispatch({ type: 'hydrate', ...merged })
+        hydratedFor.current = userId
+        await saveUserData(userId, merged)
+        if (!cancelled) setStatus('synced')
+      })
+      .catch(() => !cancelled && setStatus('error'))
+    return () => {
+      cancelled = true
+      setStatus('loading')
+    }
+  }, [userId, dispatch])
+
+  useEffect(() => {
+    if (!userId || hydratedFor.current !== userId) return
+    const timer = setTimeout(() => {
+      setStatus('saving')
+      saveUserData(userId, { wishlist: state.wishlist, disliked: state.disliked, filters: state.filters })
+        .then(() => setStatus('synced'))
+        .catch(() => setStatus('error'))
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [userId, state.wishlist, state.disliked, state.filters])
+
+  return userId ? status : 'off'
 }
 
 type Store = ReturnType<typeof useAppStore>
