@@ -6,13 +6,11 @@ export function BrandPicker({
   brands,
   selected,
   onToggle,
-  onClear,
 }: {
   /** Ordinate dalla più presente */
   brands: string[]
   selected: string[]
   onToggle: (brand: string) => void
-  onClear: () => void
 }) {
   const [query, setQuery] = useState('')
   const [showAll, setShowAll] = useState(false)
@@ -62,11 +60,6 @@ export function BrandPicker({
         {!q && brands.length > 16 && (
           <button type="button" onClick={() => setShowAll(!showAll)} className="text-neutral-600 underline underline-offset-4">
             {showAll ? 'Mostra meno' : `Mostra tutte (${brands.length})`}
-          </button>
-        )}
-        {selected.length > 0 && (
-          <button type="button" onClick={onClear} className="inline-flex items-center gap-1 text-rose-600">
-            <X className="size-4" /> Tutte le marche
           </button>
         )}
       </div>

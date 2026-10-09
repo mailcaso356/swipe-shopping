@@ -9,6 +9,9 @@ import { activeFilterCount, facetValues, matchesFilters } from '../lib/filters'
 import { useApp } from '../state/AppState'
 import { DEFAULT_FILTERS, type Filters } from '../types/product'
 
+/** "Escludi tutto" per marche e colori: nessun prodotto ha questo valore, quindi tutto è rosso. */
+const NONE = 'nessuno'
+
 /** Verde/rosso: lista vuota = tutto incluso (tutto verde). */
 const isIn = <T,>(list: T[], value: T) => list.length === 0 || list.includes(value)
 
@@ -123,38 +126,29 @@ export function FiltersPage() {
       </Section>
 
       <Section title="Categorie">
-        <div className="flex gap-2">
-          <button type="button" onClick={() => setCategories([])} className="flex-1 rounded-full bg-emerald-600 py-2 text-sm font-semibold text-[#fff] active:scale-95">
-            Seleziona tutto
-          </button>
-          <button type="button" onClick={() => setCategories([NO_CATEGORY])} className="flex-1 rounded-full bg-red-600 py-2 text-sm font-semibold text-[#fff] active:scale-95">
-            Deseleziona tutto
-          </button>
-        </div>
         <div className="space-y-4">
           {groupsOf(state.mode).map((group) => {
             const ids = group.items.map((i) => i.id) as CategoryId[]
             const all = ids.every(categoryIn)
+            const none = !ids.some(categoryIn)
             const current = f.categories.includes(NO_CATEGORY) ? [] : f.categories.length === 0 ? allCategories : f.categories
             return (
               <div key={group.id} className="space-y-2">
-                {ids.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCategories(all ? (current.filter((c) => !ids.includes(c)).length ? current.filter((c) => !ids.includes(c)) : [NO_CATEGORY]) : [...new Set([...current, ...ids])])
-                    }
-                    className="flex items-center gap-2 text-sm font-semibold"
-                  >
-                    <span aria-hidden>{group.emoji}</span> {group.label}
-                    <span className="text-xs font-normal text-neutral-400">{all ? 'deseleziona' : 'seleziona tutte'}</span>
-                  </button>
-                ) : (
-                  // Gruppo con una sola voce (es. Profumi): basta il chip, il titolo non è un pulsante.
-                  <p className="flex items-center gap-2 text-sm font-semibold">
+                <div className="flex items-center gap-2">
+                  <p className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold">
                     <span aria-hidden>{group.emoji}</span> {group.label}
                   </p>
-                )}
+                  {/* Includi/escludi tutto il gruppo (es. tutte le scarpe) */}
+                  <AllNone
+                    all={all}
+                    none={none}
+                    onAll={() => setCategories([...new Set([...current, ...ids])])}
+                    onNone={() => {
+                      const rest = current.filter((c) => !ids.includes(c))
+                      setCategories(rest.length ? rest : [NO_CATEGORY])
+                    }}
+                  />
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {group.items.map((item) => (
                     <Chip
@@ -173,12 +167,21 @@ export function FiltersPage() {
       </Section>
 
       {facets.brands.length > 0 && (
-        <Section title="Marca">
+        <Section
+          title="Marca"
+          actions={
+            <AllNone
+              all={f.brands.length === 0}
+              none={f.brands.includes(NONE)}
+              onAll={() => set({ brands: [] })}
+              onNone={() => set({ brands: [NONE] })}
+            />
+          }
+        >
           <BrandPicker
             brands={facets.brands}
             selected={f.brands}
             onToggle={(v) => set({ brands: flipKeepOne(f.brands, v, facets.brands) })}
-            onClear={() => set({ brands: [] })}
           />
         </Section>
       )}
@@ -186,7 +189,17 @@ export function FiltersPage() {
         <ChipSection title="Taglia" values={facets.sizes} selected={f.sizes} onToggle={(v) => set({ sizes: flipKeepOne(f.sizes, v, facets.sizes) })} />
       )}
       {!tech && facets.colors.length > 0 && (
-        <Section title="Colore">
+        <Section
+          title="Colore"
+          actions={
+            <AllNone
+              all={f.colors.length === 0}
+              none={f.colors.includes(NONE)}
+              onAll={() => set({ colors: [] })}
+              onNone={() => set({ colors: [NONE] })}
+            />
+          }
+        >
           <div className="flex flex-wrap gap-2">
             {facets.colors.map((c) => (
               <Chip key={c} active={isIn(f.colors, c)} onClick={() => set({ colors: flipKeepOne(f.colors, c, facets.colors) })}>
@@ -221,15 +234,42 @@ export function FiltersPage() {
   )
 }
 
-function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
+function Section({ title, hint, actions, children }: { title: string; hint?: string; actions?: ReactNode; children: ReactNode }) {
   return (
     <section className="space-y-3">
-      <div>
-        <h2 className="font-semibold">{title}</h2>
-        {hint && <p className="text-xs text-neutral-500">{hint}</p>}
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <h2 className="font-semibold">{title}</h2>
+          {hint && <p className="text-xs text-neutral-500">{hint}</p>}
+        </div>
+        {actions}
       </div>
       {children}
     </section>
+  )
+}
+
+/** Pulsanti verde/rosso "Includi tutto" e "Escludi tutto" per un gruppo di filtri. */
+function AllNone({ all, none, onAll, onNone }: { all: boolean; none: boolean; onAll: () => void; onNone: () => void }) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onAll}
+        disabled={all}
+        className="shrink-0 rounded-full bg-[#dcfce7] px-2.5 py-1 text-xs whitespace-nowrap font-semibold text-[#166534] ring-1 ring-[#22c55e] active:scale-95 disabled:opacity-40"
+      >
+        Includi tutto
+      </button>
+      <button
+        type="button"
+        onClick={onNone}
+        disabled={none}
+        className="shrink-0 rounded-full bg-[#fee2e2] px-2.5 py-1 text-xs whitespace-nowrap font-semibold text-[#991b1b] ring-1 ring-[#ef4444] active:scale-95 disabled:opacity-40"
+      >
+        Escludi tutto
+      </button>
+    </>
   )
 }
 

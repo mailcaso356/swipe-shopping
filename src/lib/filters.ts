@@ -88,7 +88,7 @@ export function facetValues(products: Product[]) {
  * come per le marche: il filtro conta solo quando restringe davvero.
  */
 export function normalizeFilters(f: Filters): Filters {
-  // "Deseleziona tutto": nessuna categoria inclusa, resta così finché l'utente non ne riaccende una.
+  // "Escludi tutto": nessuna categoria inclusa, resta così finché l'utente non ne riaccende una.
   if (f.categories.includes(NO_CATEGORY)) return { ...stripOld(f), categories: [NO_CATEGORY] }
   const unique = [...new Set(f.categories.filter(isCategoryId))]
   // Tutte le categorie della sezione (moda o tech) = nessun filtro.
