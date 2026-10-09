@@ -42,7 +42,7 @@ export function PrivacyPage() {
             piace e migliorare l'app.
           </li>
           <li>
-            <strong>Avvisi di prezzo:</strong> se hai un account, quando un tuo preferito costa meno ti scriviamo al massimo
+            <strong>Avvisi di prezzo:</strong> se hai un account, quando un tuo preferito è in offerta ti scriviamo al massimo
             un'email ogni 3 giorni. Puoi spegnerli in ogni momento dal Profilo.
           </li>
           <li>

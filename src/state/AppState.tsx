@@ -4,7 +4,7 @@ import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
 import { matchesFilters, normalizeFilters, sortProducts } from '../lib/filters'
 import { setNewBaseline } from '../lib/newness'
-import { priceDrop } from '../lib/price'
+import { discountBadge } from '../lib/price'
 import { sharedProductId } from '../lib/share'
 import { load, save } from '../lib/storage'
 import { DEFAULT_FILTERS, type Filters, type Product } from '../types/product'
@@ -45,6 +45,10 @@ type Action =
 
 const MAX_DISLIKED = 5000
 
+/** Copia salvata nei preferiti senza prezzi: i prezzi si leggono sempre dal catalogo aggiornato. */
+const snapshot = ({ price: _p, originalPrice: _o, priceCheckedAt: _c, priceFrom: _f, ...rest }: Product): Product => rest
+const stripPrices = (list: WishItem[]) => list.map((w) => ({ ...w, product: snapshot(w.product) }))
+
 /** Seme personale per l'ordine "Consigliati": stabile tra una visita e l'altra. */
 const MIX_SEED = (() => {
   const existing = load<string>('mixSeed', '')
@@ -62,7 +66,7 @@ function reducer(state: State, action: Action): State {
       if (state.wishlist.some((w) => w.product.id === action.product.id)) return state
       return {
         ...state,
-        wishlist: [{ product: action.product, savedAt: Date.now() }, ...state.wishlist],
+        wishlist: [{ product: snapshot(action.product), savedAt: Date.now() }, ...state.wishlist],
         lastAction: { type: 'like', product: action.product },
       }
     case 'dislike':
@@ -102,7 +106,7 @@ function reducer(state: State, action: Action): State {
     case 'hydrate':
       return {
         ...state,
-        wishlist: action.wishlist,
+        wishlist: stripPrices(action.wishlist),
         disliked: action.disliked.slice(-MAX_DISLIKED),
         filters: normalizeFilters({ ...DEFAULT_FILTERS, ...action.filters }),
         lastAction: null,
@@ -114,7 +118,7 @@ function useAppStore() {
   const [state, dispatch] = useReducer(reducer, undefined, (): State => ({
     catalog: { status: 'loading' },
     filters: normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>('filters:v2', {}) }),
-    wishlist: load<WishItem[]>('wishlist', []),
+    wishlist: stripPrices(load<WishItem[]>('wishlist', [])),
     disliked: load<string[]>('disliked', []),
     lastAction: null,
   }))
@@ -169,21 +173,21 @@ function useAppStore() {
         ...w,
         product: current ?? w.product,
         inCatalog: !!current,
-        /** Prezzo sceso rispetto a quando è stato salvato */
-        drop: current && current.availability !== 'out_of_stock' ? priceDrop(w.product, current) : null,
+        /** Sconto attuale sul negozio (non confrontiamo con prezzi vecchi: Amazon non lo consente) */
+        deal: current && current.availability !== 'out_of_stock' ? discountBadge(current) : null,
       }
     })
   }, [products, state.wishlist])
 
-  /** Cali di prezzo già visti nella pagina Preferiti: id → prezzo visto */
-  const [seenDrops, setSeenDrops] = useState(() => load<Record<string, number>>('priceDropsSeen', {}))
-  const unseenDrops = wishlist.filter((w) => w.drop && seenDrops[w.product.id] !== w.drop.now).length
-  const markDropsSeen = useCallback(() => {
-    setSeenDrops((prev) => {
+  /** Offerte sui preferiti già viste nella pagina Preferiti: id → sconto visto */
+  const [seenDeals, setSeenDeals] = useState(() => load<Record<string, number>>('dealsSeen', {}))
+  const unseenDeals = wishlist.filter((w) => w.deal !== null && seenDeals[w.product.id] !== w.deal).length
+  const markDealsSeen = useCallback(() => {
+    setSeenDeals((prev) => {
       const next: Record<string, number> = {}
-      for (const w of wishlist) if (w.drop) next[w.product.id] = w.drop.now
+      for (const w of wishlist) if (w.deal !== null) next[w.product.id] = w.deal
       if (Object.keys(next).every((id) => prev[id] === next[id]) && Object.keys(prev).length === Object.keys(next).length) return prev
-      save('priceDropsSeen', next)
+      save('dealsSeen', next)
       return next
     })
   }, [wishlist])
@@ -217,7 +221,7 @@ function useAppStore() {
     [reloadCatalog],
   )
 
-  return { state, products, deck, wishlist, actions, sync, unseenDrops, markDropsSeen }
+  return { state, products, deck, wishlist, actions, sync, unseenDeals, markDealsSeen }
 }
 
 export type SyncStatus = 'off' | 'loading' | 'synced' | 'saving' | 'error'

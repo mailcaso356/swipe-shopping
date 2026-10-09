@@ -1,6 +1,6 @@
-name: Email di prova "prezzo sceso"
+name: Email di prova "preferito in offerta"
 
-# Manda un'email di esempio (2 preferiti scesi di prezzo) all'indirizzo indicato.
+# Manda un'email di esempio (2 preferiti in offerta) all'indirizzo indicato.
 on:
   workflow_dispatch:
     inputs:

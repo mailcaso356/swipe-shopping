@@ -42,7 +42,7 @@ jobs:
           git commit -m "Catalogo aggiornato da Amazon"
           git pull --rebase origin main
           git push origin HEAD:main
-      - name: Avvisa via email chi ha un preferito sceso di prezzo
+      - name: Avvisa via email chi ha un preferito in offerta
         run: npm run alerts:price
         continue-on-error: true
         env:

@@ -20,19 +20,6 @@ export function freshPrice(p: Product, now = Date.now()) {
   }
 }
 
-/**
- * Calo di prezzo di un preferito: confronta il prezzo di quando è stato salvato con quello attuale
- * (solo se attuale è verificato di recente). Ignora variazioni minime.
- */
-export function priceDrop(saved: Product, current: Product, now = Date.now()) {
-  const fresh = freshPrice(current, now)
-  if (!fresh || saved.price === undefined || !saved.priceCheckedAt) return null
-  if ((saved.priceFrom === true) !== fresh.from) return null
-  const diff = saved.price - fresh.price
-  if (diff < 1 || diff / saved.price < 0.03) return null
-  return { was: saved.price, now: fresh.price, pct: Math.round((diff / saved.price) * 100) }
-}
-
 /** Sconto da mostrare come badge sulla foto (sotto il 5% non vale la pena). */
 export function discountBadge(p: Product) {
   const pct = freshPrice(p)?.discountPct

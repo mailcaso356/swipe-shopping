@@ -1,4 +1,4 @@
-import { Folder, FolderInput, Heart, Trash2, TrendingDown } from 'lucide-react'
+import { BadgePercent, Folder, FolderInput, Heart, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { FolderPicker } from '../components/FolderPicker'
 import { NewBadge } from '../components/NewBadge'
@@ -9,7 +9,7 @@ import { ProductImage } from '../components/ProductImage'
 import { StoreLink } from '../components/StoreLink'
 import { AMAZON_DISCLOSURE } from '../config/app'
 import { storeName } from '../config/stores'
-import { discountBadge, formatPrice, freshPrice } from '../lib/price'
+import { discountBadge, freshPrice } from '../lib/price'
 import { openProduct } from '../lib/productSheet'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
@@ -20,8 +20,8 @@ type WishSort = 'recenti' | 'prezzo_asc' | 'prezzo_desc' | 'sconto'
 const priceOf = (p: Product) => freshPrice(p)?.price
 
 export function WishlistPage() {
-  const { wishlist, actions, markDropsSeen } = useApp()
-  const drops = wishlist.filter((w) => w.drop).length
+  const { wishlist, actions, markDealsSeen } = useApp()
+  const deals = wishlist.filter((w) => w.deal !== null).length
   const [folder, setFolder] = useState<string | null>(null)
   const [sort, setSort] = useState<WishSort>('recenti')
   const [moving, setMoving] = useState<Product | null>(null)
@@ -51,7 +51,7 @@ export function WishlistPage() {
   }, [wishlist, current, sort])
 
   // Aprendo i Preferiti l'avviso sul menu si spegne (l'etichetta sulle card resta).
-  useEffect(() => markDropsSeen(), [markDropsSeen])
+  useEffect(() => markDealsSeen(), [markDealsSeen])
 
   if (wishlist.length === 0) {
     return (
@@ -72,12 +72,10 @@ export function WishlistPage() {
         <h1 className="text-2xl font-bold">Preferiti</h1>
         <span className="text-sm text-neutral-500">{wishlist.length} prodotti</span>
       </div>
-      {drops > 0 && (
+      {deals > 0 && (
         <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 ring-1 ring-emerald-200">
-          <TrendingDown className="size-5 shrink-0" />
-          {drops === 1
-            ? 'Un tuo preferito costa meno di quando l\'hai salvato!'
-            : `${drops} preferiti costano meno di quando li hai salvati!`}
+          <BadgePercent className="size-5 shrink-0" />
+          {deals === 1 ? 'Un tuo preferito è in offerta!' : `${deals} preferiti sono in offerta!`}
         </p>
       )}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
@@ -126,7 +124,7 @@ export function WishlistPage() {
         </select>
       </div>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {shown.map(({ product, inCatalog, drop, folder: itemFolder }) => {
+        {shown.map(({ product, inCatalog, folder: itemFolder }) => {
           const unavailable = product.availability === 'out_of_stock' || !inCatalog
           return (
             <li key={product.id} className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
@@ -176,13 +174,7 @@ export function WishlistPage() {
                 </p>
                 <h3 className="line-clamp-2 text-sm leading-snug font-medium">{product.title}</h3>
                 <div className="mt-auto pt-1">
-                  {drop && (
-                    <p className="mb-1 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
-                      <TrendingDown className="size-3.5" /> Sceso del {drop.pct}%
-                    </p>
-                  )}
                   <PriceTag product={product} />
-                  {drop && <p className="text-[11px] text-neutral-500">Quando l'hai salvato: {formatPrice(drop.was)}</p>}
                 </div>
                 <StoreLink
                   product={product}

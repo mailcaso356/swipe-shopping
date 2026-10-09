@@ -1,6 +1,8 @@
-// Email "prezzo sceso": avvisa chi ha un preferito che oggi costa meno di quando l'ha salvato.
+// Email "preferito in offerta": avvisa chi ha un preferito che oggi è scontato sul negozio.
+// Non confrontiamo con prezzi vecchi: le regole Amazon non permettono di conservarli oltre 24 ore.
 // Gira su GitHub Actions dopo l'aggiornamento del catalogo. Regole:
-// - al massimo un'email ogni 3 giorni per persona, mai due volte per lo stesso calo;
+// - al massimo un'email ogni 3 giorni per persona, mai due volte per la stessa offerta
+//   (di nuovo solo se lo sconto sale di almeno 5 punti, o se l'offerta finisce e poi ritorna);
 // - solo account confermati che non hanno spento gli avvisi dal Profilo;
 // - niente link affiliati, prezzi o testi Amazon nell'email (regole Amazon Associates):
 //   l'email porta all'app, dove il prezzo aggiornato si vede accanto al prodotto.
@@ -30,27 +32,25 @@ if (TEST_TO === undefined && (!SUPABASE_SERVICE_ROLE_KEY || (!RESEND_API_KEY && 
 interface Product {
   id: string
   price?: number
-  priceFrom?: boolean
+  originalPrice?: number
   priceCheckedAt?: string
   availability?: string
 }
 interface WishItem {
-  product: Product
+  product: { id: string }
 }
 
 const catalog = JSON.parse(readFileSync(new URL('../public/catalog.json', import.meta.url), 'utf8')) as Product[]
 const byId = new Map(catalog.map((p) => [p.id, p]))
 const now = Date.now()
 
-/** Prezzo attuale se è sceso di almeno 1 € e del 3% rispetto a quando è stato salvato (stesse regole dell'app). */
-function droppedPrice(saved: Product) {
-  const current = byId.get(saved.id)
-  if (!current || current.availability === 'out_of_stock') return null
-  if (current.price === undefined || !current.priceCheckedAt || saved.price === undefined || !saved.priceCheckedAt) return null
-  if (now - Date.parse(current.priceCheckedAt) > PRICE_MAX_AGE_MS) return null
-  if ((saved.priceFrom === true) !== (current.priceFrom === true)) return null
-  const diff = saved.price - current.price
-  return diff >= 1 && diff / saved.price >= 0.03 ? current.price : null
+/** Sconto attuale in % (almeno 5%, prezzo verificato nelle ultime 24 ore), come il badge dell'app. */
+function currentDeal(id: string) {
+  const p = byId.get(id)
+  if (!p || p.availability === 'out_of_stock' || p.price === undefined || !p.originalPrice || !p.priceCheckedAt) return null
+  if (now - Date.parse(p.priceCheckedAt) > PRICE_MAX_AGE_MS || p.originalPrice <= p.price) return null
+  const pct = Math.round((1 - p.price / p.originalPrice) * 100)
+  return pct >= 5 ? pct : null
 }
 
 async function all<T>(table: string, columns: string, filter?: (q: any) => any): Promise<T[]> {
@@ -66,17 +66,17 @@ async function all<T>(table: string, columns: string, filter?: (q: any) => any):
 }
 
 function email(count: number) {
-  const subject = count === 1 ? 'Un tuo preferito ora costa meno' : `${count} tuoi preferiti ora costano meno`
+  const subject = count === 1 ? 'Un tuo preferito è in offerta' : `${count} tuoi preferiti sono in offerta`
   const intro =
     count === 1
-      ? 'Il prezzo di un prodotto che hai salvato è sceso da quando l’hai messo nei preferiti.'
-      : `Il prezzo di ${count} prodotti che hai salvato è sceso da quando li hai messi nei preferiti.`
+      ? 'Uno dei prodotti che hai salvato nei preferiti adesso è scontato.'
+      : `${count} prodotti che hai salvato nei preferiti adesso sono scontati.`
   const link = `${APP_URL}/#/preferiti`
   const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f5f5f5;padding:32px 16px">
   <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:20px;padding:32px 28px;text-align:center">
     <img src="${APP_URL}/icons/icon-192.png" width="72" height="72" alt="Swipe Shopping" style="border-radius:16px">
     <h1 style="font-size:22px;color:#171717;margin:20px 0 8px">${subject}</h1>
-    <p style="font-size:15px;line-height:1.5;color:#525252;margin:0 0 24px">${intro} Aprili nell’app per vedere il prezzo aggiornato prima che cambi.</p>
+    <p style="font-size:15px;line-height:1.5;color:#525252;margin:0 0 24px">${intro} Aprili nell’app per vedere lo sconto prima che finisca.</p>
     <a href="${link}" style="display:inline-block;background:#f43f5e;color:#fff;text-decoration:none;font-weight:600;font-size:16px;padding:14px 28px;border-radius:999px">Vedi i miei preferiti</a>
     <p style="font-size:12px;line-height:1.5;color:#a3a3a3;margin:28px 0 0">Ricevi questa email perché hai un account su Swipe Shopping. Ti scriviamo al massimo ogni 3 giorni.<br><a href="${APP_URL}/#/profilo" style="color:#a3a3a3">Non voglio più questi avvisi</a></p>
   </div>
@@ -122,17 +122,24 @@ let sent = 0
 let failed = 0
 for (const u of users) {
   const log = sentLog.get(u.user_id)
-  if (log?.last_sent_at && now - Date.parse(log.last_sent_at) < MIN_GAP_MS) continue
-  const notified = { ...(log?.notified ?? {}) }
+  // Offerte già segnalate: id → sconto %. Le offerte finite si dimenticano, così se tornano si avvisa di nuovo.
+  const before: Record<string, number> = (log?.notified as { deals?: Record<string, number> } | undefined)?.deals ?? {}
+  const active: Record<string, number> = {}
   const fresh: Record<string, number> = {}
   for (const w of Array.isArray(u.wishlist) ? u.wishlist : []) {
-    const price = w?.product?.id ? droppedPrice(w.product) : null
-    // Già avvisato a questo prezzo (o più basso): aspetto un nuovo calo di almeno 1 €.
-    if (price === null || (notified[w.product.id] !== undefined && price > notified[w.product.id] - 1)) continue
-    fresh[w.product.id] = price
+    const id = w?.product?.id
+    const pct = id ? currentDeal(id) : null
+    if (!id || pct === null) continue
+    if (before[id] !== undefined) active[id] = before[id]
+    if (before[id] === undefined || pct >= before[id] + 5) fresh[id] = pct
   }
+  const forgotten = Object.keys(before).some((id) => active[id] === undefined)
+  const waiting = log?.last_sent_at && now - Date.parse(log.last_sent_at) < MIN_GAP_MS
   const count = Object.keys(fresh).length
-  if (count === 0) continue
+  if (count === 0 || waiting) {
+    if (forgotten && log) await db.from('price_alerts').update({ notified: { deals: active } }).eq('user_id', u.user_id)
+    continue
+  }
 
   const { data, error } = await db.auth.admin.getUserById(u.user_id)
   const to = data?.user?.email
@@ -148,10 +155,10 @@ for (const u of users) {
   }
   const { error: upsertError } = await db
     .from('price_alerts')
-    .upsert({ user_id: u.user_id, last_sent_at: new Date().toISOString(), notified: { ...notified, ...fresh } })
+    .upsert({ user_id: u.user_id, last_sent_at: new Date().toISOString(), notified: { deals: { ...active, ...fresh } } })
   if (upsertError) console.log(`::warning::price_alerts: ${upsertError.message}`)
   sent++
   await new Promise((r) => setTimeout(r, 600)) // Resend: max 2 richieste al secondo
 }
 
-console.log(`Avvisi prezzo: ${sent} email inviate${failed ? `, ${failed} non riuscite` : ''} (${users.length} account con avvisi attivi).`)
+console.log(`Avvisi offerte: ${sent} email inviate${failed ? `, ${failed} non riuscite` : ''} (${users.length} account con avvisi attivi).`)

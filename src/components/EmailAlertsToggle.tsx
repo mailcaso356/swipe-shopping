@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../state/AuthState'
 
-/** Preferenza "avvisami via email quando un preferito cala di prezzo" (colonna user_data.email_alerts). */
+/** Preferenza "avvisami via email quando un preferito è in offerta" (colonna user_data.email_alerts). */
 export function EmailAlertsToggle() {
   const { user } = useAuth()
   const userId = user?.id
@@ -42,7 +42,7 @@ export function EmailAlertsToggle() {
     <div>
       <label className="flex items-center justify-between gap-4">
         <span>
-          Avvisami via email quando un preferito cala di prezzo
+          Avvisami via email quando un preferito è in offerta
           <span className="block text-xs text-neutral-500">Al massimo un'email ogni 3 giorni.</span>
         </span>
         <input
