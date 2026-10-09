@@ -150024,21 +150024,6 @@
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
-  "id": "amazon:B0C1JNGBWT",
-  "store": "amazon",
-  "externalId": "B0C1JNGBWT",
-  "title": "Kobo Sleepcover Nera ELIPSA 2E",
-  "brand": "Kobo",
-  "gender": "unisex",
-  "category": "ereader",
-  "imageUrl": "https://m.media-amazon.com/images/I/31xn436T8FL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 67,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
   "id": "amazon:B0F2FKY2SR",
   "store": "amazon",
   "externalId": "B0F2FKY2SR",
@@ -150356,21 +150341,6 @@
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
-  "id": "amazon:B07FTJM482",
-  "store": "amazon",
-  "externalId": "B07FTJM482",
-  "title": "Radiocomando DJI RC-N3",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/31HnMQzdsjL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 119,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
   "id": "amazon:B00WAGS478",
   "store": "amazon",
   "externalId": "B00WAGS478",
@@ -150383,21 +150353,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 399,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0DHLJ3576",
-  "store": "amazon",
-  "externalId": "B0DHLJ3576",
-  "title": "DJI Goggles N3, FPV Goggles con schermo ultra ampio da 1080p, esperienza di volo immersiva, visore per drone FPV, dirette senza fili, visore per drone, kit pronto all'uso, cursore AR",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/41-FQkAtz6L._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 269,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
@@ -150476,22 +150431,6 @@
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
-  "id": "amazon:B09ZP3GZSN",
-  "store": "amazon",
-  "externalId": "B09ZP3GZSN",
-  "title": "DJI Radiocommande RC pour Dji Mini 3,Mavic 3 et Air 2S",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/31O+LehBw7L._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 220.64,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z",
-  "originalPrice": 288.84
- },
- {
   "id": "amazon:B01645FNDS",
   "store": "amazon",
   "externalId": "B01645FNDS",
@@ -150504,36 +150443,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 454,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0CS6JCX2W",
-  "store": "amazon",
-  "externalId": "B0CS6JCX2W",
-  "title": "Telecomando DJI FPV3",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/31uvVR5OdGL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 149,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B08SC8MVB1",
-  "store": "amazon",
-  "externalId": "B08SC8MVB1",
-  "title": "DJI FPV Goggles V2, Senza Drone, Visore Pilotaggio Drone, Trasmissione Immagini in Alta Definizione, Visore Realtà Aumentata per Controllo Drone a Distanza, Multi-Antenna per Trasmissione Istantanea",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/31yEWuoDx7L._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 872.52,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
@@ -150594,51 +150503,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 1400,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B077SZYQX7",
-  "store": "amazon",
-  "externalId": "B077SZYQX7",
-  "title": "DJI Goggles Occhiali VR Racing Edition, Visore Racing ad Alte Prestazioni 1920 x 1080 HD, 2 Schermi HD, Head Tracking Video Fpv, Ottimali per Corse di Droni, 3 Antenne, Nero",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/41C-CaJIkTL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 180,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0F9XHYNZL",
-  "store": "amazon",
-  "externalId": "B0F9XHYNZL",
-  "title": "DJI RC Plus 2 Enterprise - Telecomando per droni - 7.02\\",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/31wn+7XZNlL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 1450,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B09J13ZXGH",
-  "store": "amazon",
-  "externalId": "B09J13ZXGH",
-  "title": "DJI RC Pro - telecomando ad alte prestazioni per DJI Mavic 3/3 Pro e DJI Air 2S, schermo luminoso 1080p, raggio di trasmissione di 15 km, ideale per uso esterno e fotografia aerea di alta qualità",
-  "brand": "DJI",
-  "gender": "unisex",
-  "category": "droni",
-  "imageUrl": "https://m.media-amazon.com/images/I/31cWSj2+4iL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 1094.95,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
@@ -151652,21 +151516,6 @@
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
-  "id": "amazon:B0CP8B97H3",
-  "store": "amazon",
-  "externalId": "B0CP8B97H3",
-  "title": "AOC AM420B Supporto Monitor PC, NO USB HUB 2, Double",
-  "brand": "AOC",
-  "gender": "unisex",
-  "category": "monitor",
-  "imageUrl": "https://m.media-amazon.com/images/I/21BhXxbECDL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 116.46,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
   "id": "amazon:B00DBRPKQI",
   "store": "amazon",
   "externalId": "B00DBRPKQI",
@@ -151892,36 +151741,6 @@
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
-  "id": "amazon:B0CZ9P1QW9",
-  "store": "amazon",
-  "externalId": "B0CZ9P1QW9",
-  "title": "BenQ ScreenBar Pro LED Lampada da Monitor (nero)/Illuminazione ampia/Sensore di movimento/Luminosità e temperatura colore regolabili/Protezione occhi/Nessun riflesso/Salvaspazio/Monitor curvi/USB-C",
-  "brand": "BenQ",
-  "gender": "unisex",
-  "category": "monitor",
-  "imageUrl": "https://m.media-amazon.com/images/I/31TCF39+s3L._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 154.85,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0FBWCZFWQ",
-  "store": "amazon",
-  "externalId": "B0FBWCZFWQ",
-  "title": "BenQ BSH02 Ergo braccio con a supporto monitor per schermi fino a 45''&20kg",
-  "brand": "BenQ",
-  "gender": "unisex",
-  "category": "monitor",
-  "imageUrl": "https://m.media-amazon.com/images/I/31K78BY+MML._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 139,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
   "id": "amazon:B00P8UFBA6",
   "store": "amazon",
   "externalId": "B00P8UFBA6",
@@ -151979,21 +151798,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 416,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0CZ94MB2R",
-  "store": "amazon",
-  "externalId": "B0CZ94MB2R",
-  "title": "BenQ ScreenBar Pro LED Lampada da Monitor (argento)/Illuminazione ampia/Sensore di movimento/Luminosità e temperatura colore regolabili/Protezione occhi/Nessun riflesso/Salvaspazio/Monitor curvi/USB-C",
-  "brand": "BenQ",
-  "gender": "unisex",
-  "category": "monitor",
-  "imageUrl": "https://m.media-amazon.com/images/I/31HcuEiiLjL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 139,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
@@ -152219,36 +152023,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 275.63,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0H3LZS416",
-  "store": "amazon",
-  "externalId": "B0H3LZS416",
-  "title": "MSI MPG MT201DRG - Braccio doppio per monitor, monitor da 17\" a 35\", braccio con molla a gas, 20 kg per capacità schermo, compatibile VESA, Full motion, LED RGB, morsetto e passacavo, piastra a",
-  "brand": "MSI",
-  "gender": "unisex",
-  "category": "monitor",
-  "imageUrl": "https://m.media-amazon.com/images/I/31inJDuUUBL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 254.44,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0D4B57XR7",
-  "store": "amazon",
-  "externalId": "B0D4B57XR7",
-  "title": "MSI MAG MT201D - Braccio doppio per monitor di alta qualità, resistente, supporto da 17-45\", compatibile VESA, montaggio a molla regolabile, 20 kg per schermo, morsetto e occhiello, piastra a sgancio",
-  "brand": "MSI",
-  "gender": "unisex",
-  "category": "monitor",
-  "imageUrl": "https://m.media-amazon.com/images/I/3143+M2TFoL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 173.15,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
@@ -152947,22 +152721,6 @@
   "originalPrice": 89.9
  },
  {
-  "id": "amazon:B08QSNNV5H",
-  "store": "amazon",
-  "externalId": "B08QSNNV5H",
-  "title": "Corsair MM700 RGB EXL Tappetino Mouse, Nero",
-  "brand": "Corsair",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/21jaZtkiNNL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 54.9,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z",
-  "originalPrice": 69.99
- },
- {
   "id": "amazon:B0DH8PZM8T",
   "store": "amazon",
   "externalId": "B0DH8PZM8T",
@@ -152992,36 +152750,6 @@
   "price": 99.99,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z",
   "originalPrice": 169.99
- },
- {
-  "id": "amazon:B08JH6MSWK",
-  "store": "amazon",
-  "externalId": "B08JH6MSWK",
-  "title": "Corsair MM200 PRO Tappetino per Mouse, Tessuto Impermeabile di Qualità, Superficie 45 cm x 40 cm, Tessuto in Microtrama, Base Gomma Spessore Elevato 6 mm, Antiscivolo, Pesante XL, Nero",
-  "brand": "Corsair",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/214Lk9M2BPL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 32.5,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0G83YGLV1",
-  "store": "amazon",
-  "externalId": "B0G83YGLV1",
-  "title": "Corsair MM300 L Anti-Fray Tessuto Tappetino Per Mouse Da Gioco – Sci-Fi",
-  "brand": "Corsair",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/310fhex2uWL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 29.99,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
   "id": "amazon:B0D7J5XVXG",
@@ -153084,21 +152812,6 @@
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
-  "id": "amazon:B0G84B7BXF",
-  "store": "amazon",
-  "externalId": "B0G84B7BXF",
-  "title": "Corsair MM300 L Anti-Fray Tappetino Per Mouse Da Gioco – Cherry Blossom",
-  "brand": "Corsair",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/31Dx+GGemAL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 29.99,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
   "id": "amazon:B0DG36PX7P",
   "store": "amazon",
   "externalId": "B0DG36PX7P",
@@ -153141,21 +152854,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 201.08,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B01AKFPPUO",
-  "store": "amazon",
-  "externalId": "B01AKFPPUO",
-  "title": "Corsair MM300 - Tappetino per mouse da gioco in tessuto anti-sfilacciamento, esteso (CH-9000108-WW) [Importazione parallela]",
-  "brand": "Corsair",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/41kt2+NbKPL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 93,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
@@ -153246,21 +152944,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 40.99,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0HC2MLTWL",
-  "store": "amazon",
-  "externalId": "B0HC2MLTWL",
-  "title": "Keychron Set di 2 poggiapolsi in silicone per mouse e tastiera Nape Pro Trackball, poggiapolsi ergonomici con superficie liscia, 11 x 8 x 2 cm, nero",
-  "brand": "Keychron",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/310w+3-hSJL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 26.91,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
@@ -153387,21 +153070,6 @@
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {
-  "id": "amazon:B0CVN5MQ6P",
-  "store": "amazon",
-  "externalId": "B0CVN5MQ6P",
-  "title": "SteelSeries QcK XXL - Tappetino per mouse da gaming - Panno XXL - Tracciamento e stabilità ai massimi livelli - Mousepad per sport - Non scivola mai - Copertura completa della scrivania",
-  "brand": "SteelSeries",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/11Y0VdN03bL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 41.77,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
   "id": "amazon:B0BFFTDQR2",
   "store": "amazon",
   "externalId": "B0BFFTDQR2",
@@ -153433,21 +153101,6 @@
   "originalPrice": 189.99
  },
  {
-  "id": "amazon:B0D1T1HZCC",
-  "store": "amazon",
-  "externalId": "B0D1T1HZCC",
-  "title": "SteelSeries QcK Gaming Mouse Pad – Panno XXL – Monitoraggio del picco e stabilità – Tappetino per mouse Esports – Non scivola, copertura completa della scrivania",
-  "brand": "SteelSeries",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/11z29s4uvKL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 33.67,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
   "id": "amazon:B0B915R3PF",
   "store": "amazon",
   "externalId": "B0B915R3PF",
@@ -153460,66 +153113,6 @@
   "addedAt": "2026-10-09T18:31:49.112Z",
   "source": "ricerca",
   "price": 145.72,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0H9SSJZM4",
-  "store": "amazon",
-  "externalId": "B0H9SSJZM4",
-  "title": "SteelSeries QcK Tappetino mouse gaming in tessuto XXL — Edizione limitata Topographic",
-  "brand": "SteelSeries",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/31Og45wWvyL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 44.99,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0H9SX53RP",
-  "store": "amazon",
-  "externalId": "B0H9SX53RP",
-  "title": "SteelSeries QcK Tappetino mouse gaming in tessuto Large — Edizione limitata Topographic",
-  "brand": "SteelSeries",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/41BR6lpC7OL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 29.99,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0H9SVSFWR",
-  "store": "amazon",
-  "externalId": "B0H9SVSFWR",
-  "title": "SteelSeries QcK Tappetino mouse gaming in tessuto XXL — Edizione limitata Neon Sunset",
-  "brand": "SteelSeries",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/41VL0JsTowL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 44.99,
-  "priceCheckedAt": "2026-10-09T18:31:49.112Z"
- },
- {
-  "id": "amazon:B0H9TBDQN4",
-  "store": "amazon",
-  "externalId": "B0H9TBDQN4",
-  "title": "SteelSeries QcK Tappetino mouse gaming in tessuto Large — Edizione limitata Neon Sunset",
-  "brand": "SteelSeries",
-  "gender": "unisex",
-  "category": "tastiere_mouse",
-  "imageUrl": "https://m.media-amazon.com/images/I/41AbhFzjhGL._SL500_.jpg",
-  "availability": "in_stock",
-  "addedAt": "2026-10-09T18:31:49.112Z",
-  "source": "ricerca",
-  "price": 29.99,
   "priceCheckedAt": "2026-10-09T18:31:49.112Z"
  },
  {

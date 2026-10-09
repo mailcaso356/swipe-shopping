@@ -77,10 +77,15 @@ const JUNK: Record<string, RegExp[]> = {
   ],
   videogiochi: [/\b(?:fc points|punti fc|v-?bucks|gift ?card|carta regalo|abbonamento)\b/i],
   accessori_gaming: [/\b(?:ram|ddr[345]|alimentatore|psu|ssd|scheda (?:video|madre)|processore|dissipatore|ventola)\b/i],
-  ereader: [startsWith('cover|custodia|pellicola|vetro|caricatore|cavo|supporto|luce'), ACC_FOR],
-  droni: [startsWith('eliche|batteri[ae]|custodia|borsa|zaino|caricatore|caricabatteri[ae]?|filtr[oi]|paraeliche|pellicola', 1), ACC_FOR],
-  monitor: [startsWith('supporto|braccio|staffa|cavo|pellicola|filtro|lampada|adattatore', 1), ACC_FOR],
-  tastiere_mouse: [startsWith('tappetino|mousepad|poggiapolsi|cavo|ricevitore|copritastiera|keycaps?|cover|custodia', 1), ACC_FOR],
+  ereader: [startsWith('cover|custodia|pellicola|vetro|caricatore|cavo|supporto|luce'), ACC_FOR, startsWith('sleep ?cover', 2)],
+  droni: [
+    startsWith('eliche|batteri[ae]|custodia|borsa|zaino|caricatore|caricabatteri[ae]?|filtr[oi]|paraeliche|pellicola', 1),
+    ACC_FOR,
+    // Visori e radiocomandi venduti da soli ("Drone con telecomando" resta: la parola deve stare all'inizio).
+    startsWith('goggles|visore|radiocomand\\w*|radiocommande|telecomando|rc plus|rc pro', 3),
+  ],
+  monitor: [startsWith('supporto|braccio|staffa|cavo|pellicola|filtro|lampada|adattatore', 4), ACC_FOR],
+  tastiere_mouse: [startsWith('cavo|ricevitore|copritastiera|keycaps?|cover|custodia', 1), ACC_FOR, startsWith('tappetino|mouse ?pad|poggiapolsi', 5)],
   profumi: [
     /after ?shave|dopobarba|\bimpacto\b/i,
     /^(?!.*\b(?:eau de|edp|edt|parfum|profumo|cologne|colonia|fragranza)\b).*\b(?:balsamo|balm|deodorante|deodorant|gel doccia|shower gel|bagnoschiuma|crema|body lotion|lozione)\b/i,
