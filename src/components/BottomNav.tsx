@@ -1,4 +1,4 @@
-import { Flame, Heart, SlidersHorizontal, User } from 'lucide-react'
+import { Flame, Heart, SlidersHorizontal, TrendingDown, User } from 'lucide-react'
 import { activeFilterCount } from '../lib/filters'
 import { routeHref, type Route } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
@@ -11,7 +11,7 @@ const ITEMS = [
 ] as const
 
 export function BottomNav({ current }: { current: Route }) {
-  const { wishlist, state } = useApp()
+  const { wishlist, state, unseenDrops } = useApp()
   const badges: Partial<Record<Route, number>> = {
     preferiti: wishlist.length,
     filtri: activeFilterCount(state.filters),
@@ -36,7 +36,15 @@ export function BottomNav({ current }: { current: Route }) {
               >
                 <Icon className={`size-6 ${active && route === 'preferiti' ? 'fill-rose-500 text-rose-500' : ''}`} />
                 {label}
-                {!!badge && (
+                {route === 'preferiti' && unseenDrops > 0 ? (
+                  <span
+                    aria-label={`${unseenDrops} preferiti con prezzo sceso`}
+                    className="absolute top-2 left-1/2 ml-2 flex h-5 items-center gap-0.5 rounded-full bg-emerald-500 px-1.5 text-[10px] font-bold text-white"
+                  >
+                    <TrendingDown className="size-3" />
+                    {unseenDrops}
+                  </span>
+                ) : !!badge && (
                   <span className="absolute top-2 left-1/2 ml-2 min-w-5 rounded-full bg-rose-500 px-1.5 text-center text-[10px] leading-5 font-bold text-white">
                     {badge > 99 ? '99+' : badge}
                   </span>

@@ -2,8 +2,10 @@ import { BottomNav } from './components/BottomNav'
 import { ConsentBanner } from './components/ConsentBanner'
 import { APP_NAME } from './config/app'
 import { useHashRoute } from './lib/useHashRoute'
+import { Welcome } from './components/Welcome'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { FiltersPage } from './pages/FiltersPage'
+import { PrivacyPage } from './pages/PrivacyPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { WishlistPage } from './pages/WishlistPage'
 
@@ -30,8 +32,10 @@ export default function App() {
         {route === 'preferiti' && <WishlistPage />}
         {route === 'filtri' && <FiltersPage />}
         {route === 'profilo' && <ProfilePage />}
+        {route === 'privacy' && <PrivacyPage />}
       </main>
       <ConsentBanner />
+      <Welcome />
       <BottomNav current={route} />
     </div>
   )

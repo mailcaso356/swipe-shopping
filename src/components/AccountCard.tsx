@@ -150,9 +150,9 @@ function LoggedIn({
   )
 }
 
-function AuthForm() {
+export function AuthForm({ initialMode = 'accedi' }: { initialMode?: Mode }) {
   const auth = useAuth()
-  const [mode, setMode] = useState<Mode>('accedi')
+  const [mode, setMode] = useState<Mode>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)

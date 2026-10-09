@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { categoryLabel } from '../config/categories'
 import { storeName } from '../config/stores'
 import type { Product } from '../types/product'
+import { DiscountBadge } from './DiscountBadge'
 import { PriceTag } from './PriceTag'
 import { ProductImage } from './ProductImage'
 import { StoreLink } from './StoreLink'
@@ -92,6 +93,7 @@ export function SwipeCard({
             </motion.span>
           </>
         )}
+        <DiscountBadge product={product} />
         {product.searchQuery && (
           <span className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-neutral-900/80 px-3 py-1 text-xs font-medium text-white">
             Esplora la categoria

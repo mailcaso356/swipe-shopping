@@ -1,0 +1,125 @@
+import { ChevronLeft } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { AMAZON_DISCLOSURE, APP_NAME, PRIVACY_OWNER, PRIVACY_UPDATED } from '../config/app'
+import { routeHref } from '../lib/useHashRoute'
+
+/** Informativa privacy (GDPR art. 13) e termini d'uso. */
+export function PrivacyPage() {
+  const owner = PRIVACY_OWNER
+  return (
+    <article className="space-y-5 pb-8 text-sm leading-relaxed text-neutral-700">
+      <a href={routeHref('profilo')} className="inline-flex items-center gap-1 pt-1 font-medium text-neutral-500">
+        <ChevronLeft className="size-4" /> Profilo
+      </a>
+      <header>
+        <h1 className="text-2xl font-bold text-neutral-900">Privacy e termini</h1>
+        <p className="text-xs text-neutral-500">Ultimo aggiornamento: {PRIVACY_UPDATED}</p>
+      </header>
+
+      <Section title="Chi gestisce i dati">
+        <p>
+          Titolare del trattamento: <strong>{owner.name}</strong>. Per qualsiasi richiesta sulla privacy scrivi a{' '}
+          <a href={`mailto:${owner.email}`} className="font-medium text-rose-600 underline">
+            {owner.email}
+          </a>
+          .
+        </p>
+      </Section>
+
+      <Section title="Quali dati raccogliamo">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            <strong>Senza account:</strong> preferiti, prodotti scartati e filtri restano solo sul tuo dispositivo (memoria del
+            browser). Non ci arrivano.
+          </li>
+          <li>
+            <strong>Con un account:</strong> indirizzo email, password (salvata in forma cifrata, non la vediamo mai),
+            preferiti, prodotti scartati e filtri, per ritrovarli su ogni dispositivo.
+          </li>
+          <li>
+            <strong>Statistiche d'uso:</strong> solo se le attivi. Conteggi di prodotti visti, like e click, che restano sul tuo
+            dispositivo.
+          </li>
+          <li>
+            <strong>Dati tecnici:</strong> come ogni sito, il servizio di hosting registra indirizzo IP e tipo di browser per
+            sicurezza e funzionamento.
+          </li>
+        </ul>
+        <p>Non usiamo cookie pubblicitari né di profilazione e non vendiamo i tuoi dati.</p>
+      </Section>
+
+      <Section title="Perché e su quale base">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>Far funzionare l'app e il tuo account: esecuzione del servizio che hai richiesto (art. 6.1.b GDPR).</li>
+          <li>Statistiche d'uso: il tuo consenso (art. 6.1.a), che puoi ritirare in ogni momento dal Profilo.</li>
+          <li>Sicurezza del sito: legittimo interesse (art. 6.1.f).</li>
+        </ul>
+      </Section>
+
+      <Section title="A chi affidiamo i dati">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            <strong>Supabase</strong>: database e gestione degli account.
+          </li>
+          <li>
+            <strong>GitHub Pages</strong> (GitHub Inc.): pubblicazione del sito.
+          </li>
+          <li>
+            <strong>Cloudflare</strong>: gestione del dominio.
+          </li>
+        </ul>
+        <p>
+          Alcuni di questi fornitori hanno sede negli Stati Uniti. In quel caso il trasferimento è protetto dalle garanzie
+          previste dal GDPR (EU-US Data Privacy Framework o clausole contrattuali standard).
+        </p>
+      </Section>
+
+      <Section title="Link ai negozi">
+        <p>
+          Quando apri un prodotto passi al sito del negozio (per esempio Amazon), che tratta i tuoi dati secondo la propria
+          informativa e può usare i propri cookie. I link sono di affiliazione: se acquisti, riceviamo una piccola commissione
+          senza costi aggiuntivi per te. {AMAZON_DISCLOSURE}
+        </p>
+      </Section>
+
+      <Section title="Per quanto tempo">
+        <p>
+          I dati dell'account restano finché l'account è attivo. Se lo elimini dal Profilo, email, preferiti e impostazioni
+          vengono cancellati subito e in modo definitivo. I dati sul dispositivo li cancelli da Profilo → Dati.
+        </p>
+      </Section>
+
+      <Section title="I tuoi diritti">
+        <p>
+          Puoi chiedere accesso, correzione, cancellazione, limitazione, portabilità dei tuoi dati e opporti al trattamento
+          scrivendo all'indirizzo qui sopra. Puoi anche presentare reclamo al Garante per la protezione dei dati personali
+          (garanteprivacy.it).
+        </p>
+      </Section>
+
+      <Section title="Termini d'uso">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            {APP_NAME} è una vetrina: non vendiamo direttamente. L'acquisto, il pagamento, la spedizione e i resi avvengono sul
+            sito del negozio, con le sue condizioni.
+          </li>
+          <li>
+            Prezzi, sconti e disponibilità vengono dai negozi e si aggiornano più volte al giorno, ma possono cambiare: vale
+            quello mostrato dal negozio al momento dell'acquisto.
+          </li>
+          <li>Per creare un account devi avere almeno 14 anni.</li>
+          <li>Il servizio è gratuito e può cambiare o essere sospeso. Eventuali modifiche a questa pagina saranno indicate qui.</li>
+        </ul>
+      </Section>
+    </article>
+  )
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="space-y-2">
+      <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
+      {children}
+    </section>
+  )
+}

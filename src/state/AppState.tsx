@@ -3,6 +3,7 @@ import { track } from '../lib/analytics'
 import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
 import { matchesFilters, sortProducts } from '../lib/filters'
+import { priceDrop } from '../lib/price'
 import { load, save } from '../lib/storage'
 import { DEFAULT_FILTERS, type Filters, type Product } from '../types/product'
 import { useAuth } from './AuthState'
@@ -135,8 +136,30 @@ function useAppStore() {
   /** Preferiti con i dati aggiornati dal catalogo quando il prodotto è ancora presente */
   const wishlist = useMemo(() => {
     const byId = new Map(products.map((p) => [p.id, p]))
-    return state.wishlist.map((w) => ({ ...w, product: byId.get(w.product.id) ?? w.product, inCatalog: byId.has(w.product.id) }))
+    return state.wishlist.map((w) => {
+      const current = byId.get(w.product.id)
+      return {
+        ...w,
+        product: current ?? w.product,
+        inCatalog: !!current,
+        /** Prezzo sceso rispetto a quando è stato salvato */
+        drop: current && current.availability !== 'out_of_stock' ? priceDrop(w.product, current) : null,
+      }
+    })
   }, [products, state.wishlist])
+
+  /** Cali di prezzo già visti nella pagina Preferiti: id → prezzo visto */
+  const [seenDrops, setSeenDrops] = useState(() => load<Record<string, number>>('priceDropsSeen', {}))
+  const unseenDrops = wishlist.filter((w) => w.drop && seenDrops[w.product.id] !== w.drop.now).length
+  const markDropsSeen = useCallback(() => {
+    setSeenDrops((prev) => {
+      const next: Record<string, number> = {}
+      for (const w of wishlist) if (w.drop) next[w.product.id] = w.drop.now
+      if (Object.keys(next).every((id) => prev[id] === next[id]) && Object.keys(prev).length === Object.keys(next).length) return prev
+      save('priceDropsSeen', next)
+      return next
+    })
+  }, [wishlist])
 
   const actions = useMemo(
     () => ({
@@ -161,7 +184,7 @@ function useAppStore() {
     [reloadCatalog],
   )
 
-  return { state, products, deck, wishlist, actions, sync }
+  return { state, products, deck, wishlist, actions, sync, unseenDrops, markDropsSeen }
 }
 
 export type SyncStatus = 'off' | 'loading' | 'synced' | 'saving' | 'error'

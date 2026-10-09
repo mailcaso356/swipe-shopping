@@ -6,3 +6,10 @@ export const APP_TAGLINE = 'Fai shopping come su Tinder'
 export const AMAZON_DISCLOSURE = 'In qualità di Affiliato Amazon, ricevo un guadagno dagli acquisti idonei.'
 export const GENERIC_DISCLOSURE =
   'I link verso i negozi sono link di affiliazione: se acquisti, potremmo ricevere una commissione senza costi aggiuntivi per te.'
+
+/** Titolare del trattamento mostrato nella pagina Privacy (GDPR, art. 13). */
+export const PRIVACY_OWNER = {
+  name: 'Kevin Conti',
+  email: 'rispondea@gmail.com',
+}
+export const PRIVACY_UPDATED = '9 ottobre 2026'

@@ -1,14 +1,21 @@
-import { Heart, Trash2 } from 'lucide-react'
+import { Heart, Trash2, TrendingDown } from 'lucide-react'
+import { useEffect } from 'react'
+import { DiscountBadge } from '../components/DiscountBadge'
 import { PriceTag } from '../components/PriceTag'
 import { ProductImage } from '../components/ProductImage'
 import { StoreLink } from '../components/StoreLink'
 import { AMAZON_DISCLOSURE } from '../config/app'
 import { storeName } from '../config/stores'
+import { formatPrice } from '../lib/price'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 
 export function WishlistPage() {
-  const { wishlist, actions } = useApp()
+  const { wishlist, actions, markDropsSeen } = useApp()
+  const drops = wishlist.filter((w) => w.drop).length
+
+  // Aprendo i Preferiti l'avviso sul menu si spegne (l'etichetta sulle card resta).
+  useEffect(() => markDropsSeen(), [markDropsSeen])
 
   if (wishlist.length === 0) {
     return (
@@ -29,11 +36,19 @@ export function WishlistPage() {
         <h1 className="text-2xl font-bold">Preferiti</h1>
         <span className="text-sm text-neutral-500">{wishlist.length} prodotti</span>
       </div>
+      {drops > 0 && (
+        <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 ring-1 ring-emerald-200">
+          <TrendingDown className="size-5 shrink-0" />
+          {drops === 1
+            ? 'Un tuo preferito costa meno di quando l\'hai salvato!'
+            : `${drops} preferiti costano meno di quando li hai salvati!`}
+        </p>
+      )}
       <p className="text-xs text-neutral-500">
         L'acquisto avviene sul sito del negozio. Prezzi e disponibilità possono cambiare.
       </p>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {wishlist.map(({ product, inCatalog }) => {
+        {wishlist.map(({ product, inCatalog, drop }) => {
           const unavailable = product.availability === 'out_of_stock' || !inCatalog
           return (
             <li key={product.id} className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
@@ -46,6 +61,7 @@ export function WishlistPage() {
                 >
                   <ProductImage product={product} className="size-full" />
                 </StoreLink>
+                {!unavailable && <DiscountBadge product={product} size="sm" />}
                 {unavailable && (
                   <span className="pointer-events-none absolute top-2 left-2 rounded-full bg-neutral-900/80 px-2 py-0.5 text-xs text-white">
                     Non disponibile
@@ -67,7 +83,13 @@ export function WishlistPage() {
                 </p>
                 <h3 className="line-clamp-2 text-sm leading-snug font-medium">{product.title}</h3>
                 <div className="mt-auto pt-1">
+                  {drop && (
+                    <p className="mb-1 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
+                      <TrendingDown className="size-3.5" /> Sceso del {drop.pct}%
+                    </p>
+                  )}
                   <PriceTag product={product} />
+                  {drop && <p className="text-[11px] text-neutral-500">Quando l'hai salvato: {formatPrice(drop.was)}</p>}
                 </div>
                 <StoreLink
                   product={product}

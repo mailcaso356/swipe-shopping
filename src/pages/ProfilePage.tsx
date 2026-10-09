@@ -6,6 +6,7 @@ import { AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
 import { useConsent } from '../lib/useConsent'
+import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 
 export function ProfilePage() {
@@ -73,6 +74,9 @@ export function ProfilePage() {
         <p className="mt-3 text-xs text-neutral-500">
           {GENERIC_DISCLOSURE} {AMAZON_DISCLOSURE}
         </p>
+        <a href={routeHref('privacy')} className="mt-3 inline-block text-sm font-medium text-rose-600 underline">
+          Informativa privacy e termini
+        </a>
       </Card>
 
       <Card icon={<Trash2 className="size-5" />} title="Dati">
