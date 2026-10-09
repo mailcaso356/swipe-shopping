@@ -6,6 +6,7 @@ import { BrandPicker } from '../components/BrandPicker'
 import { PriceRange } from '../components/PriceRange'
 import { STORES, type StoreId } from '../config/stores'
 import { activeFilterCount, facetValues, matchesFilters } from '../lib/filters'
+import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 import { DEFAULT_FILTERS, type Filters } from '../types/product'
 
@@ -218,6 +219,16 @@ export function FiltersPage() {
       )}
 
 
+      {/* I filtri si applicano subito: il pulsante serve a far capire che si torna ai prodotti. */}
+      <div className="pointer-events-none sticky bottom-3 flex justify-center">
+        <a
+          href={routeHref('scopri')}
+          className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-rose-500 px-5 py-2.5 text-sm font-semibold text-[#fff] shadow-lg active:scale-95"
+        >
+          <Check className="size-4" /> Applica filtri
+          <span className="font-normal opacity-80">({matching.toLocaleString('it-IT')})</span>
+        </a>
+      </div>
     </div>
   )
 }
