@@ -2,7 +2,7 @@
 // Gira su GitHub Actions prima di ogni build: le credenziali restano nei Secrets del repository
 // e non finiscono mai nel sito. Uso: `npm run sync:amazon` con le variabili d'ambiente impostate.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { classify } from './classify.ts'
+import { classify, isJunk } from './classify.ts'
 import { detectColors } from '../src/config/colors.ts'
 import { validateProduct } from '../src/lib/validate.ts'
 import { DETAIL_SHARDS, detailShard, type ProductDetails } from '../src/lib/details.ts'
@@ -274,6 +274,12 @@ async function searchCatalog(token: string) {
               rejectedPrice++
               continue
             }
+            const category = classify(title, plan.category)
+            // Accessori, ricariche e ricambi al posto del prodotto vero (cover, cinturini, FC Points…).
+            if (isJunk(title, category)) {
+              rejectedBrand++
+              continue
+            }
             const id = `amazon:${asin}`
             const existing = found.get(id)
             if (existing) {
@@ -288,7 +294,7 @@ async function searchCatalog(token: string) {
               title,
               brand,
               gender,
-              category: classify(title, plan.category),
+              category,
               imageUrl: image,
               availability: 'in_stock',
               addedAt: previousAddedAt.get(id) ?? now,
