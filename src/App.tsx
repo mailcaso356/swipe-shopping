@@ -10,6 +10,7 @@ import { DiscoverPage } from './pages/DiscoverPage'
 import { FriendProfilePage } from './pages/FriendProfilePage'
 import { FriendsPage } from './pages/FriendsPage'
 import { GiftListPage } from './pages/GiftListPage'
+import { ChatPage } from './pages/ChatPage'
 import { PollPage } from './pages/PollPage'
 import { SantaPage } from './pages/SantaPage'
 import { SwipeTogetherPage } from './pages/SwipeTogetherPage'
@@ -44,6 +45,7 @@ export default function App() {
         {route === 'regalo' && <GiftListPage key={hash} />}
         {route === 'insieme' && <SwipeTogetherPage key={hash} />}
         {route === 'segreto' && <SantaPage key={hash} />}
+        {route === 'chat' && <ChatPage key={hash} />}
       </main>
       <ConsentBanner />
       <Welcome />

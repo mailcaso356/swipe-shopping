@@ -67,11 +67,12 @@ const senders = [...new Set(fresh.map((i) => i.sender))]
 const [tokens, profiles, blocks] = recipients.length
   ? await Promise.all([
       rest<{ token: string; user_id: string }[]>(`/rest/v1/push_tokens?user_id=${inList(recipients)}&select=token,user_id`),
-      rest<{ user_id: string; handle: string }[]>(`/rest/v1/profiles?user_id=${inList(senders)}&select=user_id,handle`),
+      rest<{ user_id: string; handle: string; code: string }[]>(`/rest/v1/profiles?user_id=${inList(senders)}&select=user_id,handle,code`),
       rest<{ blocker: string; blocked: string }[]>(`/rest/v1/blocks?blocker=${inList(recipients)}&select=blocker,blocked`),
     ])
   : [[], [], []]
 const handle = new Map(profiles.map((p) => [p.user_id, p.handle]))
+const codeOf = new Map(profiles.map((p) => [p.user_id, p.code]))
 const blocked = new Set(blocks.map((b) => `${b.blocker}:${b.blocked}`))
 
 /** Testo fisso per ogni tipo di novità. */
@@ -79,7 +80,7 @@ function message(i: Item): { title: string; body: string; url: string } {
   const who = handle.get(i.sender) ?? 'Un amico'
   switch (i.kind) {
     case 'consiglio':
-      return { title: `${who} ti consiglia un prodotto`, body: 'Aprilo in Swipe Shopping', url: '#/amici' }
+      return { title: `${who} ti ha mandato un prodotto`, body: 'Guardalo nella chat', url: codeOf.has(i.sender) ? `#/chat/${codeOf.get(i.sender)}` : '#/amici' }
     case 'sondaggio':
       return { title: `${who} ti chiede un parere`, body: 'Vota il sondaggio: sì o no?', url: `#/sondaggio/${i.ref_id}` }
     case 'lista':

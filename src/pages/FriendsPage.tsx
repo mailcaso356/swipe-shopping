@@ -13,7 +13,6 @@ import {
   MONTHS,
   POLL_MAX,
   profileUrl,
-  setUnseen,
   shareLink,
   social,
   timeAgo,
@@ -26,6 +25,8 @@ import {
   type PollSummary,
   santaDate,
   santaTitle,
+  refreshUnseen,
+  type ChatSummary,
   type SantaSummary,
   type SocialCard,
   type SwipeSummary,
@@ -47,11 +48,14 @@ interface Data {
   swipes: SwipeSummary[]
   santas: SantaSummary[]
   trending: { product_id: string; friends: number }[]
+  /** null finché supabase/schema-11.sql non è eseguito */
+  chats: ChatSummary[] | null
 }
 
-type Tab = 'perte' | 'crea' | 'amici'
+type Tab = 'perte' | 'chat' | 'crea' | 'amici'
 const TABS: { id: Tab; label: string }[] = [
   { id: 'perte', label: 'Per te' },
+  { id: 'chat', label: 'Chat' },
   { id: 'crea', label: 'Crea' },
   { id: 'amici', label: 'Amici' },
 ]
@@ -71,7 +75,7 @@ export function FriendsPage() {
   const reload = useCallback(async () => {
     try {
       const me = await social.me()
-      const [mine, feed, friends, inbox, birthdays, swipes, santas, trending] = await Promise.all([
+      const [mine, feed, friends, inbox, birthdays, swipes, santas, trending, chats] = await Promise.all([
         social.mine(),
         social.feed(),
         social.friends(),
@@ -81,11 +85,12 @@ export function FriendsPage() {
         // Finché supabase/schema-7.sql non è eseguito il resto della pagina funziona lo stesso.
         social.santas().catch(() => []),
         social.trending().catch(() => []),
+        social.chats().catch(() => null),
       ])
-      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes, santas, trending })
+      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes, santas, trending, chats })
       setError('')
       // Aperta la scheda, le novità contano come viste (il pallino si spegne).
-      if (inbox.some((i) => !i.seen)) void social.inboxSeen().then(() => setUnseen(0))
+      if (inbox.some((i) => !i.seen && i.kind !== 'consiglio')) void social.inboxSeen().then(refreshUnseen)
     } catch (e) {
       setError((e as Error).message)
     }
@@ -108,7 +113,7 @@ export function FriendsPage() {
         <p className="py-10 text-center text-neutral-500">Caricamento…</p>
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-1 rounded-full bg-neutral-200/60 p-1" role="tablist">
+          <div className="grid grid-cols-4 gap-1 rounded-full bg-neutral-200/60 p-1" role="tablist">
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -119,7 +124,8 @@ export function FriendsPage() {
                 className={`relative rounded-full py-2 text-sm font-semibold ${tab === t.id ? 'bg-white shadow-sm' : 'text-neutral-500'}`}
               >
                 {t.label}
-                {t.id === 'perte' && data.inbox.some((i) => !i.seen) && (
+                {((t.id === 'perte' && data.inbox.some((i) => !i.seen && i.kind !== 'consiglio')) ||
+                  (t.id === 'chat' && !!data.chats?.some((c) => c.unread > 0))) && (
                   <span className="absolute top-1.5 ml-1 inline-block size-2 rounded-full bg-rose-500" />
                 )}
               </button>
@@ -162,8 +168,9 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
   }
 
   const noFriends = data.following.length === 0 && data.followers.length === 0
+  const chatsOn = data.chats !== null
   // Cose delle funzioni nascoste (FEATURES) non si mostrano.
-  const inbox = data.inbox.filter((i) => visibleKind(i.kind, i.ref_kind))
+  const inbox = data.inbox.filter((i) => visibleKind(i.kind, i.ref_kind, chatsOn))
   const feed = data.feed.filter((i) => i.kind !== 'list' || FEATURES.giftLists)
 
   return (
@@ -221,6 +228,8 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
           </Section>
         </>
       )}
+
+      {tab === 'chat' && <ChatList chats={data.chats} noFriends={noFriends} />}
 
       {tab === 'crea' && (
         <>
@@ -413,7 +422,9 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
 
 const SWIPE_SIZE = 10
 
-function visibleKind(kind: InboxItem['kind'], refKind: InboxItem['ref_kind']) {
+function visibleKind(kind: InboxItem['kind'], refKind: InboxItem['ref_kind'], chatsEnabled: boolean) {
+  // I prodotti consigliati stanno nella Chat (se è attiva, cioè dopo schema-11.sql).
+  if (kind === 'consiglio') return !chatsEnabled
   if (kind === 'lista' || (kind === 'reazione' && refKind === 'list')) return FEATURES.giftLists
   if (kind === 'segreto' || kind === 'estrazione') return FEATURES.secretSanta
   return true
@@ -522,6 +533,40 @@ function Trending({ items }: { items: { product_id: string; friends: number }[] 
         ))}
       </div>
     </Section>
+  )
+}
+
+/** Elenco chat: un amico per riga, con l'ultimo messaggio e il pallino se c'è qualcosa di nuovo. */
+function ChatList({ chats, noFriends }: { chats: ChatSummary[] | null; noFriends: boolean }) {
+  if (!chats || chats.length === 0)
+    return (
+      <p className="rounded-2xl bg-white p-5 text-center text-sm text-neutral-600 ring-1 ring-black/5">
+        {!chats
+          ? 'Chat non ancora attiva. Riprova più tardi.'
+          : noFriends
+            ? 'Quando avrai degli amici, qui potrai mandarvi i prodotti che vi piacciono.'
+            : 'Nessuna chat per ora.'}
+      </p>
+    )
+  const last = (c: ChatSummary) =>
+    !c.last_kind
+      ? 'Mandagli un prodotto'
+      : `${c.last_from_me ? 'Tu: ' : ''}${c.last_kind === 'sondaggio' ? 'un sondaggio' : c.last_kind === 'swipe' ? 'Swipe insieme' : 'un prodotto'} · ${timeAgo(c.last_at!)}`
+  return (
+    <section className="divide-y divide-neutral-100 rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+      {chats.map((c) => (
+        <a key={c.who.code} href={`#/chat/${c.who.code}`} className="flex items-center gap-3 p-3 active:bg-neutral-50">
+          <Avatar emoji={c.who.avatar} />
+          <div className="min-w-0 flex-1">
+            <p className={`truncate ${c.unread ? 'font-bold' : 'font-medium'}`}>{c.who.handle}</p>
+            <p className={`truncate text-sm ${c.unread ? 'font-semibold text-neutral-900' : 'text-neutral-500'}`}>
+              {c.unread ? (c.unread === 1 ? 'Ti ha mandato un prodotto' : `Ti ha mandato ${c.unread} prodotti`) : last(c)}
+            </p>
+          </div>
+          {c.unread > 0 && <span className="size-2.5 rounded-full bg-rose-500" aria-label="Nuovo" />}
+        </a>
+      ))}
+    </section>
   )
 }
 

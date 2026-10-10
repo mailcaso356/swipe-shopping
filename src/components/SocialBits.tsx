@@ -145,7 +145,15 @@ export function ProductPicker(props: {
 }
 
 /** Scelta degli amici a cui mandare qualcosa (messaggio fisso, nessun testo da scrivere). */
-export function FriendPicker(props: { title: string; single?: boolean; confirmLabel: string; onConfirm: (codes: string[]) => Promise<void> | void; onClose: () => void }) {
+export function FriendPicker(props: {
+  title: string
+  single?: boolean
+  confirmLabel: string
+  onConfirm: (codes: string[]) => Promise<void> | void
+  onClose: () => void
+  /** sotto il pulsante (es. "Condividi con altre app") */
+  extra?: ReactNode
+}) {
   const [friends, setFriends] = useState<SocialCard[] | null>(null)
   const [picked, setPicked] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
@@ -220,6 +228,7 @@ export function FriendPicker(props: { title: string; single?: boolean; confirmLa
             {props.confirmLabel}
             {picked.length > 1 ? ` (${picked.length})` : ''}
           </button>
+          {props.extra}
         </div>
       </div>
     </div>

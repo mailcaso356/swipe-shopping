@@ -162,6 +162,27 @@ export interface SantaSummary {
   gives_to: SocialCard | null
 }
 
+/** Chat (supabase/schema-11.sql): solo prodotti, sondaggi e inviti a Swipe insieme, più un'emoji di risposta. */
+export interface ChatSummary {
+  who: SocialCard
+  last_at: string | null
+  last_kind: InboxItem['kind'] | null
+  last_from_me: boolean | null
+  unread: number
+}
+
+export interface ChatMessage {
+  id: number
+  kind: 'consiglio' | 'sondaggio' | 'swipe'
+  from_me: boolean
+  product_id: string | null
+  ref_id: string | null
+  product_ids: string[] | null
+  reply_emoji: string | null
+  at: string
+  seen: boolean
+}
+
 /** Reazioni disponibili (le stesse del database). */
 export const REACTIONS = ['❤️', '🔥', '😍', '😂', '💸']
 
@@ -220,6 +241,10 @@ export const social = {
     }),
   /** Prodotti salvati da più amici negli ultimi 7 giorni (senza dire chi). */
   trending: () => rpc<{ product_id: string; friends: number }[]>('social_trending'),
+  chats: () => rpc<ChatSummary[]>('chat_list'),
+  chat: (code: string) => rpc<{ who: SocialCard; messages: ChatMessage[] } | null>('chat_get', { p_code: code }),
+  chatSeen: (code: string) => rpc<void>('chat_seen', { p_code: code }),
+  chatReact: (id: number, emoji: string | null) => rpc<void>('chat_react', { p_id: id, p_emoji: emoji }),
   /** Codice del profilo con quel tag (o nome), null se non c'è. */
   find: (tag: string) => rpc<string | null>('social_find', { p_tag: tag }),
   profile: (code: string) => rpc<FriendProfile | null>('social_profile', { p_code: code }),

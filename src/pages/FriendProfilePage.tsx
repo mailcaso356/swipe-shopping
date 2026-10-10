@@ -1,4 +1,4 @@
-import { Check, UserPlus } from 'lucide-react'
+import { Check, Send, UserPlus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Avatar, LoginNeeded, ProductStrip } from '../components/SocialBits'
 import { FEATURES } from '../config/app'
@@ -75,6 +75,15 @@ export function FriendProfilePage() {
           {profile.following ? <Check className="size-5" /> : <UserPlus className="size-5" />}
           {profile.following ? 'Segui già (tocca per smettere)' : `Segui ${profile.handle}`}
         </button>
+      )}
+
+      {!profile.is_me && auth.user && (profile.following || profile.follows_me) && (
+        <a
+          href={`#/chat/${profile.code}`}
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-white py-3 font-semibold ring-1 ring-neutral-200 active:scale-[0.98]"
+        >
+          <Send className="size-5" /> Chat: mandagli un prodotto
+        </a>
       )}
 
       {canSee && (
