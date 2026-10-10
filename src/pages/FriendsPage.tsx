@@ -705,11 +705,8 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
           <Avatar emoji={me.avatar} size="lg" />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-bold">{me.handle}</p>
-          {me.tag && <p className="text-sm font-medium text-rose-500">@{me.tag}</p>}
-          <p className="text-sm text-neutral-500">
-            {me.followers === 1 ? '1 ti segue' : `${me.followers} ti seguono`} · segui {me.following}
-          </p>
+          <p className="text-lg leading-tight font-bold">{me.handle}</p>
+          {me.tag && <p className="truncate text-sm font-medium text-rose-500">@{me.tag}</p>}
           <button
             type="button"
             disabled={busy}
@@ -718,6 +715,16 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
           >
             <RefreshCw className={`size-3 ${busy ? 'animate-spin' : ''}`} /> Genera nuovo nome
           </button>
+        </div>
+        <div className="flex shrink-0 gap-3 text-center">
+          <div>
+            <p className="text-xl leading-tight font-bold">{me.followers}</p>
+            <p className="text-[11px] text-neutral-500">follower</p>
+          </div>
+          <div>
+            <p className="text-xl leading-tight font-bold">{me.following}</p>
+            <p className="text-[11px] text-neutral-500">seguiti</p>
+          </div>
         </div>
       </div>
       {choosing && (
