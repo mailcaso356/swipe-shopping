@@ -1,8 +1,10 @@
-import { Check, UserRound, X } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
+import { Check, Send, UserRound, X } from 'lucide-react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { UNIVERSES } from '../config/categories'
+import { REACTIONS, friendList, social, type Reactions, type SocialCard } from '../lib/social'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
+import { useAuth } from '../state/AuthState'
 import type { Product } from '../types/product'
 import { ProductImage } from './ProductImage'
 
@@ -138,6 +140,167 @@ export function ProductPicker(props: {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+/** Scelta degli amici a cui mandare qualcosa (messaggio fisso, nessun testo da scrivere). */
+export function FriendPicker(props: { title: string; single?: boolean; confirmLabel: string; onConfirm: (codes: string[]) => Promise<void> | void; onClose: () => void }) {
+  const [friends, setFriends] = useState<SocialCard[] | null>(null)
+  const [picked, setPicked] = useState<string[]>([])
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    friendList()
+      .then(setFriends)
+      .catch((e: Error) => setError(e.message))
+  }, [])
+  const toggle = (code: string) =>
+    setPicked((cur) => (props.single ? [code] : cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code]))
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={props.onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={props.title}
+        className="flex max-h-[80dvh] w-full max-w-md flex-col rounded-t-3xl bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 pb-2">
+          <h2 className="font-semibold">{props.title}</h2>
+          <button type="button" onClick={props.onClose} aria-label="Chiudi" className="text-neutral-500">
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 pb-2">
+          {error && <p className="py-4 text-sm text-rose-600">{error}</p>}
+          {!friends && !error && <p className="py-4 text-sm text-neutral-500">Caricamento…</p>}
+          {friends?.length === 0 && (
+            <p className="py-6 text-center text-sm text-neutral-500">
+              Non hai ancora amici. Manda il tuo link da Amici: chi lo apre può seguirti.
+            </p>
+          )}
+          {friends?.map((f) => {
+            const on = picked.includes(f.code)
+            return (
+              <button
+                key={f.code}
+                type="button"
+                onClick={() => toggle(f.code)}
+                aria-pressed={on}
+                className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-neutral-100"
+              >
+                <Avatar emoji={f.avatar} size="sm" />
+                <span className="flex-1 font-medium">{f.handle}</span>
+                <span className={`grid size-6 place-items-center rounded-full ring-1 ${on ? 'bg-rose-500 text-[#fff] ring-rose-500' : 'ring-neutral-300'}`}>
+                  {on && <Check className="size-4" />}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <div className="border-t border-neutral-100 p-4">
+          <button
+            type="button"
+            disabled={picked.length === 0 || busy}
+            onClick={async () => {
+              setBusy(true)
+              setError('')
+              try {
+                await props.onConfirm(picked)
+              } catch (e) {
+                setError((e as Error).message)
+              } finally {
+                setBusy(false)
+              }
+            }}
+            className="w-full rounded-full bg-rose-500 py-3 font-semibold text-[#fff] active:scale-[0.98] disabled:opacity-50"
+          >
+            {props.confirmLabel}
+            {picked.length > 1 ? ` (${picked.length})` : ''}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Pulsante "Manda a un amico" per prodotti, sondaggi e liste (solo con account). Mostra "Inviato" per un attimo. */
+export function SendToFriends(props: { kind: 'consiglio' | 'sondaggio' | 'lista'; productId?: string; id?: string; label: string; className: string }) {
+  const auth = useAuth()
+  const [open, setOpen] = useState(false)
+  const [done, setDone] = useState('')
+  if (!auth.user) return null
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className={props.className}>
+        <Send className="size-4" />
+        {done || props.label}
+      </button>
+      {open && (
+        <FriendPicker
+          title={props.label}
+          confirmLabel="Manda"
+          onClose={() => setOpen(false)}
+          onConfirm={async (codes) => {
+            const n = await social.send(codes, props.kind, { productId: props.productId, id: props.id })
+            setOpen(false)
+            setDone(n === 1 ? 'Inviato!' : `Inviato a ${n} amici!`)
+            setTimeout(() => setDone(''), 2500)
+          }}
+        />
+      )}
+    </>
+  )
+}
+
+/** Reazioni con emoji fisse. Il proprietario vede solo i conteggi. */
+export function ReactionBar(props: { kind: 'poll' | 'list'; id: string; initial?: Reactions; readOnly?: boolean }) {
+  const auth = useAuth()
+  const [r, setR] = useState<Reactions | undefined>(props.initial)
+  useEffect(() => {
+    if (props.initial || !auth.user) return
+    social
+      .reactions(props.kind, props.id)
+      .then(setR)
+      .catch(() => {})
+  }, [props.kind, props.id, props.initial, auth.user])
+  if (!auth.user) return null
+  const toggle = async (emoji: string) => {
+    const next = r?.mine === emoji ? null : emoji
+    try {
+      setR(await social.react(props.kind, props.id, next))
+    } catch {
+      /* rete assente: resta com'era */
+    }
+  }
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {REACTIONS.map((e) => {
+        const n = r?.counts[e] ?? 0
+        const mine = r?.mine === e
+        if (props.readOnly && n === 0) return null
+        return (
+          <button
+            key={e}
+            type="button"
+            disabled={props.readOnly}
+            onClick={(ev) => {
+              ev.preventDefault()
+              void toggle(e)
+            }}
+            aria-pressed={mine}
+            aria-label={`Reazione ${e}`}
+            className={`flex h-8 items-center gap-1 rounded-full px-2.5 text-sm ring-1 active:scale-90 ${
+              mine ? 'bg-rose-50 ring-rose-300' : 'bg-white ring-neutral-200'
+            }`}
+          >
+            <span>{e}</span>
+            {n > 0 && <span className="text-xs font-semibold text-neutral-600">{n}</span>}
+          </button>
+        )
+      })}
     </div>
   )
 }

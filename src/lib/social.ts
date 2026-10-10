@@ -14,6 +14,8 @@ export interface SocialCard {
 
 export interface MyProfile extends SocialCard {
   share_saves: boolean
+  birth_day: number | null
+  birth_month: number | null
   followers: number
   following: number
 }
@@ -41,9 +43,14 @@ export interface FriendProfile extends SocialCard {
   polls: PollSummary[]
 }
 
+export interface Reactions {
+  counts: Record<string, number>
+  mine: string | null
+}
+
 export type FeedItem =
-  | { kind: 'poll'; id: string; product_ids: string[]; at: string; who: SocialCard }
-  | { kind: 'list'; id: string; template: GiftTemplate; product_ids: string[]; at: string; who: SocialCard }
+  | { kind: 'poll'; id: string; product_ids: string[]; at: string; who: SocialCard; reactions?: Reactions }
+  | { kind: 'list'; id: string; template: GiftTemplate; product_ids: string[]; at: string; who: SocialCard; reactions?: Reactions }
   | { kind: 'saves'; product_ids: string[]; count: number; at: string; who: SocialCard }
 
 export interface GiftList extends GiftListSummary {
@@ -61,6 +68,51 @@ export interface Poll extends PollSummary {
   my_votes: Record<string, boolean>
   results: { product_id: string; yes: number; no: number }[] | null
 }
+
+export interface InboxItem {
+  id: number
+  kind: 'consiglio' | 'sondaggio' | 'lista' | 'swipe' | 'reazione'
+  product_id: string | null
+  ref_id: string | null
+  ref_kind: 'poll' | 'list' | null
+  emoji: string | null
+  template: GiftTemplate | null
+  product_ids: string[] | null
+  at: string
+  seen: boolean
+  who: SocialCard
+}
+
+export interface Birthday {
+  who: SocialCard
+  day: number
+  month: number
+  days_left: number
+  list_id: string | null
+}
+
+export interface SwipeSession {
+  id: string
+  product_ids: string[]
+  created_at: string
+  is_creator: boolean
+  other: SocialCard
+  my_votes: Record<string, boolean>
+  other_done: boolean
+  matches: string[] | null
+}
+
+export interface SwipeSummary {
+  id: string
+  created_at: string
+  other: SocialCard
+  my_done: boolean
+  other_done: boolean
+  product_ids: string[]
+}
+
+/** Reazioni disponibili (le stesse del database). */
+export const REACTIONS = ['❤️', '🔥', '😍', '😂', '💸']
 
 /** Avatar disponibili (gli stessi del database). */
 export const AVATARS = ['🦊', '🐼', '🐨', '🐯', '🦁', '🐸', '🐵', '🐧', '🦄', '🐙', '🐝', '🦋', '🐢', '🐬', '🦉', '🐰', '🐱', '🐶', '🦔', '🦦', '🦩', '🐳', '🐺', '🐻', '🐹', '🐥']
@@ -106,11 +158,14 @@ function anonVoter() {
 
 export const social = {
   me: () => rpc<MyProfile>('social_me'),
-  update: (patch: { regenerate?: boolean; avatar?: string; shareSaves?: boolean }) =>
+  /** birthday: null lo cancella */
+  update: (patch: { regenerate?: boolean; avatar?: string; shareSaves?: boolean; birthday?: { day: number; month: number } | null }) =>
     rpc<MyProfile>('social_update', {
       regenerate: patch.regenerate ?? false,
       new_avatar: patch.avatar ?? null,
       new_share_saves: patch.shareSaves ?? null,
+      new_birth_day: patch.birthday?.day ?? null,
+      new_birth_month: patch.birthday === null ? 0 : (patch.birthday?.month ?? null),
     }),
   profile: (code: string) => rpc<FriendProfile | null>('social_profile', { p_code: code }),
   follow: (code: string) => rpc<void>('social_follow', { p_code: code }),
@@ -128,6 +183,64 @@ export const social = {
   poll: (id: string) => rpc<Poll | null>('poll_get', { p_id: id, p_voter: anonVoter() }),
   vote: (id: string, productId: string, yes: boolean) =>
     rpc<void>('poll_vote', { p_id: id, p_voter: anonVoter(), p_product_id: productId, p_yes: yes }),
+  birthdays: () => rpc<Birthday[]>('social_birthdays'),
+  /** Manda a degli amici (codici) un prodotto consigliato, un mio sondaggio o una mia lista. Ritorna quanti l'hanno ricevuto. */
+  send: (codes: string[], kind: 'consiglio' | 'sondaggio' | 'lista', ref: { productId?: string; id?: string }) =>
+    rpc<number>('inbox_send', { p_codes: codes, p_kind: kind, p_product_id: ref.productId ?? null, p_ref: ref.id ?? null }),
+  inbox: () => rpc<InboxItem[]>('inbox_list'),
+  inboxUnseen: () => rpc<number>('inbox_unseen'),
+  inboxSeen: () => rpc<void>('inbox_seen'),
+  inboxDelete: (id: number) => rpc<void>('inbox_delete', { p_id: id }),
+  react: (kind: 'poll' | 'list', id: string, emoji: string | null) => rpc<Reactions>('react', { p_kind: kind, p_id: id, p_emoji: emoji }),
+  reactions: (kind: 'poll' | 'list', id: string) => rpc<Reactions>('reactions_get', { p_kind: kind, p_id: id }),
+  friendSaves: () => rpc<{ enabled: boolean; saves: { product_id: string; who: SocialCard[] }[] }>('social_friend_saves'),
+  createSwipe: (code: string, productIds: string[]) => rpc<string>('swipe_create', { p_code: code, p_product_ids: productIds }),
+  swipe: (id: string) => rpc<SwipeSession | null>('swipe_get', { p_id: id }),
+  swipeVote: (id: string, productId: string, yes: boolean) => rpc<void>('swipe_vote', { p_id: id, p_product_id: productId, p_yes: yes }),
+  swipes: () => rpc<SwipeSummary[]>('swipe_list'),
+  deleteSwipe: (id: string) => rpc<void>('swipe_delete', { p_id: id }),
+}
+
+/** Amici a cui mandare cose: chi seguo e chi mi segue, senza doppioni. */
+export async function friendList(): Promise<SocialCard[]> {
+  const { following, followers } = await social.friends()
+  const byCode = new Map([...following, ...followers].map((f) => [f.code, f]))
+  return [...byCode.values()]
+}
+
+// --- Notifiche "Per te": quante cose nuove (pallino sulla scheda Amici) ---
+let unseen = 0
+const listeners = new Set<(n: number) => void>()
+export function setUnseen(n: number) {
+  unseen = n
+  for (const l of listeners) l(n)
+}
+export async function refreshUnseen() {
+  try {
+    setUnseen(await social.inboxUnseen())
+  } catch {
+    /* senza rete o senza account: niente pallino */
+  }
+}
+export function subscribeUnseen(l: (n: number) => void) {
+  listeners.add(l)
+  l(unseen)
+  return () => void listeners.delete(l)
+}
+
+// --- Match: preferiti degli amici (cache per la sessione) ---
+let savesCache: Promise<Map<string, SocialCard[]>> | null = null
+export function friendSavesMap(refresh = false) {
+  if (!savesCache || refresh) {
+    savesCache = social
+      .friendSaves()
+      .then((r) => new Map(r.saves.map((s) => [s.product_id, s.who])))
+      .catch(() => new Map())
+  }
+  return savesCache
+}
+export function resetFriendSaves() {
+  savesCache = null
 }
 
 // --- Link ---
@@ -135,6 +248,8 @@ const SITE = 'https://swipeshopping.app/'
 export const profileUrl = (code: string) => `${SITE}#/u/${code}`
 export const pollUrl = (id: string) => `${SITE}#/sondaggio/${id}`
 export const giftListUrl = (id: string) => `${SITE}#/regalo/${id}`
+
+export const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']
 
 /** Parte dell'indirizzo dopo #/<prefisso>/ (es. il codice di #/u/abc). */
 export function hashParam(prefix: string, hash = window.location.hash) {

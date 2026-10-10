@@ -2,7 +2,7 @@ import { Check, Pencil, Share2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { PriceTag } from '../components/PriceTag'
 import { ProductImage } from '../components/ProductImage'
-import { Avatar, ProductPicker, useProductsById } from '../components/SocialBits'
+import { Avatar, ProductPicker, ReactionBar, SendToFriends, useProductsById } from '../components/SocialBits'
 import { StoreLink } from '../components/StoreLink'
 import { brandAndStore } from '../config/stores'
 import { openProduct } from '../lib/productSheet'
@@ -72,7 +72,7 @@ export function GiftListPage() {
             }}
             className="flex flex-1 items-center justify-center gap-2 rounded-full bg-rose-500 py-3 font-semibold text-[#fff] active:scale-[0.98]"
           >
-            <Share2 className="size-5" /> Manda agli amici
+            <Share2 className="size-5" /> Condividi link
           </button>
           <button
             type="button"
@@ -90,6 +90,15 @@ export function GiftListPage() {
           Segna "Lo prendo io" su quello che regali: gli altri amici lo vedono, {list.owner.handle} no.
         </p>
       )}
+      {list.is_owner && (
+        <SendToFriends
+          kind="lista"
+          id={list.id}
+          label="Manda agli amici nell'app"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 font-semibold text-white active:scale-[0.98]"
+        />
+      )}
+      <ReactionBar kind="list" id={list.id} readOnly={list.is_owner} />
       {notice && <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800 ring-1 ring-amber-200">{notice}</p>}
       {loading && products.length < list.product_ids.length && <p className="text-sm text-neutral-500">Caricamento prodotti…</p>}
 

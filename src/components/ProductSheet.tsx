@@ -14,6 +14,7 @@ import { NewBadge } from './NewBadge'
 import { PriceTag } from './PriceTag'
 import { ProductImage } from './ProductImage'
 import { ShareButton } from './ShareButton'
+import { SendToFriends } from './SocialBits'
 import { StoreLink } from './StoreLink'
 
 /** Scheda prodotto a tutto schermo: più foto, caratteristiche e pulsanti. */
@@ -139,6 +140,12 @@ function SheetContent({ product }: { product: Product }) {
             className="grid size-12 place-items-center rounded-full bg-white text-neutral-700 ring-1 ring-neutral-200"
           />
         </div>
+        <SendToFriends
+          kind="consiglio"
+          productId={product.id}
+          label="Consiglia a un amico"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white text-sm font-semibold ring-1 ring-neutral-200 active:scale-[0.98]"
+        />
 
         {details?.features && details.features.length > 0 && (
           <div>

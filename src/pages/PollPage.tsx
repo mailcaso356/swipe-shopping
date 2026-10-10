@@ -2,7 +2,7 @@ import { Crown, Heart, Share2, ThumbsDown } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { PriceTag } from '../components/PriceTag'
 import { ProductImage } from '../components/ProductImage'
-import { Avatar, useProductsById } from '../components/SocialBits'
+import { Avatar, ReactionBar, SendToFriends, useProductsById } from '../components/SocialBits'
 import { StoreLink } from '../components/StoreLink'
 import { brandAndStore } from '../config/stores'
 import { openProduct } from '../lib/productSheet'
@@ -68,9 +68,18 @@ export function PollPage() {
           }}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-rose-500 py-3 font-semibold text-[#fff] active:scale-[0.98]"
         >
-          <Share2 className="size-5" /> {copied ? 'Link copiato' : 'Manda agli amici'}
+          <Share2 className="size-5" /> {copied ? 'Link copiato' : 'Condividi il link (WhatsApp…)'}
         </button>
       )}
+      {poll.is_owner && (
+        <SendToFriends
+          kind="sondaggio"
+          id={poll.id}
+          label="Manda agli amici nell'app"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 font-semibold text-white active:scale-[0.98]"
+        />
+      )}
+      <ReactionBar kind="poll" id={poll.id} readOnly={poll.is_owner} />
       {!poll.is_owner && !results && !poll.closed && (
         <p className="text-sm text-neutral-600">
           Vota sì o no su ogni prodotto: vedi i risultati quando hai finito{left > 0 ? ` (ne mancano ${left})` : ''}.
