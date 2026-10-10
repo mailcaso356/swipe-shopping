@@ -243,6 +243,9 @@ export function AuthForm({ initialMode = 'accedi' }: { initialMode?: Mode }) {
           <span>Voglio ricevere via email le novità di Swipe Shopping. Puoi cambiare idea quando vuoi dal Profilo.</span>
         </label>
       )}
+      {mode === 'registrati' && (
+        <p className="px-1 text-xs text-neutral-500">Registrandoti confermi di avere almeno 14 anni.</p>
+      )}
       {(error || auth.linkError) && <p className="text-rose-600">{error || auth.linkError}</p>}
       {info && (
         <p className="flex gap-2 rounded-xl bg-emerald-50 p-3 text-emerald-800">

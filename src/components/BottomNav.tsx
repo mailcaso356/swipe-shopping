@@ -1,4 +1,4 @@
-import { Flame, Heart, SlidersHorizontal, BadgePercent, User } from 'lucide-react'
+import { Flame, Heart, SlidersHorizontal, BadgePercent, User, Users } from 'lucide-react'
 import { universeOf } from '../config/categories'
 import { routeHref, type Route } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
@@ -6,6 +6,7 @@ import { useApp } from '../state/AppState'
 const ITEMS = [
   { route: 'scopri', label: 'Scopri', Icon: Flame },
   { route: 'preferiti', label: 'Preferiti', Icon: Heart },
+  { route: 'amici', label: 'Amici', Icon: Users },
   { route: 'filtri', label: 'Filtri', Icon: SlidersHorizontal },
   { route: 'profilo', label: 'Profilo', Icon: User },
 ] as const
@@ -20,7 +21,7 @@ export function BottomNav({ current }: { current: Route }) {
       aria-label="Navigazione principale"
       className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200/70 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur"
     >
-      <ul className="mx-auto grid h-16 max-w-md grid-cols-4">
+      <ul className="mx-auto grid h-16 max-w-md grid-cols-5">
         {ITEMS.map(({ route, label, Icon }) => {
           const active = current === route
           const badge = badges[route]

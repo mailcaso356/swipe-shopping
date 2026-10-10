@@ -6,6 +6,10 @@ import { useHashRoute } from './lib/useHashRoute'
 import { Welcome } from './components/Welcome'
 import { AdminPage } from './pages/AdminPage'
 import { DiscoverPage } from './pages/DiscoverPage'
+import { FriendProfilePage } from './pages/FriendProfilePage'
+import { FriendsPage } from './pages/FriendsPage'
+import { GiftListPage } from './pages/GiftListPage'
+import { PollPage } from './pages/PollPage'
 import { FiltersPage } from './pages/FiltersPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -13,7 +17,7 @@ import { SharedListPage } from './pages/SharedListPage'
 import { WishlistPage } from './pages/WishlistPage'
 
 export default function App() {
-  const route = useHashRoute()
+  const { route, hash } = useHashRoute()
   const isDiscover = route === 'scopri'
 
   return (
@@ -31,6 +35,10 @@ export default function App() {
         {route === 'privacy' && <PrivacyPage />}
         {route === 'admin' && <AdminPage />}
         {route === 'lista' && <SharedListPage />}
+        {route === 'amici' && <FriendsPage />}
+        {route === 'u' && <FriendProfilePage key={hash} />}
+        {route === 'sondaggio' && <PollPage key={hash} />}
+        {route === 'regalo' && <GiftListPage key={hash} />}
       </main>
       <ConsentBanner />
       <Welcome />

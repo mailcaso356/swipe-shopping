@@ -50,6 +50,12 @@ export function PrivacyPage() {
             Puoi spegnerle in ogni momento dal Profilo o dal link in fondo a ogni email.
           </li>
           <li>
+            <strong>Amici:</strong> se usi la sezione Amici ricevi un nome generato a caso (es. "Volpe Rosa 482") e un avatar
+            scelto da un elenco: non mostriamo mai la tua email. Chi ha il tuo link di invito vede nome e avatar e può seguirti;
+            chi ti segue vede le tue liste regalo e i sondaggi, e i preferiti che salvi solo se lo attivi tu. Chi ha il link di
+            una lista o di un sondaggio li vede e può votare o segnare "lo prendo io". Puoi rimuovere o bloccare chi ti segue.
+          </li>
+          <li>
             <strong>Dati tecnici:</strong> come ogni sito, il servizio di hosting registra indirizzo IP e tipo di browser per
             sicurezza e funzionamento.
           </li>
