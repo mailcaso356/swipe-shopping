@@ -1,4 +1,4 @@
-import { BarChart3, Bell, Cake, Gift, Inbox, Layers, RefreshCw, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
+import { BarChart3, Bell, Cake, Gift, Inbox, Layers, RefreshCw, Search, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ProductImage } from '../components/ProductImage'
 import { Avatar, FriendPicker, LoginNeeded, ProductPicker, ProductStrip, ReactionBar, useProductsById } from '../components/SocialBits'
@@ -315,6 +315,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
       {tab === 'amici' && (
         <>
           <MyCard me={data.me} onChange={(me) => setData({ ...data, me })} onShare={share} />
+          <FindFriend />
           <PushToggle />
           <BirthdayCard me={data.me} onSave={(birthday) => act(() => updateMe({ birthday }))} />
           <Section icon={<UserPlus className="size-5" />} title={`Amici (${data.following.length} seguiti, ${data.followers.length} ti seguono)`}>
@@ -424,6 +425,55 @@ function PushCard() {
         </button>
       )}
     </div>
+  )
+}
+
+/** Cerca un amico con il suo @tag (esatto): si apre il suo profilo, da lì lo segui. */
+function FindFriend() {
+  const [tag, setTag] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+  const search = async () => {
+    if (!tag.trim()) return
+    setBusy(true)
+    setMessage('')
+    try {
+      const code = await social.find(tag)
+      if (code) window.location.hash = `#/u/${code}`
+      else setMessage('Nessuno con questo tag. Controlla di averlo scritto bene, es. @volperosa482.')
+    } catch (e) {
+      setMessage((e as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <Section icon={<Search className="size-5" />} title="Cerca un amico">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          void search()
+        }}
+        className="flex gap-2"
+      >
+        <input
+          type="search"
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          placeholder="@tag del tuo amico"
+          aria-label="Tag dell'amico"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          maxLength={40}
+          className="min-w-0 flex-1 rounded-full bg-neutral-100 px-4 py-2 text-base outline-none focus:ring-2 focus:ring-rose-300"
+        />
+        <button type="submit" disabled={busy || !tag.trim()} className={smallBtn}>
+          Cerca
+        </button>
+      </form>
+      {message && <p className="text-sm text-neutral-500">{message}</p>}
+    </Section>
   )
 }
 
@@ -609,6 +659,7 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
         </button>
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-bold">{me.handle}</p>
+          {me.tag && <p className="text-sm font-medium text-rose-500">@{me.tag}</p>}
           <p className="text-sm text-neutral-500">
             {me.followers} ti seguono · segui {me.following}
           </p>
@@ -642,7 +693,7 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
       )}
       <button
         type="button"
-        onClick={() => onShare(`Seguimi su Swipe Shopping! Sono ${me.handle}`, profileUrl(me.code))}
+        onClick={() => onShare(`Seguimi su Swipe Shopping! Sono ${me.handle}${me.tag ? ` (@${me.tag})` : ''}`, profileUrl(me.code))}
         className="flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 font-semibold text-white active:scale-[0.98]"
       >
         <Share2 className="size-4" /> Invita amici

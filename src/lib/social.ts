@@ -10,6 +10,8 @@ export interface SocialCard {
   handle: string
   avatar: string
   code: string
+  /** @tag per cercare (supabase/schema-8.sql), ricavato dal nome */
+  tag?: string
 }
 
 export interface MyProfile extends SocialCard {
@@ -216,6 +218,8 @@ export const social = {
       new_birth_day: patch.birthday?.day ?? null,
       new_birth_month: patch.birthday === null ? 0 : (patch.birthday?.month ?? null),
     }),
+  /** Codice del profilo con quel tag (o nome), null se non c'è. */
+  find: (tag: string) => rpc<string | null>('social_find', { p_tag: tag }),
   profile: (code: string) => rpc<FriendProfile | null>('social_profile', { p_code: code }),
   follow: (code: string) => rpc<void>('social_follow', { p_code: code }),
   unfriend: (code: string, action: 'unfollow' | 'remove' | 'block') => rpc<void>('social_unfriend', { p_code: code, action }),

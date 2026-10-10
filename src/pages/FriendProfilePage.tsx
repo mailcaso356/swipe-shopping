@@ -50,6 +50,7 @@ export function FriendProfilePage() {
         <Avatar emoji={profile.avatar} size="lg" />
         <h1 className="text-2xl font-bold">{profile.handle}</h1>
         <p className="text-sm text-neutral-500">
+          {profile.tag && `@${profile.tag} · `}
           {profile.followers} follower
           {profile.follows_me && ' · ti segue'}
         </p>
