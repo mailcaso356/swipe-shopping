@@ -192,7 +192,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
               ))}
             </Section>
           )}
-          {data.birthdays.length > 0 && (
+          {FEATURES.birthdays && data.birthdays.length > 0 && (
             <Section icon={<Cake className="size-5" />} title="Compleanni in arrivo">
               {data.birthdays.map((b) => (
                 <a key={b.who.code} href={FEATURES.giftLists && b.list_id ? `#/regalo/${b.list_id}` : `#/u/${b.who.code}`} className="flex items-center gap-3 border-t border-neutral-100 pt-3">
@@ -329,7 +329,9 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
           <MyCard me={data.me} onChange={(me) => setData({ ...data, me })} onShare={share} />
           <FindFriend />
           <PushToggle />
-          <BirthdayCard me={data.me} onSave={(birthday) => act(() => updateMe({ birthday }))} />
+          {FEATURES.birthdays && (
+            <BirthdayCard me={data.me} onSave={(birthday) => act(() => updateMe({ birthday }))} />
+          )}
           <Section icon={<UserPlus className="size-5" />} title={`Amici (${data.following.length} seguiti, ${data.followers.length} ti seguono)`}>
             {noFriends && <p className="text-sm text-neutral-500">Manda il tuo link con "Invita amici": chi lo apre può seguirti, e tu apri il suo.</p>}
             <FriendList

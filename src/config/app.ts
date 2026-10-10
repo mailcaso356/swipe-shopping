@@ -24,4 +24,6 @@ export const ADMIN_EMAIL = 'kevinconti0118@gmail.com'
 export const FEATURES = {
   giftLists: false,
   secretSanta: false,
+  /** compleanno nel profilo e "Compleanni in arrivo" (tolti il 10/10/2026) */
+  birthdays: false,
 }
