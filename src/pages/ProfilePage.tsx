@@ -1,7 +1,8 @@
-import { BarChart3, ChevronRight, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, Heart, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { AccountCard } from '../components/AccountCard'
 import { InstallCard } from '../components/InstallCard'
+import { SocialLinks } from '../components/SocialLinks'
 import { ADMIN_EMAIL, AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
@@ -15,15 +16,16 @@ export function ProfilePage() {
   const { state, wishlist, allProducts: products, actions } = useApp()
   const consent = useConsent()
   const { user } = useAuth()
+  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL
   const [confirmClear, setConfirmClear] = useState(false)
-  const stats = consent === 'granted' ? summary() : null
+  const stats = isAdmin && consent === 'granted' ? summary() : null
   const titleOf = (id: string) => products.find((p) => p.id === id)?.title ?? id
 
   return (
     <div className="space-y-5 pb-6">
       <h1 className="text-2xl font-bold">Profilo</h1>
 
-      {user?.email?.toLowerCase() === ADMIN_EMAIL && (
+      {isAdmin && (
         <a
           href={routeHref('admin')}
           className="flex items-center justify-between rounded-2xl bg-neutral-900 p-4 font-semibold text-white shadow-sm"
@@ -43,34 +45,51 @@ export function ProfilePage() {
             <Stat label="Preferiti" value={wishlist.length} />
             <Stat label="Scartati" value={state.disliked.length} />
           </div>
+          {state.disliked.length > 0 && (
+            <a
+              href={routeHref('scopri')}
+              onClick={actions.resetSeen}
+              className="mt-3 flex items-center justify-center gap-2 rounded-full bg-rose-500 px-4 py-3 text-sm font-semibold text-[#fff] active:scale-95"
+            >
+              <Undo2 className="size-4" /> {state.disliked.length === 1 ? 'Rivedi il prodotto scartato' : `Rivedi i ${state.disliked.length.toLocaleString('it-IT')} prodotti scartati`}
+            </a>
+          )}
         </AccountCard>
       </Card>
 
-      <Card icon={<BarChart3 className="size-5" />} title="Statistiche">
-        {stats ? (
-          <div className="space-y-3 text-sm">
-            <div className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
-              <Stat label="Visti" value={stats.views} />
-              <Stat label="Mi piace" value={stats.likes} />
-              <Stat label="No" value={stats.dislikes} />
-              <Stat label="Click negozio" value={stats.clicks} />
+      {/* Le statistiche personali le vede solo l'amministratore. */}
+      {isAdmin && (
+        <Card icon={<BarChart3 className="size-5" />} title="Statistiche">
+          {stats ? (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
+                <Stat label="Visti" value={stats.views} />
+                <Stat label="Mi piace" value={stats.likes} />
+                <Stat label="No" value={stats.dislikes} />
+                <Stat label="Click negozio" value={stats.clicks} />
+              </div>
+              <p className="text-neutral-600">
+                Click / visualizzazioni: <strong>{(stats.ctr * 100).toFixed(1)}%</strong>
+              </p>
+              {stats.topCategories.length > 0 && (
+                <TopList
+                  title="Categorie preferite"
+                  rows={stats.topCategories.map(([id, n]) => [isCategoryId(id) ? categoryLabel(id) : id, n])}
+                />
+              )}
+              {stats.topProducts.length > 0 && (
+                <TopList title="Prodotti più interessanti" rows={stats.topProducts.map(([id, n]) => [titleOf(id), n])} />
+              )}
             </div>
-            <p className="text-neutral-600">
-              Click / visualizzazioni: <strong>{(stats.ctr * 100).toFixed(1)}%</strong>
-            </p>
-            {stats.topCategories.length > 0 && (
-              <TopList
-                title="Categorie preferite"
-                rows={stats.topCategories.map(([id, n]) => [isCategoryId(id) ? categoryLabel(id) : id, n])}
-              />
-            )}
-            {stats.topProducts.length > 0 && (
-              <TopList title="Prodotti più interessanti" rows={stats.topProducts.map(([id, n]) => [titleOf(id), n])} />
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-neutral-600">Attiva le statistiche anonime qui sotto per vedere i tuoi numeri.</p>
-        )}
+          ) : (
+            <p className="text-sm text-neutral-600">Attiva le statistiche anonime qui sotto per vedere i tuoi numeri.</p>
+          )}
+        </Card>
+      )}
+
+      <Card icon={<Heart className="size-5" />} title="Seguici">
+        <p className="mb-3 text-sm text-neutral-600">Novità, offerte e i prodotti più amati, anche sui social.</p>
+        <SocialLinks />
       </Card>
 
       <Card icon={<ShieldCheck className="size-5" />} title="Privacy">
@@ -96,14 +115,6 @@ export function ProfilePage() {
 
       <Card icon={<Trash2 className="size-5" />} title="Dati">
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={actions.resetSeen}
-            disabled={state.disliked.length === 0}
-            className="inline-flex items-center gap-2 text-left text-sm font-medium disabled:opacity-40"
-          >
-            <Undo2 className="size-4" /> Rivedi i prodotti scartati
-          </button>
           {confirmClear ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span>Cancellare preferiti, filtri e statistiche?</span>

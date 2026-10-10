@@ -35,13 +35,17 @@ interface State {
   sectionFilters: Record<OtherSection, Filters>
   wishlist: WishItem[]
   disliked: string[]
-  lastAction: { type: 'like' | 'dislike'; product: Product } | null
+  /** Ultimi swipe, per annullarli uno alla volta (il più recente in fondo) */
+  history: { type: 'like' | 'dislike'; product: Product }[]
+  /** Scartati rimessi nel mazzo: tornano in cima, il più recente per primo */
+  restored: string[]
 }
 
 type Action =
   | { type: 'catalog'; catalog: CatalogState }
   | { type: 'like' | 'dislike'; product: Product }
   | { type: 'undo' }
+  | { type: 'restore'; ids: string[] }
   | { type: 'remove'; id: string }
   | { type: 'filters'; filters: Filters; section?: Universe }
   | { type: 'mode'; mode: Universe }
@@ -52,6 +56,7 @@ type Action =
   | { type: 'renameFolder'; from: string; to?: string }
 
 const MAX_DISLIKED = 5000
+const MAX_HISTORY = 30
 
 type OtherSection = Exclude<Universe, 'moda'>
 
@@ -94,26 +99,37 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         wishlist: [{ product: snapshot(action.product), savedAt: Date.now() }, ...state.wishlist],
-        lastAction: { type: 'like', product: action.product },
+        history: [...state.history, { type: 'like' as const, product: action.product }].slice(-MAX_HISTORY),
       }
     case 'dislike':
       return {
         ...state,
         disliked: [...state.disliked, action.product.id].slice(-MAX_DISLIKED),
-        lastAction: { type: 'dislike', product: action.product },
+        history: [...state.history, { type: 'dislike' as const, product: action.product }].slice(-MAX_HISTORY),
       }
     case 'undo': {
-      const last = state.lastAction
+      const last = state.history.at(-1)
       if (!last) return state
       return {
         ...state,
         wishlist: last.type === 'like' ? state.wishlist.filter((w) => w.product.id !== last.product.id) : state.wishlist,
         disliked: last.type === 'dislike' ? state.disliked.filter((id) => id !== last.product.id) : state.disliked,
-        lastAction: null,
+        history: state.history.slice(0, -1),
+        restored: [last.product.id, ...state.restored.filter((id) => id !== last.product.id)],
+      }
+    }
+    case 'restore': {
+      const ids = new Set(action.ids)
+      return {
+        ...state,
+        disliked: state.disliked.filter((id) => !ids.has(id)),
+        history: state.history.filter((h) => !(h.type === 'dislike' && ids.has(h.product.id))),
+        // Il più recente torna per primo.
+        restored: [...action.ids].reverse().concat(state.restored.filter((id) => !ids.has(id))),
       }
     }
     case 'remove':
-      return { ...state, wishlist: state.wishlist.filter((w) => w.product.id !== action.id), lastAction: null }
+      return { ...state, wishlist: state.wishlist.filter((w) => w.product.id !== action.id), history: state.history.filter((h) => h.product.id !== action.id) }
     case 'filters': {
       const section = action.section ?? state.mode
       return section === 'moda'
@@ -121,11 +137,11 @@ function reducer(state: State, action: Action): State {
         : { ...state, sectionFilters: { ...state.sectionFilters, [section]: normalizeFilters(action.filters) } }
     }
     case 'mode':
-      return { ...state, mode: action.mode, lastAction: null }
+      return { ...state, mode: action.mode, history: [], restored: [] }
     case 'resetSeen':
-      return { ...state, disliked: [], lastAction: null }
+      return { ...state, disliked: [], history: [], restored: [] }
     case 'clearAll':
-      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, sectionFilters: otherSectionFilters(() => DEFAULT_FILTERS), lastAction: null }
+      return { ...state, wishlist: [], disliked: [], filters: DEFAULT_FILTERS, sectionFilters: otherSectionFilters(() => DEFAULT_FILTERS), history: [], restored: [] }
     case 'folder':
       return {
         ...state,
@@ -142,7 +158,8 @@ function reducer(state: State, action: Action): State {
         wishlist: stripPrices(action.wishlist),
         disliked: action.disliked.slice(-MAX_DISLIKED),
         filters: normalizeFilters({ ...DEFAULT_FILTERS, ...action.filters }),
-        lastAction: null,
+        history: [],
+        restored: [],
       }
   }
 }
@@ -155,7 +172,8 @@ function useAppStore() {
     sectionFilters: otherSectionFilters((u) => normalizeFilters({ ...DEFAULT_FILTERS, ...load<Partial<Filters>>(`${u}Filters`, {}) })),
     wishlist: stripPrices(load<WishItem[]>('wishlist', [])),
     disliked: load<string[]>('disliked', []),
-    lastAction: null,
+    history: [],
+    restored: [],
   }))
 
   useEffect(() => save('filters:v2', state.filters), [state.filters])
@@ -231,9 +249,25 @@ function useAppStore() {
     const byId = new Map(products.map((p) => [p.id, p]))
     const seenModels = new Set([...seen].flatMap((id) => (byId.has(id) ? [modelKey(byId.get(id)!)] : [])))
     const sorted = onePerModel(sortProducts(list, activeFilters.sort, MIX_SEED), seenModels)
+    // Scartati rimessi nel mazzo: in cima (anche se il modello era già stato visto).
+    const back = state.restored.flatMap((id) => {
+      const p = byId.get(id)
+      return p && list.includes(p) ? [p] : []
+    })
+    const rest = back.length ? sorted.filter((p) => !back.includes(p)) : sorted
+    const withBack = [...back, ...rest]
     const shared = sharedId ? products.find((p) => p.id === sharedId) : undefined
-    return shared ? [shared, ...sorted.filter((p) => p.id !== shared.id)] : sorted
-  }, [products, state.disliked, state.wishlist, state.mode, activeFilters, sharedId])
+    return shared ? [shared, ...withBack.filter((p) => p.id !== shared.id)] : withBack
+  }, [products, state.disliked, state.wishlist, state.mode, state.restored, activeFilters, sharedId])
+
+  /** Gli scartati della sezione aperta, dal più vecchio al più recente */
+  const sectionDisliked = useMemo(() => {
+    const byId = new Map(products.map((p) => [p.id, p]))
+    return state.disliked.filter((id) => {
+      const p = byId.get(id)
+      return !!p && universeOf(p.category) === state.mode
+    })
+  }, [products, state.disliked, state.mode])
 
   /** Preferiti con i dati aggiornati dal catalogo quando il prodotto è ancora presente */
   const wishlist = useMemo(() => {
@@ -276,6 +310,8 @@ function useAppStore() {
         dispatch({ type: 'dislike', product })
       },
       undo: () => dispatch({ type: 'undo' }),
+      /** Rimette nel mazzo questi scartati */
+      restore: (ids: string[]) => dispatch({ type: 'restore', ids }),
       remove: (product: Product) => {
         track('remove', product)
         dispatch({ type: 'remove', id: product.id })
@@ -300,7 +336,7 @@ function useAppStore() {
   const view = useMemo(() => ({ ...state, filters: activeFilters }), [state, activeFilters])
   /** Prodotti della sezione aperta (per i filtri) */
   const sectionProducts = useMemo(() => products.filter((p) => universeOf(p.category) === state.mode), [products, state.mode])
-  return { state: view, products: sectionProducts, allProducts: products, deck, wishlist, actions, sync, unseenDeals, markDealsSeen }
+  return { state: view, products: sectionProducts, allProducts: products, deck, sectionDisliked, wishlist, actions, sync, unseenDeals, markDealsSeen }
 }
 
 export type SyncStatus = 'off' | 'loading' | 'synced' | 'saving' | 'error'

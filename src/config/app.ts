@@ -14,6 +14,12 @@ export const PRIVACY_OWNER = {
 }
 export const PRIVACY_UPDATED = '9 ottobre 2026'
 
+/** Profili social dell'app (mostrati nel Profilo). Per aggiungerne uno basta inserirlo qui e in SocialLinks. */
+export const SOCIAL_LINKS = {
+  instagram: 'https://www.instagram.com/swipeshoppingapp/',
+  tiktok: 'https://www.tiktok.com/@swipeshoppingapp',
+}
+
 /** Unico account che vede la pagina Statistiche (#/admin). Il controllo vero è in Supabase (admin_stats). */
 export const ADMIN_EMAIL = 'kevinconti0118@gmail.com'
 

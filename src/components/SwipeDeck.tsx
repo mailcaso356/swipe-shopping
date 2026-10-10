@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion'
-import { Heart, RotateCcw, X } from 'lucide-react'
+import { Heart, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/AppState'
@@ -7,6 +7,7 @@ import { productImageUrl, storeLinkLabel } from '../config/stores'
 import { CoachMarks } from './CoachMarks'
 import { SendButton } from './SendButton'
 import { StoreLink } from './StoreLink'
+import { UndoMenu } from './UndoMenu'
 import { SwipeCard, type SwipeDir } from './SwipeCard'
 
 const preloaded = new Set<string>()
@@ -19,7 +20,7 @@ function preload(url?: string) {
 }
 
 export function SwipeDeck() {
-  const { deck, state, actions } = useApp()
+  const { deck, actions } = useApp()
   const [exitDir, setExitDir] = useState<SwipeDir>(1)
   const top = deck[0]
   const visible = deck.slice(0, 3)
@@ -68,16 +69,7 @@ export function SwipeDeck() {
       </div>
 
       <div className="flex items-center justify-center gap-3 sm:gap-4">
-        <button
-          type="button"
-          onClick={actions.undo}
-          disabled={!state.lastAction}
-          aria-label="Annulla ultimo swipe"
-          title="Annulla"
-          className="grid size-11 place-items-center rounded-full bg-white text-neutral-500 shadow-md ring-1 ring-black/5 transition active:scale-90 disabled:opacity-30"
-        >
-          <RotateCcw className="size-5" />
-        </button>
+        <UndoMenu />
         <button
           type="button"
           onClick={() => swipe(-1)}
