@@ -111,6 +111,8 @@ export const TECH_GROUPS = [
     items: [
       { id: 'monitor', label: 'Monitor' },
       { id: 'tastiere_mouse', label: 'Tastiere e mouse' },
+      { id: 'notebook', label: 'Notebook' },
+      { id: 'powerbank', label: 'Power bank e caricatori' },
     ],
   },
 ] as const
@@ -138,6 +140,8 @@ export const GADGET_GROUPS = [
       { id: 'giochi_tavolo', label: 'Giochi da tavolo' },
       { id: 'rompicapi', label: 'Rompicapi' },
       { id: 'costruzioni', label: 'Set da costruire' },
+      { id: 'puzzle', label: 'Puzzle' },
+      { id: 'collezionismo', label: 'Da collezione' },
     ],
   },
   {
@@ -179,6 +183,7 @@ export const SNACK_GROUPS = [
     items: [
       { id: 'snack_proteici', label: 'Snack proteici' },
       { id: 'caffe_te', label: 'Caffè e tè' },
+      { id: 'bevande', label: 'Bibite ed energy drink' },
     ],
   },
 ] as const
@@ -215,6 +220,15 @@ export const BEAUTY_GROUPS = [
     emoji: '🪒',
     items: [{ id: 'rasatura', label: 'Rasoi ed epilatori' }],
   },
+  {
+    id: 'igiene',
+    label: 'Corpo e sorriso',
+    emoji: '🪥',
+    items: [
+      { id: 'cura_corpo', label: 'Cura del corpo' },
+      { id: 'spazzolini', label: 'Spazzolini elettrici' },
+    ],
+  },
 ] as const
 
 /** La sezione Casa: cucina, oggetti di design, casa smart. */
@@ -226,6 +240,8 @@ export const CASA_GROUPS = [
     items: [
       { id: 'elettrodomestici', label: 'Piccoli elettrodomestici' },
       { id: 'pentole', label: 'Pentole e coltelli' },
+      { id: 'macchine_caffe', label: 'Macchine da caffè' },
+      { id: 'friggitrici', label: 'Friggitrici ad aria' },
     ],
   },
   {
@@ -247,6 +263,12 @@ export const CASA_GROUPS = [
       { id: 'domotica', label: 'Domotica e assistenti' },
     ],
   },
+  {
+    id: 'pulizia',
+    label: 'Pulizia',
+    emoji: '🧹',
+    items: [{ id: 'aspirapolvere', label: 'Scope elettriche' }],
+  },
 ] as const
 
 /** La sezione Animali: accessori e giochi per cani e gatti. */
@@ -258,6 +280,7 @@ export const ANIMALI_GROUPS = [
     items: [
       { id: 'guinzagli', label: 'Guinzagli e pettorine' },
       { id: 'cucce', label: 'Cucce e cuscini' },
+      { id: 'cibo_cani', label: 'Cibo per cani' },
     ],
   },
   {
@@ -267,6 +290,8 @@ export const ANIMALI_GROUPS = [
     items: [
       { id: 'tiragraffi', label: 'Tiragraffi' },
       { id: 'ciotole', label: 'Ciotole e fontanelle' },
+      { id: 'cibo_gatti', label: 'Cibo per gatti' },
+      { id: 'lettiere', label: 'Lettiere' },
     ],
   },
   {
@@ -276,6 +301,7 @@ export const ANIMALI_GROUPS = [
     items: [
       { id: 'giochi_animali', label: 'Giochi' },
       { id: 'premietti', label: 'Snack e premietti' },
+      { id: 'trasportini', label: 'Trasportini' },
     ],
   },
 ] as const
