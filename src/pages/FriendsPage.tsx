@@ -708,18 +708,17 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
           <p className="truncate text-lg font-bold">{me.handle}</p>
           {me.tag && <p className="text-sm font-medium text-rose-500">@{me.tag}</p>}
           <p className="text-sm text-neutral-500">
-            {me.followers} ti seguono · segui {me.following}
+            {me.followers === 1 ? '1 ti segue' : `${me.followers} ti seguono`} · segui {me.following}
           </p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => update({ regenerate: true })}
+            className="mt-0.5 flex items-center gap-1 text-xs font-medium text-neutral-500 underline active:opacity-60 disabled:opacity-50"
+          >
+            <RefreshCw className={`size-3 ${busy ? 'animate-spin' : ''}`} /> Genera nuovo nome
+          </button>
         </div>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => update({ regenerate: true })}
-          aria-label="Genera un altro nome"
-          className="grid size-10 place-items-center rounded-full bg-neutral-100 text-neutral-600 active:scale-90 disabled:opacity-50"
-        >
-          <RefreshCw className={`size-5 ${busy ? 'animate-spin' : ''}`} />
-        </button>
       </div>
       {choosing && (
         <div className="grid grid-cols-7 gap-1.5">
