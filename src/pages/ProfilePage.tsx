@@ -1,6 +1,6 @@
 import { BarChart3, ChevronRight, Heart, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { AccountCard } from '../components/AccountCard'
+import { AccountActions, AccountCard } from '../components/AccountCard'
 import { InstallCard } from '../components/InstallCard'
 import { MyProfileCard } from '../components/MyProfileCard'
 import { SocialLinks } from '../components/SocialLinks'
@@ -116,8 +116,9 @@ export function ProfilePage() {
         </a>
       </Card>
 
-      <Card icon={<Trash2 className="size-5" />} title="Dati">
+      <Card icon={<Trash2 className="size-5" />} title={user ? "Account e dati" : "Dati"}>
         <div className="flex flex-col gap-2">
+          <AccountActions />
           {confirmClear ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span>Cancellare preferiti, filtri e statistiche?</span>

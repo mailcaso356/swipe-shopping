@@ -33,7 +33,7 @@ const SYNC_LABEL: Record<SyncStatus, ReactNode> = {
 /** Accesso, registrazione e gestione dell'account (Supabase). */
 export function AccountCard({ children }: { children?: ReactNode }) {
   const auth = useAuth()
-  const { sync, actions } = useApp()
+  const { sync } = useApp()
 
   if (!auth.enabled) {
     return (
@@ -52,14 +52,6 @@ export function AccountCard({ children }: { children?: ReactNode }) {
       <LoggedIn
         email={auth.user.email ?? ''}
         sync={sync}
-        onSignOut={async () => {
-          await auth.signOut()
-          actions.clearAll()
-        }}
-        onDelete={async () => {
-          await auth.deleteAccount()
-          actions.clearAll()
-        }}
       >
         {children}
       </LoggedIn>
@@ -76,23 +68,37 @@ export function AccountCard({ children }: { children?: ReactNode }) {
   )
 }
 
-function LoggedIn({
-  email,
-  sync,
-  onSignOut,
-  onDelete,
-  children,
-}: {
-  email: string
-  sync: SyncStatus
-  onSignOut: () => Promise<void>
-  onDelete: () => Promise<void>
-  children?: ReactNode
-}) {
+function LoggedIn({ email, sync, children }: { email: string; sync: SyncStatus; children?: ReactNode }) {
+  return (
+    <div className="space-y-3 text-sm">
+      <p className="flex items-center gap-2">
+        <UserRound className="size-4 text-neutral-500" />
+        <span className="truncate font-medium">{email}</span>
+      </p>
+      {SYNC_LABEL[sync] && <p className="flex items-center gap-2 text-neutral-600">{SYNC_LABEL[sync]}</p>}
+      <EmailAlertsToggle />
+      <EmailNewsToggle />
+      {children}
+    </div>
+  )
+}
+
+/** "Esci" ed "Elimina account": in fondo al Profilo, solo con un account. */
+export function AccountActions() {
+  const auth = useAuth()
+  const { actions } = useApp()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-
+  if (!auth.user) return null
+  const onSignOut = async () => {
+    await auth.signOut()
+    actions.clearAll()
+  }
+  const onDelete = async () => {
+    await auth.deleteAccount()
+    actions.clearAll()
+  }
   const act = async (fn: () => Promise<void>) => {
     setBusy(true)
     setError('')
@@ -105,50 +111,40 @@ function LoggedIn({
   }
 
   return (
-    <div className="space-y-3 text-sm">
-      <p className="flex items-center gap-2">
-        <UserRound className="size-4 text-neutral-500" />
-        <span className="truncate font-medium">{email}</span>
-      </p>
-      {SYNC_LABEL[sync] && <p className="flex items-center gap-2 text-neutral-600">{SYNC_LABEL[sync]}</p>}
-      <EmailAlertsToggle />
-      <EmailNewsToggle />
-      {children}
+    <div className="flex flex-col gap-2 text-sm">
       {error && <p className="text-rose-600">{error}</p>}
-      <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => act(onSignOut)}
-          className="inline-flex items-center gap-2 text-left font-medium disabled:opacity-40"
-        >
-          <LogOut className="size-4" /> Esci
-        </button>
-        {confirmDelete ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <span>Eliminare l'account e tutti i dati salvati?</span>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => act(onDelete)}
-              className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-[#fff] disabled:opacity-40"
-            >
-              Sì, elimina
-            </button>
-            <button type="button" onClick={() => setConfirmDelete(false)} className="px-2 py-1 font-medium text-neutral-500">
-              Annulla
-            </button>
-          </div>
-        ) : (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => act(onSignOut)}
+        className="inline-flex items-center gap-2 text-left font-medium disabled:opacity-40"
+      >
+        <LogOut className="size-4" /> Esci
+      </button>
+      {confirmDelete ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span>Eliminare l'account e tutti i dati salvati?</span>
           <button
             type="button"
-            onClick={() => setConfirmDelete(true)}
-            className="inline-flex items-center gap-2 text-left font-medium text-rose-600"
+            disabled={busy}
+            onClick={() => act(onDelete)}
+            className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-[#fff] disabled:opacity-40"
           >
-            <Trash2 className="size-4" /> Elimina account
+            Sì, elimina
           </button>
-        )}
-      </div>
+          <button type="button" onClick={() => setConfirmDelete(false)} className="px-2 py-1 font-medium text-neutral-500">
+            Annulla
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setConfirmDelete(true)}
+          className="inline-flex items-center gap-2 text-left font-medium text-rose-600"
+        >
+          <Trash2 className="size-4" /> Elimina account
+        </button>
+      )}
     </div>
   )
 }
