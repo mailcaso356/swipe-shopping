@@ -59,7 +59,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-full flex-col pb-[calc(5rem+env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-neutral-200 bg-neutral-50 py-3">
         <a href={`#/u/${chat.who.code}`} className="flex min-w-0 flex-1 items-center gap-3">
           <Avatar emoji={chat.who.avatar} />
@@ -87,7 +87,7 @@ export function ChatPage() {
         {chat.messages.map((m) => (
           <Bubble key={m.id} m={m} product={products.find((p) => p.id === m.product_id)} onReact={(e) => react(m, e)} />
         ))}
-        <div ref={endRef} className="scroll-mb-[calc(6rem+env(safe-area-inset-bottom))]" />
+        <div ref={endRef} className="scroll-mb-[calc(11rem+env(safe-area-inset-bottom))]" />
       </div>
 
       <a href={routeHref('amici')} className="block pb-4 text-center text-xs text-neutral-500 underline">
