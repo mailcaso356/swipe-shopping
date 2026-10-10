@@ -87,7 +87,7 @@ export function ChatPage() {
         {chat.messages.map((m) => (
           <Bubble key={m.id} m={m} product={products.find((p) => p.id === m.product_id)} onReact={(e) => react(m, e)} />
         ))}
-        <div ref={endRef} />
+        <div ref={endRef} className="scroll-mb-[calc(6rem+env(safe-area-inset-bottom))]" />
       </div>
 
       <a href={routeHref('amici')} className="block pb-4 text-center text-xs text-neutral-500 underline">

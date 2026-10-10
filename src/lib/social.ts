@@ -351,7 +351,7 @@ export async function shareLink(text: string, url: string): Promise<'shared' | '
 export function timeAgo(iso: string) {
   const s = (Date.now() - new Date(iso).getTime()) / 1000
   if (s < 3600) return `${Math.max(1, Math.round(s / 60))} min fa`
-  if (s < 86400) return `${Math.round(s / 3600)} ore fa`
+  if (s < 86400) return Math.round(s / 3600) === 1 ? '1 ora fa' : `${Math.round(s / 3600)} ore fa`
   const d = Math.round(s / 86400)
   return d === 1 ? 'ieri' : `${d} giorni fa`
 }
