@@ -28,8 +28,8 @@ export default function App() {
     <div className="flex h-dvh flex-col bg-neutral-50 text-neutral-900">
       <Header />
       <main
-        className={`mx-auto flex w-full min-h-0 flex-1 flex-col px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] ${
-          isDiscover ? 'max-w-md overflow-hidden' : 'max-w-4xl overflow-y-auto'
+        className={`mx-auto flex w-full min-h-0 flex-1 flex-col px-4 ${
+          isDiscover ? 'max-w-md overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom))]' : 'max-w-4xl overflow-y-auto'
         }`}
       >
         {route === 'scopri' && <DiscoverPage />}
@@ -46,6 +46,8 @@ export default function App() {
         {route === 'insieme' && <SwipeTogetherPage key={hash} />}
         {route === 'segreto' && <SantaPage key={hash} />}
         {route === 'chat' && <ChatPage key={hash} />}
+        {/* Spazio per la barra in basso: un elemento vero, perché Safari ignora il padding in fondo ai contenitori che scorrono. */}
+        {!isDiscover && <div aria-hidden className="h-[calc(6rem+env(safe-area-inset-bottom))] shrink-0" />}
       </main>
       <ConsentBanner />
       <Welcome />
