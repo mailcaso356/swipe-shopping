@@ -20,7 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
+      # L'ultimo main, non il commit che ha avviato il giro: un aggiornamento in coda parte dal catalogo
+      # salvato da quello prima (altrimenti il push finisce in conflitto).
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -40,7 +44,7 @@ jobs:
           git add public/catalog.json public/details
           git diff --cached --quiet && exit 0
           git commit -m "Catalogo aggiornato da Amazon"
-          git pull --rebase origin main
+          git pull --rebase -X theirs origin main
           git push origin HEAD:main
       - name: Avvisa via email chi ha un preferito in offerta
         run: npm run alerts:price
