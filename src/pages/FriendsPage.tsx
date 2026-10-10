@@ -1,6 +1,7 @@
-import { BarChart3, Bell, Cake, Gift, Inbox, Layers, RefreshCw, Search, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
+import { BarChart3, Bell, Cake, Flame, Gift, Inbox, Layers, QrCode, RefreshCw, Search, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ProductImage } from '../components/ProductImage'
+import { ProfileQr } from '../components/ProfileQr'
 import { Avatar, FriendPicker, LoginNeeded, ProductPicker, ProductStrip, ReactionBar, useProductsById } from '../components/SocialBits'
 import { openProduct } from '../lib/productSheet'
 import { disablePush, enablePush, pushAvailable, pushEnabledHere, pushPermission } from '../lib/push'
@@ -44,6 +45,7 @@ interface Data {
   birthdays: Birthday[]
   swipes: SwipeSummary[]
   santas: SantaSummary[]
+  trending: { product_id: string; friends: number }[]
 }
 
 type Tab = 'perte' | 'crea' | 'amici'
@@ -68,7 +70,7 @@ export function FriendsPage() {
   const reload = useCallback(async () => {
     try {
       const me = await social.me()
-      const [mine, feed, friends, inbox, birthdays, swipes, santas] = await Promise.all([
+      const [mine, feed, friends, inbox, birthdays, swipes, santas, trending] = await Promise.all([
         social.mine(),
         social.feed(),
         social.friends(),
@@ -77,8 +79,9 @@ export function FriendsPage() {
         social.swipes(),
         // Finché supabase/schema-7.sql non è eseguito il resto della pagina funziona lo stesso.
         social.santas().catch(() => []),
+        social.trending().catch(() => []),
       ])
-      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes, santas })
+      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes, santas, trending })
       setError('')
       // Aperta la scheda, le novità contano come viste (il pallino si spegne).
       if (inbox.some((i) => !i.seen)) void social.inboxSeen().then(() => setUnseen(0))
@@ -202,6 +205,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
               ))}
             </Section>
           )}
+          <Trending items={data.trending} />
           <Section icon={<Users className="size-5" />} title="Cosa fanno i tuoi amici">
             {data.feed.length === 0 ? (
               <p className="text-sm text-neutral-500">
@@ -477,6 +481,34 @@ function FindFriend() {
   )
 }
 
+/** I prodotti salvati da più amici questa settimana (solo chi mostra i preferiti, senza dire chi). */
+function Trending({ items }: { items: { product_id: string; friends: number }[] }) {
+  const { products } = useProductsById(items.length ? items.map((i) => i.product_id) : undefined)
+  const shown = items.map((i) => ({ ...i, product: products.find((p) => p.id === i.product_id) })).filter((i) => i.product)
+  if (shown.length === 0) return null
+  return (
+    <Section icon={<Flame className="size-5" />} title="Di tendenza tra i tuoi amici">
+      <p className="text-sm text-neutral-500">I prodotti che i tuoi amici hanno salvato di più questa settimana.</p>
+      <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1">
+        {shown.map(({ product, friends }) => (
+          <button
+            key={product!.id}
+            type="button"
+            onClick={() => openProduct(product!)}
+            className="w-32 shrink-0 snap-start space-y-1.5 text-left"
+          >
+            <ProductImage product={product!} className="aspect-square w-full overflow-hidden rounded-xl bg-[#fff] ring-1 ring-black/5 [&_span]:text-4xl" />
+            <span className="line-clamp-2 text-xs font-medium">{product!.title}</span>
+            <span className="block text-xs font-semibold text-rose-500">
+              {friends === 1 ? 'Salvato da 1 amico' : `Salvato da ${friends} amici`}
+            </span>
+          </button>
+        ))}
+      </div>
+    </Section>
+  )
+}
+
 function PushToggle() {
   const [on, setOn] = useState(pushEnabledHere)
   const [busy, setBusy] = useState(false)
@@ -642,6 +674,7 @@ const smallBtn = 'rounded-full bg-rose-500 px-3.5 py-1.5 text-sm font-semibold t
 
 function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyProfile) => void; onShare: (text: string, url: string) => void }) {
   const [choosing, setChoosing] = useState(false)
+  const [qr, setQr] = useState(false)
   const [busy, setBusy] = useState(false)
   const update = async (patch: Parameters<typeof social.update>[0]) => {
     setBusy(true)
@@ -691,13 +724,23 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
           ))}
         </div>
       )}
-      <button
-        type="button"
-        onClick={() => onShare(`Seguimi su Swipe Shopping! Sono ${me.handle}${me.tag ? ` (@${me.tag})` : ''}`, profileUrl(me.code))}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 font-semibold text-white active:scale-[0.98]"
-      >
-        <Share2 className="size-4" /> Invita amici
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => onShare(`Seguimi su Swipe Shopping! Sono ${me.handle}${me.tag ? ` (@${me.tag})` : ''}`, profileUrl(me.code))}
+          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 font-semibold text-white active:scale-[0.98]"
+        >
+          <Share2 className="size-4" /> Invita amici
+        </button>
+        <button
+          type="button"
+          onClick={() => setQr(true)}
+          className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 font-semibold ring-1 ring-neutral-200 active:scale-[0.98]"
+        >
+          <QrCode className="size-4" /> QR
+        </button>
+      </div>
+      {qr && <ProfileQr me={me} onClose={() => setQr(false)} />}
       <label className="flex items-center justify-between gap-3 text-sm">
         <span>Mostra ai miei amici cosa salvo nei preferiti</span>
         <input

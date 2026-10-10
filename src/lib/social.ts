@@ -218,6 +218,8 @@ export const social = {
       new_birth_day: patch.birthday?.day ?? null,
       new_birth_month: patch.birthday === null ? 0 : (patch.birthday?.month ?? null),
     }),
+  /** Prodotti salvati da più amici negli ultimi 7 giorni (senza dire chi). */
+  trending: () => rpc<{ product_id: string; friends: number }[]>('social_trending'),
   /** Codice del profilo con quel tag (o nome), null se non c'è. */
   find: (tag: string) => rpc<string | null>('social_find', { p_tag: tag }),
   profile: (code: string) => rpc<FriendProfile | null>('social_profile', { p_code: code }),
