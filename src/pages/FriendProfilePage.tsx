@@ -1,6 +1,7 @@
 import { Check, UserPlus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Avatar, LoginNeeded, ProductStrip } from '../components/SocialBits'
+import { FEATURES } from '../config/app'
 import { GIFT_TEMPLATES, hashParam, social, type FriendProfile } from '../lib/social'
 import { routeHref } from '../lib/useHashRoute'
 import { useAuth } from '../state/AuthState'
@@ -61,7 +62,7 @@ export function FriendProfilePage() {
           Questo è il tuo profilo: vai ad Amici
         </a>
       ) : !auth.user ? (
-        <LoginNeeded text={`Accedi o registrati per seguire ${profile.handle} e vedere le sue liste regalo.`} />
+        <LoginNeeded text={`Accedi o registrati per seguire ${profile.handle} e vedere i suoi sondaggi.`} />
       ) : (
         <button
           type="button"
@@ -89,6 +90,7 @@ export function FriendProfilePage() {
               ))}
             </section>
           )}
+          {FEATURES.giftLists && (
           <section className="space-y-3">
             <h2 className="font-semibold">Liste regalo</h2>
             {profile.lists.length === 0 && <p className="text-sm text-neutral-500">Nessuna lista per ora.</p>}
@@ -101,6 +103,7 @@ export function FriendProfilePage() {
               </a>
             ))}
           </section>
+          )}
         </>
       )}
     </div>

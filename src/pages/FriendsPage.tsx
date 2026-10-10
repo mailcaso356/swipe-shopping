@@ -31,6 +31,7 @@ import {
   type SwipeSummary,
 } from '../lib/social'
 import { useApp } from '../state/AppState'
+import { FEATURES } from '../config/app'
 import { useAuth } from '../state/AuthState'
 import { SantaCreator } from './SantaPage'
 
@@ -100,7 +101,7 @@ export function FriendsPage() {
     <div className="space-y-4 pb-6">
       <h1 className="text-2xl font-bold">Amici</h1>
       {!auth.user ? (
-        <LoginNeeded text="Con un account puoi invitare gli amici, chiedere un parere sui prodotti e creare liste regalo." />
+        <LoginNeeded text="Con un account puoi invitare gli amici, chiedere un parere sui prodotti e fare Swipe insieme." />
       ) : error && !data ? (
         <p className="rounded-2xl bg-white p-5 text-center text-sm text-neutral-600 ring-1 ring-black/5">{error}</p>
       ) : !data ? (
@@ -161,6 +162,9 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
   }
 
   const noFriends = data.following.length === 0 && data.followers.length === 0
+  // Cose delle funzioni nascoste (FEATURES) non si mostrano.
+  const inbox = data.inbox.filter((i) => visibleKind(i.kind, i.ref_kind))
+  const feed = data.feed.filter((i) => i.kind !== 'list' || FEATURES.giftLists)
 
   return (
     <>
@@ -171,7 +175,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
           <PushCard />
           {noFriends && (
             <div className="space-y-3 rounded-2xl bg-rose-50 p-4 ring-1 ring-rose-100">
-              <p className="text-sm text-rose-900">Qui arrivano consigli, sondaggi e liste dei tuoi amici. Inizia invitandone qualcuno!</p>
+              <p className="text-sm text-rose-900">Qui arrivano consigli e sondaggi dei tuoi amici. Inizia invitandone qualcuno!</p>
               <button
                 type="button"
                 onClick={() => share(`Seguimi su Swipe Shopping! Sono ${data.me.handle}`, profileUrl(data.me.code))}
@@ -181,9 +185,9 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
               </button>
             </div>
           )}
-          {data.inbox.length > 0 && (
+          {inbox.length > 0 && (
             <Section icon={<Inbox className="size-5" />} title="Novità per te">
-              {data.inbox.map((item) => (
+              {inbox.map((item) => (
                 <InboxRow key={item.id} item={item} onDelete={() => act(() => social.inboxDelete(item.id))} />
               ))}
             </Section>
@@ -191,14 +195,14 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
           {data.birthdays.length > 0 && (
             <Section icon={<Cake className="size-5" />} title="Compleanni in arrivo">
               {data.birthdays.map((b) => (
-                <a key={b.who.code} href={b.list_id ? `#/regalo/${b.list_id}` : `#/u/${b.who.code}`} className="flex items-center gap-3 border-t border-neutral-100 pt-3">
+                <a key={b.who.code} href={FEATURES.giftLists && b.list_id ? `#/regalo/${b.list_id}` : `#/u/${b.who.code}`} className="flex items-center gap-3 border-t border-neutral-100 pt-3">
                   <Avatar emoji={b.who.avatar} size="sm" />
                   <p className="flex-1 text-sm">
                     <strong>{b.who.handle}</strong>{' '}
                     {b.days_left === 0 ? 'compie gli anni oggi! 🎉' : b.days_left === 1 ? 'compie gli anni domani' : `compie gli anni tra ${b.days_left} giorni`}
                     <span className="block text-xs text-neutral-500">
                       {b.day} {MONTHS[b.month - 1]}
-                      {b.list_id ? ' · guarda la sua lista regalo' : ''}
+                      {FEATURES.giftLists && b.list_id ? ' · guarda la sua lista regalo' : ''}
                     </span>
                   </p>
                 </a>
@@ -207,12 +211,12 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
           )}
           <Trending items={data.trending} />
           <Section icon={<Users className="size-5" />} title="Cosa fanno i tuoi amici">
-            {data.feed.length === 0 ? (
+            {feed.length === 0 ? (
               <p className="text-sm text-neutral-500">
-                {noFriends ? 'Quando avrai degli amici, qui vedi i loro sondaggi e le loro liste.' : 'Ancora niente di nuovo dai tuoi amici.'}
+                {noFriends ? 'Quando avrai degli amici, qui vedi i loro sondaggi e cosa salvano.' : 'Ancora niente di nuovo dai tuoi amici.'}
               </p>
             ) : (
-              data.feed.map((item, i) => <FeedRow key={`${item.kind}-${'id' in item ? item.id : item.who.code}-${i}`} item={item} />)
+              feed.map((item, i) => <FeedRow key={`${item.kind}-${'id' in item ? item.id : item.who.code}-${i}`} item={item} />)
             )}
           </Section>
         </>
@@ -242,6 +246,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
             ))}
           </Section>
 
+          {FEATURES.giftLists && (
           <Section
             icon={<Gift className="size-5" />}
             title="Liste regalo"
@@ -263,6 +268,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
               />
             ))}
           </Section>
+          )}
 
           <Section
             icon={<Layers className="size-5" />}
@@ -290,6 +296,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
             ))}
           </Section>
 
+          {FEATURES.secretSanta && (
           <Section
             icon={<Snowflake className="size-5" />}
             title="Babbo Natale segreto"
@@ -313,6 +320,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
               </a>
             ))}
           </Section>
+          )}
         </>
       )}
 
@@ -402,6 +410,12 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
 }
 
 const SWIPE_SIZE = 10
+
+function visibleKind(kind: InboxItem['kind'], refKind: InboxItem['ref_kind']) {
+  if (kind === 'lista' || (kind === 'reazione' && refKind === 'list')) return FEATURES.giftLists
+  if (kind === 'segreto' || kind === 'estrazione') return FEATURES.secretSanta
+  return true
+}
 
 /** Invito ad attivare le notifiche (solo nell'app Android, finché non sono attive). */
 function PushCard() {

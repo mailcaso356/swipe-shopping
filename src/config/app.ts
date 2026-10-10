@@ -16,3 +16,12 @@ export const PRIVACY_UPDATED = '9 ottobre 2026'
 
 /** Unico account che vede la pagina Statistiche (#/admin). Il controllo vero è in Supabase (admin_stats). */
 export const ADMIN_EMAIL = 'kevinconti0118@gmail.com'
+
+/**
+ * Funzioni di Amici nascoste per ora (codice e dati restano: basta rimettere true).
+ * Liste regalo e Babbo Natale segreto: tolte il 10/10/2026 perché creavano confusione.
+ */
+export const FEATURES = {
+  giftLists: false,
+  secretSanta: false,
+}
