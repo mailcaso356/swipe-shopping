@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { setSystemBarsTheme } from './native'
 import { load, save } from './storage'
 
 /** Tema chiaro/scuro: segue il telefono finché l'utente non sceglie con il pulsante in alto. */
@@ -13,6 +14,7 @@ const effective = (): Theme => {
 function apply(theme: Theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark')
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'dark' ? '#0e0e10' : '#fafafa')
+  setSystemBarsTheme(theme === 'dark')
 }
 
 export function useTheme() {

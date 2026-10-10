@@ -2,11 +2,13 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { isNative, setupNative } from './lib/native'
 import { startRemoteAnalytics } from './lib/remoteAnalytics'
 import { AppStateProvider } from './state/AppState.tsx'
 import { AuthProvider } from './state/AuthState.tsx'
 
 startRemoteAnalytics()
+void setupNative()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,8 +20,8 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// App installabile (PWA): il service worker c'è solo nel sito pubblicato.
-if (import.meta.env.PROD && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+// App installabile (PWA): il service worker c'è solo nel sito pubblicato (non nell'app Android/iOS).
+if (import.meta.env.PROD && !isNative && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {})
   })

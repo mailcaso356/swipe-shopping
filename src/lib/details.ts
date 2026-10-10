@@ -24,7 +24,7 @@ export function loadDetails(id: string): Promise<ProductDetails | null> {
   const n = detailShard(id)
   let shard = shards.get(n)
   if (!shard) {
-    shard = fetch(`./details/${n}.json`)
+    shard = fetch(`${base()}details/${n}.json`)
       .then((r) => (r.ok ? r.json() : {}))
       .catch(() => {
         shards.delete(n) // offline: riprovo la prossima volta
@@ -33,4 +33,10 @@ export function loadDetails(id: string): Promise<ProductDetails | null> {
     shards.set(n, shard)
   }
   return shard.then((s) => s[id] ?? null)
+}
+
+/** Nell'app Android/iOS i dettagli arrivano dal sito online (come in src/lib/native.ts, senza importarlo). */
+function base() {
+  const cap = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
+  return cap?.isNativePlatform?.() ? 'https://swipeshopping.app/' : './'
 }

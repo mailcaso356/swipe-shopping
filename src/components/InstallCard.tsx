@@ -1,11 +1,13 @@
 import { Share, Smartphone } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { isNative } from '../lib/native'
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>
 }
 
 const isStandalone = () =>
+  isNative ||
   window.matchMedia('(display-mode: standalone)').matches ||
   (navigator as Navigator & { standalone?: boolean }).standalone === true
 

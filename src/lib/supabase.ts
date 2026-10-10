@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { SITE, isNative } from './native'
 
 const url: string | undefined = import.meta.env.VITE_SUPABASE_URL
 const anonKey: string | undefined = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -21,4 +22,5 @@ export const supabase =
     : null
 
 /** Indirizzo a cui tornano i link delle email (conferma, recupero password). */
-export const authRedirectUrl = () => `${window.location.origin}${window.location.pathname}`
+// Nell'app l'indirizzo interno (https://localhost) non funziona fuori dal telefono: le email portano al sito.
+export const authRedirectUrl = () => (isNative ? SITE : `${window.location.origin}${window.location.pathname}`)

@@ -1,4 +1,5 @@
 import { UNIVERSES, type Universe } from '../config/categories'
+import { DATA_BASE } from './native'
 import { buildExploreCards } from '../data/exploreCards'
 import type { Product } from '../types/product'
 import { checkCatalog } from './validate'
@@ -17,10 +18,10 @@ export interface CatalogResult {
  * si scarica prima la sezione aperta, poi le altre. In sviluppo c'è solo `catalog.json` (tutto).
  */
 export async function loadCatalog(section: Universe, signal?: AbortSignal): Promise<CatalogResult> {
-  let res = await fetch(`${import.meta.env.BASE_URL}catalog-${section}.json`, { signal })
+  let res = await fetch(`${DATA_BASE}catalog-${section}.json`, { signal })
   let sections: Universe[] = [section]
   if (!res.ok) {
-    res = await fetch(`${import.meta.env.BASE_URL}catalog.json`, { signal })
+    res = await fetch(`${DATA_BASE}catalog.json`, { signal })
     sections = [...UNIVERSES]
   }
   if (!res.ok) throw new Error(`Catalogo non disponibile (HTTP ${res.status})`)

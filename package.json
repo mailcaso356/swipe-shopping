@@ -12,9 +12,16 @@
     "typecheck": "tsc -b",
     "sync:amazon": "node scripts/sync-amazon.ts",
     "sync:stores": "node scripts/sync-stores.ts",
-    "alerts:price": "node scripts/price-alerts.ts"
+    "alerts:price": "node scripts/price-alerts.ts",
+    "build:app": "tsc -b && vite build && node scripts/prune-app.ts && cap sync",
+    "assets:app": "npx -y @capacitor/assets@3.0.5 generate --android --iconBackgroundColor \"#ffffff\" --splashBackgroundColor \"#ffffff\""
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/splash-screen": "^8.0.2",
     "@supabase/supabase-js": "^2.117.3",
     "@tailwindcss/vite": "^4.3.3",
     "framer-motion": "^14.0.0",
@@ -24,6 +31,7 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

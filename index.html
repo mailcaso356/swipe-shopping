@@ -21,13 +21,16 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <script>
       // Il catalogo della sezione aperta inizia a scaricarsi subito, in parallelo al codice dell'app.
-      var l = document.createElement('link')
-      l.rel = 'preload'
-      l.as = 'fetch'
-      l.crossOrigin = 'anonymous'
-      var c = document.documentElement.classList
-      l.href = './catalog-' + (['tech', 'gadget', 'snack'].filter(function (x) { return c.contains(x) })[0] || 'moda') + '.json'
-      document.head.appendChild(l)
+      // Nell'app (Capacitor) il catalogo arriva dal sito online, non da qui.
+      if (!window.Capacitor) {
+        var l = document.createElement('link')
+        l.rel = 'preload'
+        l.as = 'fetch'
+        l.crossOrigin = 'anonymous'
+        var c = document.documentElement.classList
+        l.href = './catalog-' + (['tech', 'gadget', 'snack'].filter(function (x) { return c.contains(x) })[0] || 'moda') + '.json'
+        document.head.appendChild(l)
+      }
     </script>
     <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
