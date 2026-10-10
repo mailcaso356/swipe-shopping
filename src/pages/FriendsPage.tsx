@@ -171,7 +171,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
   const chatsOn = data.chats !== null
   // Cose delle funzioni nascoste (FEATURES) non si mostrano.
   const inbox = data.inbox.filter((i) => visibleKind(i.kind, i.ref_kind, chatsOn))
-  const feed = data.feed.filter((i) => i.kind !== 'list' || FEATURES.giftLists)
+  const feed = data.feed.filter((i) => (i.kind !== 'list' || FEATURES.giftLists) && (i.kind !== 'saves' || FEATURES.feedSaves))
 
   return (
     <>
@@ -220,7 +220,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
           <Section icon={<Users className="size-5" />} title="Cosa fanno i tuoi amici">
             {feed.length === 0 ? (
               <p className="text-sm text-neutral-500">
-                {noFriends ? 'Quando avrai degli amici, qui vedi i loro sondaggi e cosa salvano.' : 'Ancora niente di nuovo dai tuoi amici.'}
+                {noFriends ? 'Quando avrai degli amici, qui vedi i loro sondaggi.' : 'Ancora niente di nuovo dai tuoi amici.'}
               </p>
             ) : (
               feed.map((item, i) => <FeedRow key={`${item.kind}-${'id' in item ? item.id : item.who.code}-${i}`} item={item} />)

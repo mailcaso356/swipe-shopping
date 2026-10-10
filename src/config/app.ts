@@ -26,4 +26,6 @@ export const FEATURES = {
   secretSanta: false,
   /** compleanno nel profilo e "Compleanni in arrivo" (tolti il 10/10/2026) */
   birthdays: false,
+  /** "X ha salvato N prodotti" in "Cosa fanno i tuoi amici" (tolto il 10/10/2026: restano le tendenze) */
+  feedSaves: false,
 }
