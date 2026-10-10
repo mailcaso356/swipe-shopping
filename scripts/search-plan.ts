@@ -23,6 +23,10 @@ const BOTH: SearchGender[] = ['uomo', 'donna']
 const TECH: SearchGender[] = ['unisex']
 /** Gadget: per tutti, con almeno 4 stelle e 50 recensioni quando Amazon le fornisce */
 const GADGET = { genders: TECH, minRating: 4, minReviews: 50 }
+/** Beauty: uomo e donna, solo prodotti ben recensiti */
+const BEAUTY = { searchIndex: 'Beauty', minRating: 4, minReviews: 50 }
+/** Casa e animali: per tutti, solo prodotti ben recensiti */
+const HOME = { genders: TECH, minRating: 4, minReviews: 50 }
 /** Snack: come i gadget, nel reparto Alimentari */
 const SNACK = { ...GADGET, searchIndex: 'GroceryAndGourmetFood' }
 
@@ -165,6 +169,49 @@ export const SEARCH_PLAN: CategoryPlan[] = [
     brands: ['Lavazza', 'illy', 'Kimbo', 'Borbone', 'Segafredo', 'Starbucks', 'Nescafé'] },
   { category: 'caffe_te', keywords: 'tè', minPrice: 5, ...SNACK,
     brands: ['Twinings', 'Pompadour', 'Lipton', 'Yogi Tea', 'Sonnentor'] },
+  // Sezione Beauty (i profumi sono più su)
+  { category: 'skincare', keywords: 'crema viso', minPrice: 8, genders: BOTH, ...BEAUTY,
+    brands: ['La Roche-Posay', 'CeraVe', 'Vichy', "L'Oréal Paris", 'Nivea', 'Eucerin', 'Garnier', 'The Ordinary', 'Clinique'] },
+  { category: 'trucco', keywords: 'trucco', minPrice: 6, genders: ['donna'], ...BEAUTY,
+    brands: ['Maybelline', "L'Oréal Paris", 'NYX', 'Rimmel', 'Max Factor', 'Benefit', 'Clinique', 'Estée Lauder', 'e.l.f.'] },
+  { category: 'cura_capelli', keywords: 'shampoo', minPrice: 6, genders: BOTH, ...BEAUTY,
+    brands: ["L'Oréal Professionnel", 'Kérastase', 'Olaplex', 'Pantene', 'Garnier', 'Moroccanoil', 'Davines'] },
+  { category: 'styling_capelli', keywords: 'piastra capelli', minPrice: 25, genders: ['donna'], ...BEAUTY,
+    brands: ['Dyson', 'ghd', 'Remington', 'BaByliss', 'Philips', 'Rowenta'] },
+  { category: 'styling_capelli', keywords: 'asciugacapelli', minPrice: 25, genders: ['unisex'], ...BEAUTY,
+    brands: ['Dyson', 'ghd', 'Remington', 'BaByliss', 'Philips', 'Rowenta', 'Braun'] },
+  { category: 'rasatura', keywords: 'rasoio elettrico', minPrice: 25, genders: ['uomo'], ...BEAUTY,
+    brands: ['Philips', 'Braun', 'Panasonic', 'Remington', 'Gillette'] },
+  { category: 'rasatura', keywords: 'epilatore', minPrice: 25, genders: ['donna'], ...BEAUTY,
+    brands: ['Braun', 'Philips', 'Remington', 'Panasonic'] },
+  // Sezione Casa
+  { category: 'elettrodomestici', keywords: 'piccoli elettrodomestici cucina', searchIndex: 'HomeAndKitchen', minPrice: 30, ...HOME,
+    brands: ['Smeg', 'KitchenAid', "De'Longhi", 'Kenwood', 'Ninja', 'Philips', 'Nespresso', 'Bialetti'] },
+  { category: 'pentole', keywords: 'pentole', searchIndex: 'HomeAndKitchen', minPrice: 20, ...HOME,
+    brands: ['Lagostina', 'Tefal', 'Le Creuset', 'WMF', 'Zwilling', 'Ballarini', 'Moneta', 'Victorinox'] },
+  { category: 'design', keywords: 'oggetti design casa', searchIndex: 'HomeAndKitchen', minPrice: 20, ...HOME,
+    brands: ['Alessi', 'Kartell', 'Guzzini', 'Umbra', 'Bitossi', 'Seletti', 'Stelton'] },
+  { category: 'candele', keywords: 'candela profumata', searchIndex: 'HomeAndKitchen', minPrice: 10, ...HOME,
+    brands: ['Yankee Candle', 'Millefiori Milano', 'Mr & Mrs Fragrance', 'Muha', 'Culti', 'Woodwick'] },
+  { category: 'biancheria', keywords: 'copripiumino', searchIndex: 'HomeAndKitchen', minPrice: 25, ...HOME,
+    brands: ['Caleffi', 'Bassetti', 'Zucchi', 'Somma', 'Gabel'] },
+  { category: 'robot', keywords: 'robot aspirapolvere', searchIndex: 'HomeAndKitchen', minPrice: 120, ...HOME,
+    brands: ['iRobot', 'Roborock', 'Dreame', 'Ecovacs', 'Xiaomi', 'Rowenta'] },
+  { category: 'domotica', keywords: 'casa intelligente', searchIndex: 'Electronics', minPrice: 20, ...HOME,
+    brands: ['Amazon', 'Google', 'Philips', 'Ring', 'TP-Link', 'Netatmo', 'Eufy'] },
+  // Sezione Animali
+  { category: 'guinzagli', keywords: 'pettorina cane', searchIndex: 'PetSupplies', minPrice: 12, ...HOME,
+    brands: ['Julius-K9', 'Flexi', 'Ruffwear', 'Hunter', 'Trixie', 'Rabbitgoo'] },
+  { category: 'cucce', keywords: 'cuccia', searchIndex: 'PetSupplies', minPrice: 20, ...HOME,
+    brands: ['Ferplast', 'Trixie', 'Feandrea', 'Kerbl', 'Bedsure', 'Nobby'] },
+  { category: 'tiragraffi', keywords: 'tiragraffi', searchIndex: 'PetSupplies', minPrice: 20, ...HOME,
+    brands: ['Feandrea', 'Trixie', 'Ferplast', 'Kerbl', 'Nobby'] },
+  { category: 'ciotole', keywords: 'fontanella gatto', searchIndex: 'PetSupplies', minPrice: 12, ...HOME,
+    brands: ['Catit', 'PetSafe', 'Trixie', 'Ferplast', 'Xiaomi', 'Petlibro'] },
+  { category: 'giochi_animali', keywords: 'gioco', searchIndex: 'PetSupplies', minPrice: 8, ...HOME,
+    brands: ['Kong', 'Trixie', 'Chuckit!', 'Nerf Dog', 'Ferplast', 'Catit', 'Petstages'] },
+  { category: 'premietti', keywords: 'snack', searchIndex: 'PetSupplies', minPrice: 8, ...HOME,
+    brands: ['Pedigree', 'Purina', 'Whiskas', 'Dreamies', 'Royal Canin', 'Felix', 'Trixie'] },
 ]
 
 /** Confronto tollerante tra marche ("TOMMY HILFIGER" = "Tommy Hilfiger", "Levi's" = "Levis"). */

@@ -74,7 +74,7 @@ async function callApi(op: string, token: string, payload: Record<string, unknow
 }
 
 /** Tetto di richieste per esecuzione: Amazon concede 8640 richieste al giorno. */
-const MAX_REQUESTS = Number(process.env.AMAZON_MAX_REQUESTS ?? 1500)
+const MAX_REQUESTS = Number(process.env.AMAZON_MAX_REQUESTS ?? 2500)
 let requests = 0
 
 const OFFER_RESOURCES = ['offersV2.listings.price', 'offersV2.listings.availability', 'offersV2.listings.isBuyBoxWinner']

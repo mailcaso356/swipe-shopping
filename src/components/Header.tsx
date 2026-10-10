@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Cookie, Cpu, Gift, Moon, Shirt, Sun } from 'lucide-react'
+import { Check, ChevronDown, Cookie, Cpu, Gift, Moon, PawPrint, Shirt, Sofa, Sparkles, Sun } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { APP_NAME } from '../config/app'
 import { SECTIONS, sectionOf, type Universe } from '../config/categories'
@@ -37,10 +37,18 @@ export function Header() {
   )
 }
 
-const ICONS: Record<Universe, typeof Shirt> = { moda: Shirt, tech: Cpu, gadget: Gift, snack: Cookie }
+const ICONS: Record<Universe, typeof Shirt> = {
+  moda: Shirt,
+  beauty: Sparkles,
+  tech: Cpu,
+  casa: Sofa,
+  gadget: Gift,
+  snack: Cookie,
+  animali: PawPrint,
+}
 
 /** Sezioni nuove: hanno il segno "Nuovo" finché l'utente non le apre. Aggiungere qui le prossime. */
-const NEW_SECTIONS: Universe[] = ['gadget', 'snack']
+const NEW_SECTIONS: Universe[] = ['beauty', 'casa', 'gadget', 'snack', 'animali']
 
 /** Menu delle sezioni: ognuna è come un'app a sé, con filtri e preferiti suoi. */
 function SectionMenu() {
@@ -50,7 +58,7 @@ function SectionMenu() {
   const current = sectionOf(state.mode)
   const Icon = ICONS[current.id]
   const [visited, setVisited] = useState(() => load<Universe[]>('sectionsVisited', []))
-  const [menuSeen, setMenuSeen] = useState(() => load<boolean>('sectionsMenuSeen', false))
+  const [menuSeen, setMenuSeen] = useState(() => load<boolean>('sectionsMenuSeen:2', false))
   const isNew = (u: Universe) => NEW_SECTIONS.includes(u) && !visited.includes(u) && u !== state.mode
   // Il pallino sul pulsante sparisce alla prima apertura del menu; il "Nuovo" nel menu quando si apre la sezione.
   const dot = !menuSeen && NEW_SECTIONS.some(isNew)
@@ -83,7 +91,7 @@ function SectionMenu() {
           setOpen(!open)
           if (!menuSeen) {
             setMenuSeen(true)
-            save('sectionsMenuSeen', true)
+            save('sectionsMenuSeen:2', true)
           }
         }}
         aria-haspopup="menu"

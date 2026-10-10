@@ -1,0 +1,36 @@
+# Grafica per la scheda di Google Play (screenshot con prodotti veri e grafica in evidenza).
+# Si avvia a mano; il risultato va nel ramo "store-assets".
+name: Grafica store
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm i --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Screenshot
+        run: |
+          npx vite preview --port 4173 &
+          npx wait-on -t 30000 http://localhost:4173 2>/dev/null || sleep 5
+          node scripts/store/shots.mjs
+      - name: Salva nel ramo store-assets
+        run: |
+          cd store-out
+          git init -q -b store-assets
+          git config user.name "catalog-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Grafica store"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" store-assets

@@ -89,6 +89,57 @@ body {
   --color-rose-700: #5eead4;
 }
 
+/* Sezione Beauty: fucsia. */
+:root.beauty {
+  --color-rose-50: #fdf4ff;
+  --color-rose-100: #fae8ff;
+  --color-rose-300: #f0abfc;
+  --color-rose-400: #e879f9;
+  --color-rose-500: #c026d3;
+  --color-rose-600: #a21caf;
+  --color-rose-700: #86198f;
+}
+:root.beauty.dark {
+  --color-rose-50: #3a1040;
+  --color-rose-100: #4a1552;
+  --color-rose-500: #d946ef;
+  --color-rose-700: #f0abfc;
+}
+
+/* Sezione Casa: blu. */
+:root.casa {
+  --color-rose-50: #eff6ff;
+  --color-rose-100: #dbeafe;
+  --color-rose-300: #93c5fd;
+  --color-rose-400: #60a5fa;
+  --color-rose-500: #2563eb;
+  --color-rose-600: #1d4ed8;
+  --color-rose-700: #1e40af;
+}
+:root.casa.dark {
+  --color-rose-50: #172554;
+  --color-rose-100: #1e3a8a;
+  --color-rose-500: #3b82f6;
+  --color-rose-700: #93c5fd;
+}
+
+/* Sezione Animali: ocra. */
+:root.animali {
+  --color-rose-50: #fefce8;
+  --color-rose-100: #fef9c3;
+  --color-rose-300: #fde047;
+  --color-rose-400: #eab308;
+  --color-rose-500: #a16207;
+  --color-rose-600: #854d0e;
+  --color-rose-700: #713f12;
+}
+:root.animali.dark {
+  --color-rose-50: #3a2a08;
+  --color-rose-100: #4a360a;
+  --color-rose-500: #ca8a04;
+  --color-rose-700: #fde047;
+}
+
 body {
   background: var(--color-neutral-50);
 }

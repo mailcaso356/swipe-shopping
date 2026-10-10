@@ -156,8 +156,14 @@ const OTHER = {
     dealsIntro: 'Gadget, lampade, tazze, giochi da tavolo, LEGO e regali curiosi scontati almeno del 5%, aggiornati più volte al giorno.' },
   snack: { what: 'snack, dolci e caffè', deals: 'Offerte snack di oggi: cioccolato, caramelle, caffè', dealsH1: 'Offerte snack di oggi',
     dealsIntro: 'Cioccolato, caramelle, biscotti, patatine, snack proteici, caffè e tè scontati almeno del 5%, aggiornati più volte al giorno.' },
+  beauty: { what: 'profumi, trucco e cura della persona', deals: 'Offerte beauty di oggi: profumi, trucco, skincare', dealsH1: 'Offerte beauty di oggi',
+    dealsIntro: 'Profumi, trucco, creme viso, shampoo, phon, piastre e rasoi delle migliori marche scontati almeno del 5%, aggiornati più volte al giorno.' },
+  casa: { what: 'casa, cucina e design', deals: 'Offerte casa di oggi: cucina, design, robot', dealsH1: 'Offerte casa di oggi',
+    dealsIntro: 'Piccoli elettrodomestici, pentole, oggetti di design, candele, robot aspirapolvere e domotica scontati almeno del 5%, aggiornati più volte al giorno.' },
+  animali: { what: 'accessori per cani e gatti', deals: 'Offerte per animali: cani e gatti', dealsH1: 'Offerte per cani e gatti di oggi',
+    dealsIntro: 'Pettorine, cucce, tiragraffi, fontanelle, giochi e snack per cani e gatti scontati almeno del 5%, aggiornati più volte al giorno.' },
 } as const
-for (const section of ['tech', 'gadget', 'snack'] as const) {
+for (const section of ['beauty', 'tech', 'casa', 'gadget', 'snack', 'animali'] as const) {
   const t = OTHER[section]
   const list = products.filter((p) => universeOf(p.category) === section)
   for (const group of groupsOf(section)) {
@@ -296,7 +302,7 @@ for (const pg of pages) {
 const INDEX = {
   moda: {
     title: 'Moda di marca: categorie, marche e offerte | Swipe Shopping',
-    description: 'Abbigliamento, scarpe, borse, accessori e profumi dei migliori marchi, divisi per categoria e marca, con le offerte del giorno.',
+    description: 'Abbigliamento, scarpe, borse e accessori dei migliori marchi, divisi per categoria e marca, con le offerte del giorno.',
     h1: 'Moda di marca',
   },
   tech: {
@@ -308,6 +314,21 @@ const INDEX = {
     title: 'Idee regalo e gadget curiosi: lampade, tazze, giochi, LEGO | Swipe Shopping',
     description: 'Gadget da cucina, lampade, tazze, giochi da tavolo, rompicapi, LEGO e regali divertenti delle migliori marche, con le offerte del giorno.',
     h1: 'Gadget e idee regalo',
+  },
+  beauty: {
+    title: 'Beauty in offerta: profumi, trucco, skincare, capelli | Swipe Shopping',
+    description: 'Profumi, trucco, cura del viso, shampoo, phon, piastre e rasoi delle migliori marche, con le offerte del giorno.',
+    h1: 'Beauty in offerta',
+  },
+  casa: {
+    title: 'Casa e cucina in offerta: elettrodomestici, design, robot | Swipe Shopping',
+    description: 'Piccoli elettrodomestici, pentole, oggetti di design, candele, biancheria, robot aspirapolvere e domotica delle migliori marche, con le offerte del giorno.',
+    h1: 'Casa e cucina in offerta',
+  },
+  animali: {
+    title: 'Accessori per cani e gatti in offerta | Swipe Shopping',
+    description: 'Pettorine, cucce, tiragraffi, fontanelle, giochi e snack per cani e gatti delle migliori marche, con le offerte del giorno.',
+    h1: 'Cani e gatti: accessori in offerta',
   },
   snack: {
     title: 'Snack in offerta: cioccolato, caramelle, patatine, caffè | Swipe Shopping',

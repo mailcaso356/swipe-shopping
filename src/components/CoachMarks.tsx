@@ -45,7 +45,7 @@ export function CoachMarks() {
           <strong>Tocca il centro</strong> o il nome per aprire la scheda con caratteristiche e prezzo.
         </Tip>
         <Tip icon={<ArrowUp className="size-5" />}>
-          <strong>Il menu in alto a sinistra</strong> apre le altre sezioni: Moda, Tech, Gadget e Snack, ognuna con preferiti e filtri suoi.
+          <strong>Il menu in alto a sinistra</strong> apre le altre sezioni: Beauty, Tech, Casa, Gadget, Snack e Animali, ognuna con preferiti e filtri suoi.
         </Tip>
         <button type="button" onClick={close} className="h-12 w-full rounded-full bg-rose-500 font-semibold text-[#fff]">
           Ho capito

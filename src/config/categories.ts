@@ -57,12 +57,6 @@ export const CATEGORY_GROUPS = [
       { id: 'borse_viaggio', label: 'Borse da viaggio' },
     ],
   },
-  {
-    id: 'profumi',
-    label: 'Profumi',
-    emoji: '🌸',
-    items: [{ id: 'profumi', label: 'Profumi' }],
-  },
 ] as const
 
 /**
@@ -189,49 +183,149 @@ export const SNACK_GROUPS = [
   },
 ] as const
 
-export type Universe = 'moda' | 'tech' | 'gadget' | 'snack'
+/** La sezione Beauty: profumi, viso e trucco, capelli, rasatura. Come la moda, ha donna/uomo. */
+export const BEAUTY_GROUPS = [
+  {
+    id: 'profumi',
+    label: 'Profumi',
+    emoji: '🌸',
+    items: [{ id: 'profumi', label: 'Profumi' }],
+  },
+  {
+    id: 'viso',
+    label: 'Viso e trucco',
+    emoji: '💄',
+    items: [
+      { id: 'skincare', label: 'Cura del viso' },
+      { id: 'trucco', label: 'Trucco' },
+    ],
+  },
+  {
+    id: 'capelli',
+    label: 'Capelli',
+    emoji: '💇',
+    items: [
+      { id: 'cura_capelli', label: 'Shampoo e trattamenti' },
+      { id: 'styling_capelli', label: 'Phon e piastre' },
+    ],
+  },
+  {
+    id: 'corpo',
+    label: 'Rasatura e depilazione',
+    emoji: '🪒',
+    items: [{ id: 'rasatura', label: 'Rasoi ed epilatori' }],
+  },
+] as const
 
-/** Le sezioni dell'app, come app separate: ognuna con categorie, filtri e preferiti suoi. */
-export const SECTIONS: { id: Universe; label: string; hint: string; color: string }[] = [
-  { id: 'moda', label: 'Moda', hint: 'Vestiti, scarpe, borse, profumi', color: '#f43f5e' },
+/** La sezione Casa: cucina, oggetti di design, casa smart. */
+export const CASA_GROUPS = [
+  {
+    id: 'cucina',
+    label: 'Cucina',
+    emoji: '🍳',
+    items: [
+      { id: 'elettrodomestici', label: 'Piccoli elettrodomestici' },
+      { id: 'pentole', label: 'Pentole e coltelli' },
+    ],
+  },
+  {
+    id: 'arredo',
+    label: 'Arredo e design',
+    emoji: '🛋️',
+    items: [
+      { id: 'design', label: 'Oggetti di design' },
+      { id: 'candele', label: 'Candele e profumatori' },
+      { id: 'biancheria', label: 'Biancheria per la casa' },
+    ],
+  },
+  {
+    id: 'smart_home',
+    label: 'Casa smart',
+    emoji: '🤖',
+    items: [
+      { id: 'robot', label: 'Robot aspirapolvere' },
+      { id: 'domotica', label: 'Domotica e assistenti' },
+    ],
+  },
+] as const
+
+/** La sezione Animali: accessori e giochi per cani e gatti. */
+export const ANIMALI_GROUPS = [
+  {
+    id: 'cani',
+    label: 'Cani',
+    emoji: '🐶',
+    items: [
+      { id: 'guinzagli', label: 'Guinzagli e pettorine' },
+      { id: 'cucce', label: 'Cucce e cuscini' },
+    ],
+  },
+  {
+    id: 'gatti',
+    label: 'Gatti',
+    emoji: '🐱',
+    items: [
+      { id: 'tiragraffi', label: 'Tiragraffi' },
+      { id: 'ciotole', label: 'Ciotole e fontanelle' },
+    ],
+  },
+  {
+    id: 'tutti_animali',
+    label: 'Per tutti',
+    emoji: '🐾',
+    items: [
+      { id: 'giochi_animali', label: 'Giochi' },
+      { id: 'premietti', label: 'Snack e premietti' },
+    ],
+  },
+] as const
+
+export type Universe = 'moda' | 'tech' | 'gadget' | 'snack' | 'beauty' | 'casa' | 'animali'
+
+/**
+ * Le sezioni dell'app, come app separate: ognuna con categorie, filtri e preferiti suoi.
+ * `gender`: la sezione ha prodotti da donna e da uomo (filtro Genere). `colors`: filtro per colore.
+ */
+export const SECTIONS: { id: Universe; label: string; hint: string; color: string; gender?: boolean; colors?: boolean }[] = [
+  { id: 'moda', label: 'Moda', hint: 'Vestiti, scarpe, borse, orologi', color: '#f43f5e', gender: true, colors: true },
+  { id: 'beauty', label: 'Beauty', hint: 'Profumi, trucco, viso, capelli', color: '#c026d3', gender: true },
   { id: 'tech', label: 'Tech', hint: 'Cuffie, smartphone, gaming', color: '#f97316' },
+  { id: 'casa', label: 'Casa', hint: 'Cucina, design, casa smart', color: '#2563eb' },
   { id: 'gadget', label: 'Gadget', hint: 'Idee regalo e oggetti curiosi', color: '#8b5cf6' },
   { id: 'snack', label: 'Snack', hint: 'Dolci, salati, proteici, caffè', color: '#0d9488' },
+  { id: 'animali', label: 'Animali', hint: 'Cani e gatti: giochi, cucce', color: '#a16207' },
 ]
 export const UNIVERSES = SECTIONS.map((s) => s.id)
 export const isUniverse = (v: unknown): v is Universe => UNIVERSES.includes(v as Universe)
 export const sectionOf = (u: Universe) => SECTIONS.find((s) => s.id === u)!
 
-export type CategoryGroup = (typeof CATEGORY_GROUPS)[number] | (typeof TECH_GROUPS)[number] | (typeof GADGET_GROUPS)[number]
-  | (typeof SNACK_GROUPS)[number]
+/** Gruppi di categorie di ogni sezione */
+const GROUPS = {
+  moda: CATEGORY_GROUPS,
+  beauty: BEAUTY_GROUPS,
+  tech: TECH_GROUPS,
+  casa: CASA_GROUPS,
+  gadget: GADGET_GROUPS,
+  snack: SNACK_GROUPS,
+  animali: ANIMALI_GROUPS,
+} as const satisfies Record<Universe, readonly unknown[]>
+
+export type CategoryGroup = (typeof GROUPS)[Universe][number]
 export type CategoryId = CategoryGroup['items'][number]['id']
 
 const byId = new Map<string, { label: string; group: CategoryGroup; universe: Universe }>()
-for (const group of CATEGORY_GROUPS) {
-  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'moda' })
-}
-for (const group of TECH_GROUPS) {
-  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'tech' })
-}
-for (const group of GADGET_GROUPS) {
-  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'gadget' })
-}
-for (const group of SNACK_GROUPS) {
-  for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: 'snack' })
+for (const u of UNIVERSES) {
+  for (const group of GROUPS[u] as readonly CategoryGroup[]) {
+    for (const item of group.items) byId.set(item.id, { label: item.label, group, universe: u })
+  }
 }
 
 export const isCategoryId = (id: string): id is CategoryId => byId.has(id)
 export const categoryLabel = (id: CategoryId) => byId.get(id)?.label ?? id
 export const categoryGroupOf = (id: CategoryId) => byId.get(id)?.group
-/** Sezione della categoria (moda, tech, gadget, snack) */
+/** Sezione della categoria (moda, tech, gadget…) */
 export const universeOf = (id: CategoryId): Universe => byId.get(id)?.universe ?? 'moda'
 /** Gruppi di categorie della sezione */
-const GROUPS: Record<Universe, readonly CategoryGroup[]> = {
-  moda: CATEGORY_GROUPS,
-  tech: TECH_GROUPS,
-  gadget: GADGET_GROUPS,
-  snack: SNACK_GROUPS,
-}
 export const groupsOf = (u: Universe): readonly CategoryGroup[] => GROUPS[u]
 /** Tutte le categorie della sezione */
 export const categoryIdsOf = (u: Universe) => groupsOf(u).flatMap((g) => g.items.map((i) => i.id)) as CategoryId[]
