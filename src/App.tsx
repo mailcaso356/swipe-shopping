@@ -11,6 +11,7 @@ import { FriendProfilePage } from './pages/FriendProfilePage'
 import { FriendsPage } from './pages/FriendsPage'
 import { GiftListPage } from './pages/GiftListPage'
 import { PollPage } from './pages/PollPage'
+import { SantaPage } from './pages/SantaPage'
 import { SwipeTogetherPage } from './pages/SwipeTogetherPage'
 import { FiltersPage } from './pages/FiltersPage'
 import { PrivacyPage } from './pages/PrivacyPage'
@@ -42,6 +43,7 @@ export default function App() {
         {route === 'sondaggio' && <PollPage key={hash} />}
         {route === 'regalo' && <GiftListPage key={hash} />}
         {route === 'insieme' && <SwipeTogetherPage key={hash} />}
+        {route === 'segreto' && <SantaPage key={hash} />}
       </main>
       <ConsentBanner />
       <Welcome />

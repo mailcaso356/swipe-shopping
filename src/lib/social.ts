@@ -71,7 +71,7 @@ export interface Poll extends PollSummary {
 
 export interface InboxItem {
   id: number
-  kind: 'consiglio' | 'sondaggio' | 'lista' | 'swipe' | 'reazione'
+  kind: 'consiglio' | 'sondaggio' | 'lista' | 'swipe' | 'reazione' | 'segreto' | 'estrazione'
   product_id: string | null
   ref_id: string | null
   ref_kind: 'poll' | 'list' | null
@@ -109,6 +109,55 @@ export interface SwipeSummary {
   my_done: boolean
   other_done: boolean
   product_ids: string[]
+}
+
+/** Babbo Natale segreto (supabase/schema-7.sql). */
+export const SANTA_THEMES = {
+  famiglia: { label: 'In famiglia', emoji: '👨‍👩‍👧' },
+  amici: { label: 'Tra amici', emoji: '🥂' },
+  ufficio: { label: 'In ufficio', emoji: '💼' },
+  classe: { label: 'In classe', emoji: '🎒' },
+  squadra: { label: 'Squadra', emoji: '⚽' },
+  casa: { label: 'Coinquilini', emoji: '🏠' },
+} as const
+export type SantaTheme = keyof typeof SANTA_THEMES
+export const SANTA_BUDGETS = [10, 15, 20, 25, 30, 50, 100]
+export const santaTitle = (theme: SantaTheme) => `${SANTA_THEMES[theme].emoji} ${SANTA_THEMES[theme].label}`
+/** "24 dicembre" */
+export const santaDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })
+
+export interface SantaMember extends SocialCard {
+  is_me: boolean
+  ready: boolean
+  has_list: boolean
+}
+
+export interface SantaGroup {
+  id: string
+  theme: SantaTheme
+  budget: number | null
+  exchange_on: string | null
+  drawn: boolean
+  broken: boolean
+  is_owner: boolean
+  is_member: boolean
+  owner: SocialCard
+  members: SantaMember[]
+  my_list_id: string | null
+  my_ready: boolean
+  gives_to: SocialCard | null
+  gives_to_list: GiftListSummary | null
+}
+
+export interface SantaSummary {
+  id: string
+  theme: SantaTheme
+  budget: number | null
+  exchange_on: string | null
+  drawn: boolean
+  is_owner: boolean
+  members: number
+  gives_to: SocialCard | null
 }
 
 /** Reazioni disponibili (le stesse del database). */
@@ -198,6 +247,17 @@ export const social = {
   swipeVote: (id: string, productId: string, yes: boolean) => rpc<void>('swipe_vote', { p_id: id, p_product_id: productId, p_yes: yes }),
   swipes: () => rpc<SwipeSummary[]>('swipe_list'),
   deleteSwipe: (id: string) => rpc<void>('swipe_delete', { p_id: id }),
+  createSanta: (theme: SantaTheme, budget: number | null, exchangeOn: string | null) =>
+    rpc<string>('santa_create', { p_theme: theme, p_budget: budget, p_exchange_on: exchangeOn }),
+  santa: (id: string) => rpc<SantaGroup | null>('santa_get', { p_id: id }),
+  santas: () => rpc<SantaSummary[]>('santa_list'),
+  santaJoin: (id: string) => rpc<void>('santa_join', { p_id: id }),
+  /** code null: esco io; altrimenti l'organizzatore toglie quella persona */
+  santaLeave: (id: string, code: string | null) => rpc<void>('santa_leave', { p_id: id, p_code: code }),
+  santaSet: (id: string, listId: string | null, ready: boolean) => rpc<void>('santa_set', { p_id: id, p_list_id: listId, p_ready: ready }),
+  santaDraw: (id: string) => rpc<void>('santa_draw', { p_id: id }),
+  santaInvite: (id: string, codes: string[]) => rpc<number>('santa_invite', { p_id: id, p_codes: codes }),
+  deleteSanta: (id: string) => rpc<void>('santa_delete', { p_id: id }),
 }
 
 /** Amici a cui mandare cose: chi seguo e chi mi segue, senza doppioni. */
@@ -232,6 +292,7 @@ const SITE = 'https://swipeshopping.app/'
 export const profileUrl = (code: string) => `${SITE}#/u/${code}`
 export const pollUrl = (id: string) => `${SITE}#/sondaggio/${id}`
 export const giftListUrl = (id: string) => `${SITE}#/regalo/${id}`
+export const santaUrl = (id: string) => `${SITE}#/segreto/${id}`
 
 export const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']
 

@@ -1,4 +1,4 @@
-import { BarChart3, Bell, Cake, Gift, Inbox, Layers, RefreshCw, Share2, Trash2, UserPlus, Users, X } from 'lucide-react'
+import { BarChart3, Bell, Cake, Gift, Inbox, Layers, RefreshCw, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ProductImage } from '../components/ProductImage'
 import { Avatar, FriendPicker, LoginNeeded, ProductPicker, ProductStrip, ReactionBar, useProductsById } from '../components/SocialBits'
@@ -23,11 +23,15 @@ import {
   type GiftTemplate,
   type MyProfile,
   type PollSummary,
+  santaDate,
+  santaTitle,
+  type SantaSummary,
   type SocialCard,
   type SwipeSummary,
 } from '../lib/social'
 import { useApp } from '../state/AppState'
 import { useAuth } from '../state/AuthState'
+import { SantaCreator } from './SantaPage'
 
 interface Data {
   me: MyProfile
@@ -39,6 +43,7 @@ interface Data {
   inbox: InboxItem[]
   birthdays: Birthday[]
   swipes: SwipeSummary[]
+  santas: SantaSummary[]
 }
 
 type Tab = 'perte' | 'crea' | 'amici'
@@ -63,15 +68,17 @@ export function FriendsPage() {
   const reload = useCallback(async () => {
     try {
       const me = await social.me()
-      const [mine, feed, friends, inbox, birthdays, swipes] = await Promise.all([
+      const [mine, feed, friends, inbox, birthdays, swipes, santas] = await Promise.all([
         social.mine(),
         social.feed(),
         social.friends(),
         social.inbox(),
         social.birthdays(),
         social.swipes(),
+        // Finché supabase/schema-7.sql non è eseguito il resto della pagina funziona lo stesso.
+        social.santas().catch(() => []),
       ])
-      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes })
+      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes, santas })
       setError('')
       // Aperta la scheda, le novità contano come viste (il pallino si spegne).
       if (inbox.some((i) => !i.seen)) void social.inboxSeen().then(() => setUnseen(0))
@@ -124,7 +131,7 @@ export function FriendsPage() {
 function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload: () => Promise<void>; setData: (d: Data) => void }) {
   const { tab, data, reload, setData } = props
   const { deck, products } = useApp()
-  const [picker, setPicker] = useState<null | 'poll' | 'list' | 'swipe'>(null)
+  const [picker, setPicker] = useState<null | 'poll' | 'list' | 'swipe' | 'santa'>(null)
   const [template, setTemplate] = useState<GiftTemplate>('compleanno')
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
@@ -278,6 +285,30 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
               />
             ))}
           </Section>
+
+          <Section
+            icon={<Snowflake className="size-5" />}
+            title="Babbo Natale segreto"
+            action={
+              <button type="button" disabled={busy} onClick={() => setPicker('santa')} className={smallBtn}>
+                Nuovo
+              </button>
+            }
+          >
+            <p className="text-sm text-neutral-500">Crea un gruppo e invita gli amici: l'app estrae a chi fa il regalo ognuno, e nessuno sa chi lo fa a lui.</p>
+            {data.santas.map((s) => (
+              <a key={s.id} href={`#/segreto/${s.id}`} className="block border-t border-neutral-100 pt-3">
+                <p className="font-medium">{santaTitle(s.theme)}</p>
+                <p className="text-xs text-neutral-500">
+                  {s.members} {s.members === 1 ? 'persona' : 'persone'}
+                  {s.budget ? ` · ${s.budget} €` : ''}
+                  {s.exchange_on ? ` · ${santaDate(s.exchange_on)}` : ''}
+                  {' · '}
+                  {s.drawn ? (s.gives_to ? 'estrazione fatta: scopri a chi fai il regalo' : 'estrazione da rifare') : s.is_owner ? 'organizzi tu' : 'in attesa dell\'estrazione'}
+                </p>
+              </a>
+            ))}
+          </Section>
         </>
       )}
 
@@ -343,6 +374,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
           <TemplateChips value={template} onChange={setTemplate} />
         </ProductPicker>
       )}
+      {picker === 'santa' && <SantaCreator onClose={() => setPicker(null)} />}
       {picker === 'swipe' && (
         <FriendPicker
           title="Swipe insieme con…"
@@ -448,7 +480,11 @@ function InboxRow({ item, onDelete }: { item: InboxItem; onDelete: () => void })
           ? `ti ha mandato la lista ${t ? `${t.emoji} ${t.label}` : ''}`
           : item.kind === 'swipe'
             ? 'ti invita a Swipe insieme'
-            : `ha reagito ${item.emoji ?? ''} ${item.ref_kind === 'list' ? 'alla tua lista' : 'al tuo sondaggio'}`
+            : item.kind === 'segreto'
+              ? 'ti invita al Babbo Natale segreto 🎅'
+              : item.kind === 'estrazione'
+                ? 'ha fatto l\'estrazione del Babbo Natale segreto: scopri a chi fai il regalo! 🎁'
+                : `ha reagito ${item.emoji ?? ''} ${item.ref_kind === 'list' ? 'alla tua lista' : 'al tuo sondaggio'}`
   const href =
     item.kind === 'sondaggio' || (item.kind === 'reazione' && item.ref_kind === 'poll')
       ? `#/sondaggio/${item.ref_id}`
@@ -456,7 +492,9 @@ function InboxRow({ item, onDelete }: { item: InboxItem; onDelete: () => void })
         ? `#/regalo/${item.ref_id}`
         : item.kind === 'swipe'
           ? `#/insieme/${item.ref_id}`
-          : null
+          : item.kind === 'segreto' || item.kind === 'estrazione'
+            ? `#/segreto/${item.ref_id}`
+            : null
   if (item.kind === 'consiglio' && !product) return null
   const body = (
     <>

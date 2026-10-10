@@ -21,7 +21,7 @@ interface Item {
   id: number
   recipient: string
   sender: string
-  kind: 'consiglio' | 'sondaggio' | 'lista' | 'swipe' | 'reazione'
+  kind: 'consiglio' | 'sondaggio' | 'lista' | 'swipe' | 'reazione' | 'segreto' | 'estrazione'
   ref_id: string | null
   emoji: string | null
   created_at: string
@@ -86,6 +86,10 @@ function message(i: Item): { title: string; body: string; url: string } {
       return { title: `${who} ti ha mandato una lista regalo`, body: 'Guarda cosa desidera', url: `#/regalo/${i.ref_id}` }
     case 'swipe':
       return { title: `${who} ti invita a Swipe insieme`, body: 'Scoprite cosa piace a entrambi', url: `#/insieme/${i.ref_id}` }
+    case 'segreto':
+      return { title: `${who} ti invita al Babbo Natale segreto`, body: 'Entra nel gruppo per partecipare all\'estrazione', url: `#/segreto/${i.ref_id}` }
+    case 'estrazione':
+      return { title: 'Estrazione fatta! 🎁', body: 'Scopri a chi fai il regalo nel Babbo Natale segreto', url: `#/segreto/${i.ref_id}` }
     case 'reazione':
       return { title: `${who} ha reagito ${i.emoji ?? ''}`.trim(), body: 'Guarda in Amici', url: '#/amici' }
   }
