@@ -51,7 +51,7 @@ export function PrivacyPage() {
           </li>
           <li>
             <strong>Amici:</strong> se usi la sezione Amici ricevi un nome generato a caso (es. "Volpe Rosa 482") e un avatar
-            scelto da un elenco: non mostriamo mai la tua email. Chi ha il tuo link di invito, o cerca il tuo @tag (ricavato dal nome), vede nome e avatar e può seguirti;
+            scelto da un elenco: non mostriamo mai la tua email. Chi ha il tuo link di invito, o cerca il tuo @tag (generato dal nome o scelto da te, e segnalabile se offensivo), vede nome e avatar e può seguirti;
             chi ti segue vede le tue liste regalo e i sondaggi, e i preferiti che salvi solo se lo attivi tu (che contano anche, senza il tuo nome, tra i prodotti "di tendenza" dei tuoi amici). Chi ha il link di
             una lista o di un sondaggio li vede e può votare o segnare "lo prendo io". Puoi rimuovere o bloccare chi ti segue.
             Se lo inserisci, chi ti segue vede il giorno e il mese del tuo compleanno (non l'anno). Gli amici possono mandarti solo

@@ -4,6 +4,7 @@ import { ADMIN_EMAIL } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { supabase } from '../lib/supabase'
 import { AdminBroadcast } from '../components/AdminBroadcast'
+import { AdminReports } from '../components/AdminReports'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
 import { useAuth } from '../state/AuthState'
@@ -100,6 +101,7 @@ function AdminStatsView() {
       </div>
 
       <AdminBroadcast />
+      <AdminReports />
 
       {loading && !stats && (
         <p className="flex items-center justify-center gap-2 py-10 text-sm text-neutral-500">

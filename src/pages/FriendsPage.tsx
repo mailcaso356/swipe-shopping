@@ -1,4 +1,4 @@
-import { BarChart3, Bell, Cake, Flame, Gift, Inbox, Layers, QrCode, RefreshCw, Search, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
+import { BarChart3, Bell, Cake, Flame, Gift, Inbox, Layers, Pencil, QrCode, RefreshCw, Search, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ProductImage } from '../components/ProductImage'
 import { ProfileQr } from '../components/ProfileQr'
@@ -689,6 +689,7 @@ const smallBtn = 'rounded-full bg-rose-500 px-3.5 py-1.5 text-sm font-semibold t
 function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyProfile) => void; onShare: (text: string, url: string) => void }) {
   const [choosing, setChoosing] = useState(false)
   const [qr, setQr] = useState(false)
+  const [editingTag, setEditingTag] = useState(false)
   const [busy, setBusy] = useState(false)
   const update = async (patch: Parameters<typeof social.update>[0]) => {
     setBusy(true)
@@ -706,7 +707,11 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
         </button>
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-bold">{me.handle}</p>
-          {me.tag && <p className="text-sm font-medium text-rose-500">@{me.tag}</p>}
+          {me.tag && (
+            <button type="button" onClick={() => setEditingTag(true)} className="flex items-center gap-1 text-sm font-medium text-rose-500">
+              @{me.tag} <Pencil className="size-3.5" aria-label="Cambia tag" />
+            </button>
+          )}
           <p className="text-sm text-neutral-500">
             {me.followers} ti seguono · segui {me.following}
           </p>
@@ -755,6 +760,16 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
         </button>
       </div>
       {qr && <ProfileQr me={me} onClose={() => setQr(false)} />}
+      {editingTag && (
+        <TagEditor
+          current={me.tag ?? ''}
+          onCancel={() => setEditingTag(false)}
+          onSaved={(updated) => {
+            onChange(updated)
+            setEditingTag(false)
+          }}
+        />
+      )}
       <label className="flex items-center justify-between gap-3 text-sm">
         <span>Mostra ai miei amici cosa salvo nei preferiti</span>
         <input
@@ -766,6 +781,60 @@ function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyPro
         />
       </label>
     </div>
+  )
+}
+
+/** Il tuo @tag, scritto da te: 3-10 caratteri (il controllo vero, con le parole vietate, è nel database). */
+function TagEditor(props: { current: string; onCancel: () => void; onSaved: (me: MyProfile) => void }) {
+  const [tag, setTag] = useState(props.current.length <= 10 ? props.current : '')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const clean = tag.toLowerCase().replace(/^@/, '')
+  const valid = /^[a-z0-9._]{3,10}$/.test(clean) && /[a-z]/.test(clean)
+  return (
+    <form
+      className="space-y-2 border-t border-neutral-100 pt-3"
+      onSubmit={async (e) => {
+        e.preventDefault()
+        if (!valid) return
+        setBusy(true)
+        setError('')
+        try {
+          props.onSaved(await social.setTag(clean))
+        } catch (err) {
+          setError((err as Error).message)
+        } finally {
+          setBusy(false)
+        }
+      }}
+    >
+      <p className="text-sm font-medium">Scegli il tuo @tag</p>
+      <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center rounded-full bg-neutral-100 px-4 focus-within:ring-2 focus-within:ring-rose-300">
+          <span className="text-neutral-400">@</span>
+          <input
+            value={tag}
+            onChange={(e) => setTag(e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 10))}
+            aria-label="Nuovo tag"
+            autoFocus
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            maxLength={10}
+            className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none"
+          />
+          <span className="text-xs text-neutral-400">{clean.length}/10</span>
+        </div>
+        <button type="submit" disabled={!valid || busy} className={smallBtn}>
+          Salva
+        </button>
+      </div>
+      <p className="text-xs text-neutral-500">Da 3 a 10 caratteri: lettere, numeri, punto o trattino basso. Puoi cambiarlo una volta al giorno.</p>
+      {error && <p className="text-sm text-rose-600">{error}</p>}
+      <button type="button" onClick={props.onCancel} className="text-sm text-neutral-500 underline">
+        Annulla
+      </button>
+    </form>
   )
 }
 
