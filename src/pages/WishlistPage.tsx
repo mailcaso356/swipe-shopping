@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { FolderPicker } from '../components/FolderPicker'
 import { NewBadge } from '../components/NewBadge'
 import { DiscountBadge } from '../components/DiscountBadge'
-import { ShareButton } from '../components/ShareButton'
+import { SendButton } from '../components/SendButton'
+import { FriendPicker } from '../components/SocialBits'
 import { PriceTag } from '../components/PriceTag'
 import { ProductImage } from '../components/ProductImage'
 import { StoreLink } from '../components/StoreLink'
@@ -13,8 +14,10 @@ import { brandAndStore } from '../config/stores'
 import { discountBadge, freshPrice } from '../lib/price'
 import { openProduct } from '../lib/productSheet'
 import { shareList } from '../lib/share'
+import { social } from '../lib/social'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
+import { useAuth } from '../state/AuthState'
 import type { Product } from '../types/product'
 
 type WishSort = 'recenti' | 'prezzo_asc' | 'prezzo_desc' | 'sconto'
@@ -27,7 +30,6 @@ export function WishlistPage() {
   const wishlist = useMemo(() => all.filter((w) => universeOf(w.product.category) === state.mode), [all, state.mode])
   const deals = wishlist.filter((w) => w.deal !== null).length
   const [folder, setFolder] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
   const [sort, setSort] = useState<WishSort>('recenti')
   const [moving, setMoving] = useState<Product | null>(null)
   const [dealsOnly, setDealsOnly] = useState(false)
@@ -105,22 +107,7 @@ export function WishlistPage() {
           <FolderChip key={name} active={current === name} onClick={() => setFolder(name)} label={name} count={n} folder />
         ))}
       </div>
-      {shown.length > 0 && (
-        <button
-          type="button"
-          onClick={async () => {
-            const result = await shareList(current ?? 'I miei preferiti', shown.map((w) => w.product))
-            if (result === 'copied') {
-              setCopied(true)
-              setTimeout(() => setCopied(false), 2000)
-            }
-          }}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-white py-2.5 text-sm font-semibold ring-1 ring-neutral-200 active:scale-[0.98]"
-        >
-          <Share2 className="size-4" />
-          {copied ? 'Link copiato' : current ? `Condividi la cartella "${current}"` : 'Condividi questa lista'}
-        </button>
-      )}
+      {shown.length > 0 && <ListShare name={current} products={shown.map((w) => w.product)} />}
       <div className="flex items-center justify-between gap-3 text-sm">
         {current ? (
           <span className="flex gap-3">
@@ -191,7 +178,7 @@ export function WishlistPage() {
                 >
                   <FolderInput className="size-4" />
                 </button>
-                <ShareButton
+                <SendButton
                   product={product}
                   className="absolute top-2 right-13 grid size-9 place-items-center rounded-full bg-white/90 text-neutral-600 shadow ring-1 ring-black/5 active:scale-90"
                 />
@@ -250,3 +237,58 @@ function FolderChip(props: { active: boolean; onClick: () => void; label: string
     </button>
   )
 }
+
+/** Condividi la lista o la cartella: con un account la mandi in chat agli amici, oppure il link con altre app. */
+function ListShare({ name, products }: { name: string | null; products: Product[] }) {
+  const auth = useAuth()
+  const [open, setOpen] = useState(false)
+  const [toast, setToast] = useState('')
+  const flash = (text: string) => {
+    setToast(text)
+    setTimeout(() => setToast(''), 2500)
+  }
+  const shareOutside = async () => {
+    setOpen(false)
+    if ((await shareList(name ?? 'I miei preferiti', products)) === 'copied') flash('Link copiato')
+  }
+  const toSend = products.slice(0, CHAT_MAX)
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => (auth.user ? setOpen(true) : void shareOutside())}
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-white py-2.5 text-sm font-semibold ring-1 ring-neutral-200 active:scale-[0.98]"
+      >
+        <Share2 className="size-4" />
+        {toast || (name ? `Condividi la cartella "${name}"` : 'Condividi questa lista')}
+      </button>
+      {open && (
+        <FriendPicker
+          title={name ? `Manda la cartella "${name}"` : 'Manda i tuoi preferiti'}
+          confirmLabel={toSend.length === 1 ? 'Manda' : `Manda ${toSend.length} prodotti`}
+          onClose={() => setOpen(false)}
+          onConfirm={async (codes) => {
+            // Arrivano in chat come prodotti, uno per messaggio (i primi CHAT_MAX).
+            let n = 0
+            for (const p of toSend) n = await social.send(codes, 'consiglio', { productId: p.id })
+            setOpen(false)
+            flash(n === 1 ? 'Inviato in chat!' : `Inviato in chat a ${n}!`)
+          }}
+          extra={
+            <>
+              {products.length > CHAT_MAX && (
+                <p className="mt-2 text-center text-xs text-neutral-500">In chat vanno i primi {CHAT_MAX} prodotti; con il link li vedono tutti.</p>
+              )}
+              <button type="button" onClick={shareOutside} className="mt-3 w-full text-center text-sm font-medium text-neutral-600 underline">
+                Condividi il link con altre app
+              </button>
+            </>
+          }
+        />
+      )}
+    </>
+  )
+}
+
+/** Quanti prodotti di una cartella si mandano in chat in una volta */
+const CHAT_MAX = 10

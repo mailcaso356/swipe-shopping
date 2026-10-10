@@ -1,4 +1,4 @@
-import { BarChart3, ChevronRight, Heart, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, Heart, RotateCcw, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { AccountActions, AccountCard } from '../components/AccountCard'
 import { InstallCard } from '../components/InstallCard'
@@ -121,7 +121,7 @@ export function ProfilePage() {
           <AccountActions />
           {confirmClear ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span>Cancellare preferiti, filtri e statistiche?</span>
+              <span>Svuotare preferiti, scartati e filtri? L'account resta.</span>
               <button
                 type="button"
                 onClick={() => {
@@ -132,7 +132,7 @@ export function ProfilePage() {
                 }}
                 className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-[#fff]"
               >
-                Sì, cancella
+                Sì, ricomincia
               </button>
               <button type="button" onClick={() => setConfirmClear(false)} className="px-2 py-1 font-medium text-neutral-500">
                 Annulla
@@ -144,7 +144,11 @@ export function ProfilePage() {
               onClick={() => setConfirmClear(true)}
               className="inline-flex items-center gap-2 text-left text-sm font-medium text-rose-600"
             >
-              <Trash2 className="size-4" /> Cancella tutti i miei dati
+              <RotateCcw className="size-4" />
+              <span>
+                Ricomincia da zero
+                <span className="block text-xs font-normal text-neutral-500">Svuota preferiti, scartati e filtri. L'account resta.</span>
+              </span>
             </button>
           )}
         </div>
