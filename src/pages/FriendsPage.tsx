@@ -1,8 +1,9 @@
-import { BarChart3, Cake, Gift, Inbox, Layers, RefreshCw, Share2, Trash2, UserPlus, Users, X } from 'lucide-react'
+import { BarChart3, Bell, Cake, Gift, Inbox, Layers, RefreshCw, Share2, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ProductImage } from '../components/ProductImage'
 import { Avatar, FriendPicker, LoginNeeded, ProductPicker, ProductStrip, ReactionBar, useProductsById } from '../components/SocialBits'
 import { openProduct } from '../lib/productSheet'
+import { disablePush, enablePush, pushAvailable, pushEnabledHere, pushPermission } from '../lib/push'
 import { load, save } from '../lib/storage'
 import {
   AVATARS,
@@ -157,6 +158,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
 
       {tab === 'perte' && (
         <>
+          <PushCard />
           {noFriends && (
             <div className="space-y-3 rounded-2xl bg-rose-50 p-4 ring-1 ring-rose-100">
               <p className="text-sm text-rose-900">Qui arrivano consigli, sondaggi e liste dei tuoi amici. Inizia invitandone qualcuno!</p>
@@ -282,6 +284,7 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
       {tab === 'amici' && (
         <>
           <MyCard me={data.me} onChange={(me) => setData({ ...data, me })} onShare={share} />
+          <PushToggle />
           <BirthdayCard me={data.me} onSave={(birthday) => act(() => updateMe({ birthday }))} />
           <Section icon={<UserPlus className="size-5" />} title={`Amici (${data.following.length} seguiti, ${data.followers.length} ti seguono)`}>
             {noFriends && <p className="text-sm text-neutral-500">Manda il tuo link con "Invita amici": chi lo apre può seguirti, e tu apri il suo.</p>}
@@ -362,6 +365,66 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
 }
 
 const SWIPE_SIZE = 10
+
+/** Invito ad attivare le notifiche (solo nell'app Android, finché non sono attive). */
+function PushCard() {
+  const [state, setState] = useState<'hidden' | 'ask' | 'denied'>('hidden')
+  useEffect(() => {
+    if (!pushAvailable || pushEnabledHere()) return
+    void pushPermission().then((p) => setState(p === 'denied' ? 'denied' : 'ask'))
+  }, [])
+  if (state === 'hidden') return null
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-neutral-900 p-4 text-white">
+      <Bell className="size-6 shrink-0" />
+      <p className="flex-1 text-sm">
+        {state === 'denied'
+          ? 'Notifiche bloccate: attivale dalle impostazioni del telefono per sapere quando un amico ti manda qualcosa.'
+          : 'Attiva le notifiche: ti avvisiamo quando un amico ti chiede un parere o ti manda qualcosa.'}
+      </p>
+      {state === 'ask' && (
+        <button
+          type="button"
+          onClick={async () => setState((await enablePush()) ? 'hidden' : 'denied')}
+          className="rounded-full bg-white px-3.5 py-1.5 text-sm font-semibold text-neutral-900"
+        >
+          Attiva
+        </button>
+      )}
+    </div>
+  )
+}
+
+function PushToggle() {
+  const [on, setOn] = useState(pushEnabledHere)
+  const [busy, setBusy] = useState(false)
+  if (!pushAvailable) return null
+  return (
+    <label className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-black/5">
+      <span className="flex items-center gap-2">
+        <Bell className="size-5 text-rose-500" /> Notifiche dagli amici su questo telefono
+      </span>
+      <input
+        type="checkbox"
+        checked={on}
+        disabled={busy}
+        onChange={async (e) => {
+          setBusy(true)
+          try {
+            if (e.target.checked) setOn(await enablePush())
+            else {
+              await disablePush()
+              setOn(false)
+            }
+          } finally {
+            setBusy(false)
+          }
+        }}
+        className="size-5 accent-rose-500"
+      />
+    </label>
+  )
+}
 
 function shuffle<T>(list: T[]) {
   const a = [...list]

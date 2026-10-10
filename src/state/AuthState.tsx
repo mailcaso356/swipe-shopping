@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { APP_AUTH_URL, isNative } from '../lib/native'
+import { disablePush } from '../lib/push'
 import { authRedirectUrl, supabase } from '../lib/supabase'
 
 /** Messaggi d'errore di Supabase tradotti in italiano semplice. */
@@ -145,8 +146,10 @@ function useAuthStore() {
         pendingSignup = { email, password, until: Date.now() + PENDING_MS }
       },
       signIn: (email: string, password: string) => run(() => supabase!.auth.signInWithPassword({ email, password })),
-      signOut: () => {
+      signOut: async () => {
         pendingSignup = null
+        // Questo telefono non riceve più le notifiche di questo account.
+        await disablePush(false).catch(() => {})
         return run(() => supabase!.auth.signOut())
       },
       resetPassword: (email: string) =>

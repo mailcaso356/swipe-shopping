@@ -28,7 +28,10 @@ jobs:
           java-version: 21
           cache: gradle
       - run: npm ci
+      # Notifiche push: si accendono nell'app quando c'è il file di Firebase.
       - run: npm run build:app
+        env:
+          VITE_PUSH: ${{ hashFiles('android/app/google-services.json') != '' && '1' || '' }}
 
       - name: Chiave di firma
         env:
