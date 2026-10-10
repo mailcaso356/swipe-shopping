@@ -1,4 +1,4 @@
-import { BarChart3, Cake, Gift, Inbox, Layers, RefreshCw, Share2, Sparkles, Trash2, UserPlus, Users, X } from 'lucide-react'
+import { BarChart3, Cake, Gift, Inbox, Layers, RefreshCw, Share2, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ProductImage } from '../components/ProductImage'
 import { Avatar, FriendPicker, LoginNeeded, ProductPicker, ProductStrip, ReactionBar, useProductsById } from '../components/SocialBits'
@@ -10,7 +10,6 @@ import {
   LIST_MAX,
   MONTHS,
   POLL_MAX,
-  friendSavesMap,
   profileUrl,
   setUnseen,
   shareLink,
@@ -39,7 +38,6 @@ interface Data {
   inbox: InboxItem[]
   birthdays: Birthday[]
   swipes: SwipeSummary[]
-  friendSaves: Map<string, SocialCard[]>
 }
 
 type Tab = 'perte' | 'crea' | 'amici'
@@ -64,16 +62,15 @@ export function FriendsPage() {
   const reload = useCallback(async () => {
     try {
       const me = await social.me()
-      const [mine, feed, friends, inbox, birthdays, swipes, friendSaves] = await Promise.all([
+      const [mine, feed, friends, inbox, birthdays, swipes] = await Promise.all([
         social.mine(),
         social.feed(),
         social.friends(),
         social.inbox(),
         social.birthdays(),
         social.swipes(),
-        friendSavesMap(true),
       ])
-      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes, friendSaves })
+      setData({ me, ...mine, feed, ...friends, inbox, birthdays, swipes })
       setError('')
       // Aperta la scheda, le novità contano come viste (il pallino si spegne).
       if (inbox.some((i) => !i.seen)) void social.inboxSeen().then(() => setUnseen(0))
@@ -125,7 +122,7 @@ export function FriendsPage() {
 
 function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload: () => Promise<void>; setData: (d: Data) => void }) {
   const { tab, data, reload, setData } = props
-  const { wishlist, deck, products } = useApp()
+  const { deck, products } = useApp()
   const [picker, setPicker] = useState<null | 'poll' | 'list' | 'swipe'>(null)
   const [template, setTemplate] = useState<GiftTemplate>('compleanno')
   const [busy, setBusy] = useState(false)
@@ -152,10 +149,6 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
     if (patch.shareSaves !== undefined) await reload()
   }
 
-  // Match: miei preferiti salvati anche da un amico.
-  const matches = wishlist
-    .filter((w) => data.friendSaves.has(w.product.id))
-    .map((w) => ({ product: w.product, who: data.friendSaves.get(w.product.id)! }))
   const noFriends = data.following.length === 0 && data.followers.length === 0
 
   return (
@@ -200,36 +193,6 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
               ))}
             </Section>
           )}
-          <Section icon={<Sparkles className="size-5" />} title="Match con gli amici">
-            {!data.me.share_saves ? (
-              <div className="space-y-2">
-                <p className="text-sm text-neutral-600">
-                  Scopri i prodotti che piacciono sia a te sia ai tuoi amici. Funziona tra amici che mostrano cosa salvano.
-                </p>
-                <button type="button" onClick={() => act(() => updateMe({ shareSaves: true }))} disabled={busy} className={smallBtn}>
-                  Mostra cosa salvo e trova i match
-                </button>
-              </div>
-            ) : matches.length === 0 ? (
-              <p className="text-sm text-neutral-500">Ancora nessun match: quando tu e un amico salvate lo stesso prodotto, lo trovi qui.</p>
-            ) : (
-              <ul className="space-y-2">
-                {matches.slice(0, 20).map(({ product, who }) => (
-                  <li key={product.id}>
-                    <button type="button" onClick={() => openProduct(product)} className="flex w-full items-center gap-3 text-left">
-                      <ProductImage product={product} className="size-14 shrink-0 overflow-hidden rounded-xl bg-[#fff] ring-1 ring-black/5 [&_span]:text-2xl" />
-                      <span className="min-w-0 flex-1">
-                        <span className="line-clamp-1 text-sm font-medium">{product.title}</span>
-                        <span className="block text-xs text-rose-600">
-                          💞 Anche {who.map((w) => w.handle).join(', ')} {who.length === 1 ? 'lo vuole' : 'lo vogliono'}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Section>
           <Section icon={<Users className="size-5" />} title="Cosa fanno i tuoi amici">
             {data.feed.length === 0 ? (
               <p className="text-sm text-neutral-500">

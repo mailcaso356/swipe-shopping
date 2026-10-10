@@ -193,7 +193,6 @@ export const social = {
   inboxDelete: (id: number) => rpc<void>('inbox_delete', { p_id: id }),
   react: (kind: 'poll' | 'list', id: string, emoji: string | null) => rpc<Reactions>('react', { p_kind: kind, p_id: id, p_emoji: emoji }),
   reactions: (kind: 'poll' | 'list', id: string) => rpc<Reactions>('reactions_get', { p_kind: kind, p_id: id }),
-  friendSaves: () => rpc<{ enabled: boolean; saves: { product_id: string; who: SocialCard[] }[] }>('social_friend_saves'),
   createSwipe: (code: string, productIds: string[]) => rpc<string>('swipe_create', { p_code: code, p_product_ids: productIds }),
   swipe: (id: string) => rpc<SwipeSession | null>('swipe_get', { p_id: id }),
   swipeVote: (id: string, productId: string, yes: boolean) => rpc<void>('swipe_vote', { p_id: id, p_product_id: productId, p_yes: yes }),
@@ -226,21 +225,6 @@ export function subscribeUnseen(l: (n: number) => void) {
   listeners.add(l)
   l(unseen)
   return () => void listeners.delete(l)
-}
-
-// --- Match: preferiti degli amici (cache per la sessione) ---
-let savesCache: Promise<Map<string, SocialCard[]>> | null = null
-export function friendSavesMap(refresh = false) {
-  if (!savesCache || refresh) {
-    savesCache = social
-      .friendSaves()
-      .then((r) => new Map(r.saves.map((s) => [s.product_id, s.who])))
-      .catch(() => new Map())
-  }
-  return savesCache
-}
-export function resetFriendSaves() {
-  savesCache = null
 }
 
 // --- Link ---

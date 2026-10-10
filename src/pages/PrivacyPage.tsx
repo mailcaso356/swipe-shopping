@@ -56,8 +56,7 @@ export function PrivacyPage() {
             una lista o di un sondaggio li vede e può votare o segnare "lo prendo io". Puoi rimuovere o bloccare chi ti segue.
             Se lo inserisci, chi ti segue vede il giorno e il mese del tuo compleanno (non l'anno). Gli amici possono mandarti solo
             contenuti prestabiliti (un prodotto, un sondaggio, una lista, un invito a Swipe insieme, una reazione con emoji): non ci
-            sono messaggi scritti. Se mostri cosa salvi, gli amici che fanno lo stesso vedono i prodotti salvati da entrambi
-            ("match").
+            sono messaggi scritti.
           </li>
           <li>
             <strong>Dati tecnici:</strong> come ogni sito, il servizio di hosting registra indirizzo IP e tipo di browser per
