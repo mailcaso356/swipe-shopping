@@ -2,6 +2,7 @@ import { BarChart3, ChevronRight, Heart, ShieldCheck, Trash2, Undo2, UserRound }
 import { useState, type ReactNode } from 'react'
 import { AccountCard } from '../components/AccountCard'
 import { InstallCard } from '../components/InstallCard'
+import { MyProfileCard } from '../components/MyProfileCard'
 import { SocialLinks } from '../components/SocialLinks'
 import { ADMIN_EMAIL, AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
@@ -24,6 +25,8 @@ export function ProfilePage() {
   return (
     <div className="space-y-5 pb-6">
       <h1 className="text-2xl font-bold">Profilo</h1>
+
+      <MyProfileCard />
 
       {isAdmin && (
         <a

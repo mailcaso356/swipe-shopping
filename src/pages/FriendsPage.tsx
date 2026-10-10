@@ -1,13 +1,11 @@
-import { BarChart3, Bell, Cake, Flame, Gift, Inbox, Layers, QrCode, RefreshCw, Search, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
+import { BarChart3, Bell, Cake, Flame, Gift, Inbox, Layers, Search, Share2, Snowflake, Trash2, UserPlus, Users, X } from 'lucide-react'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ProductImage } from '../components/ProductImage'
-import { ProfileQr } from '../components/ProfileQr'
 import { Avatar, FriendPicker, LoginNeeded, ProductPicker, ProductStrip, ReactionBar, useProductsById } from '../components/SocialBits'
 import { openProduct } from '../lib/productSheet'
 import { disablePush, enablePush, pushAvailable, pushEnabledHere, pushPermission } from '../lib/push'
 import { load, save } from '../lib/storage'
 import {
-  AVATARS,
   GIFT_TEMPLATES,
   LIST_MAX,
   MONTHS,
@@ -335,7 +333,13 @@ function Loaded(props: { tab: Tab; setTab: (t: Tab) => void; data: Data; reload:
 
       {tab === 'amici' && (
         <>
-          <MyCard me={data.me} onChange={(me) => setData({ ...data, me })} onShare={share} />
+          <button
+            type="button"
+            onClick={() => share(`Seguimi su Swipe Shopping! Sono ${data.me.handle}${data.me.tag ? ` (@${data.me.tag})` : ''}`, profileUrl(data.me.code))}
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 font-semibold text-white active:scale-[0.98]"
+          >
+            <Share2 className="size-4" /> Invita amici
+          </button>
           <FindFriend />
           <PushToggle />
           {FEATURES.birthdays && (
@@ -732,95 +736,6 @@ function BirthdayCard({ me, onSave }: { me: MyProfile; onSave: (b: { day: number
 }
 
 const smallBtn = 'rounded-full bg-rose-500 px-3.5 py-1.5 text-sm font-semibold text-[#fff] active:scale-95 disabled:opacity-50'
-
-function MyCard({ me, onChange, onShare }: { me: MyProfile; onChange: (me: MyProfile) => void; onShare: (text: string, url: string) => void }) {
-  const [choosing, setChoosing] = useState(false)
-  const [qr, setQr] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const update = async (patch: Parameters<typeof social.update>[0]) => {
-    setBusy(true)
-    try {
-      onChange(await social.update(patch))
-    } finally {
-      setBusy(false)
-    }
-  }
-  return (
-    <div className="space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
-      <div className="flex items-center gap-3">
-        <button type="button" onClick={() => setChoosing(!choosing)} aria-label="Cambia avatar">
-          <Avatar emoji={me.avatar} size="lg" />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="text-lg leading-tight font-bold">{me.handle}</p>
-          {me.tag && <p className="truncate text-sm font-medium text-rose-500">@{me.tag}</p>}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => update({ regenerate: true })}
-            className="mt-0.5 flex items-center gap-1 text-xs font-medium text-neutral-500 underline active:opacity-60 disabled:opacity-50"
-          >
-            <RefreshCw className={`size-3 ${busy ? 'animate-spin' : ''}`} /> Genera nuovo nome
-          </button>
-        </div>
-        <div className="flex shrink-0 gap-3 text-center">
-          <div>
-            <p className="text-xl leading-tight font-bold">{me.followers}</p>
-            <p className="text-[11px] text-neutral-500">follower</p>
-          </div>
-          <div>
-            <p className="text-xl leading-tight font-bold">{me.following}</p>
-            <p className="text-[11px] text-neutral-500">seguiti</p>
-          </div>
-        </div>
-      </div>
-      {choosing && (
-        <div className="grid grid-cols-7 gap-1.5">
-          {AVATARS.map((a) => (
-            <button
-              key={a}
-              type="button"
-              onClick={() => {
-                setChoosing(false)
-                void update({ avatar: a })
-              }}
-              className={`grid aspect-square place-items-center rounded-xl text-2xl ${a === me.avatar ? 'bg-rose-100 ring-2 ring-rose-400' : 'bg-neutral-50'}`}
-            >
-              {a}
-            </button>
-          ))}
-        </div>
-      )}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => onShare(`Seguimi su Swipe Shopping! Sono ${me.handle}${me.tag ? ` (@${me.tag})` : ''}`, profileUrl(me.code))}
-          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 font-semibold text-white active:scale-[0.98]"
-        >
-          <Share2 className="size-4" /> Invita amici
-        </button>
-        <button
-          type="button"
-          onClick={() => setQr(true)}
-          className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 font-semibold ring-1 ring-neutral-200 active:scale-[0.98]"
-        >
-          <QrCode className="size-4" /> QR
-        </button>
-      </div>
-      {qr && <ProfileQr me={me} onClose={() => setQr(false)} />}
-      <label className="flex items-center justify-between gap-3 text-sm">
-        <span>Mostra ai miei amici cosa salvo nei preferiti</span>
-        <input
-          type="checkbox"
-          checked={me.share_saves}
-          disabled={busy}
-          onChange={(e) => update({ shareSaves: e.target.checked })}
-          className="size-5 accent-rose-500"
-        />
-      </label>
-    </div>
-  )
-}
 
 function Section({ icon, title, action, children }: { icon: ReactNode; title: string; action?: ReactNode; children: ReactNode }) {
   return (
