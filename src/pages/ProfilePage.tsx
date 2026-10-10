@@ -1,9 +1,8 @@
-import { BarChart3, ChevronRight, Heart, RotateCcw, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
+import { BarChart3, ChevronRight, RotateCcw, ShieldCheck, Trash2, Undo2, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { AccountActions, AccountCard } from '../components/AccountCard'
 import { InstallCard } from '../components/InstallCard'
 import { MyProfileCard } from '../components/MyProfileCard'
-import { SocialLinks } from '../components/SocialLinks'
 import { ADMIN_EMAIL, AMAZON_DISCLOSURE, APP_NAME, GENERIC_DISCLOSURE } from '../config/app'
 import { categoryLabel, isCategoryId } from '../config/categories'
 import { setConsent, summary } from '../lib/analytics'
@@ -122,11 +121,6 @@ export function ProfilePage() {
           )}
         </Card>
       )}
-
-      <Card icon={<Heart className="size-5" />} title="Seguici">
-        <p className="mb-3 text-sm text-neutral-600">Novità, offerte e i prodotti più amati, anche sui social.</p>
-        <SocialLinks />
-      </Card>
 
       <Card icon={<ShieldCheck className="size-5" />} title="Privacy">
         <label className="flex items-center justify-between gap-4 text-sm">

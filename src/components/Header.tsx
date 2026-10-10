@@ -4,6 +4,7 @@ import { APP_NAME } from '../config/app'
 import { SECTIONS, sectionOf, type Universe } from '../config/categories'
 import { load, save } from '../lib/storage'
 import { useTheme } from '../lib/theme'
+import { SocialLinks } from './SocialLinks'
 import { useApp } from '../state/AppState'
 
 /** Barra in alto: menu delle sezioni a sinistra, logo al centro, tema chiaro/scuro a destra. */
@@ -146,6 +147,9 @@ function SectionMenu() {
               </button>
             )
           })}
+          <div className="mt-1 border-t border-neutral-100 pt-1">
+            <SocialLinks />
+          </div>
         </div>
       )}
     </div>
