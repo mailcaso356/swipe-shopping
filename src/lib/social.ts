@@ -12,8 +12,6 @@ export interface SocialCard {
   code: string
   /** @tag per cercare (supabase/schema-8.sql), ricavato dal nome */
   tag?: string
-  /** tag scelto a mano (schema-10.sql) */
-  tag_custom?: boolean
 }
 
 export interface MyProfile extends SocialCard {
@@ -188,8 +186,6 @@ export const LIST_MAX = 60
 function friendly(message: string) {
   const m = message.toLowerCase()
   if (m.includes('could not find the function') || m.includes('does not exist')) return 'Funzione non ancora attiva. Riprova più tardi.'
-  // Errori dei controlli sul tag: già in italiano.
-  if (m.includes('could not find the function public.social_set_tag')) return 'Funzione non ancora attiva. Riprova più tardi.'
   if (m.includes('failed to fetch') || m.includes('network')) return 'Connessione assente. Riprova.'
   return message
 }
@@ -224,12 +220,6 @@ export const social = {
     }),
   /** Prodotti salvati da più amici negli ultimi 7 giorni (senza dire chi). */
   trending: () => rpc<{ product_id: string; friends: number }[]>('social_trending'),
-  /** Scegli il tuo @tag (3-10 caratteri). Ritorna il profilo aggiornato. */
-  setTag: (tag: string) => rpc<MyProfile>('social_set_tag', { p_tag: tag }),
-  /** Segnala il tag di qualcuno. */
-  report: (code: string) => rpc<void>('social_report', { p_code: code }),
-  adminReports: () => rpc<{ code: string; tag: string; handle: string; reports: number; last: string }[]>('admin_reports'),
-  adminResetTag: (code: string) => rpc<void>('admin_reset_tag', { p_code: code }),
   /** Codice del profilo con quel tag (o nome), null se non c'è. */
   find: (tag: string) => rpc<string | null>('social_find', { p_tag: tag }),
   profile: (code: string) => rpc<FriendProfile | null>('social_profile', { p_code: code }),

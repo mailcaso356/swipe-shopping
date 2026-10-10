@@ -77,8 +77,6 @@ export function FriendProfilePage() {
         </button>
       )}
 
-      {!profile.is_me && auth.user && profile.tag_custom && <ReportTag code={profile.code} tag={profile.tag ?? ''} />}
-
       {canSee && (
         <>
           {profile.polls.length > 0 && (
@@ -109,24 +107,5 @@ export function FriendProfilePage() {
         </>
       )}
     </div>
-  )
-}
-
-/** "Segnala tag": con 3 segnalazioni il tag torna quello generato. */
-function ReportTag({ code, tag }: { code: string; tag: string }) {
-  const [done, setDone] = useState(false)
-  if (done) return <p className="text-center text-xs text-neutral-500">Grazie, segnalazione inviata.</p>
-  return (
-    <button
-      type="button"
-      onClick={async () => {
-        if (!window.confirm(`Segnalare il tag @${tag} come offensivo o falso?`)) return
-        await social.report(code).catch(() => {})
-        setDone(true)
-      }}
-      className="mx-auto block text-xs text-neutral-400 underline"
-    >
-      Segnala tag
-    </button>
   )
 }
