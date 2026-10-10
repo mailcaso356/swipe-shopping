@@ -3,7 +3,7 @@
 // donna), una per marca e una per le offerte, più sitemap.xml e robots.txt.
 // Ogni prodotto porta all'app (#/p/<id>) e al negozio con link affiliato.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { groupsOf, universeOf, type Universe } from '../src/config/categories.ts'
+import { SECTIONS, UNIVERSES, groupsOf, sectionOf, universeOf, type Universe } from '../src/config/categories.ts'
 import { productUrl, STORES } from '../src/config/stores.ts'
 import type { Product } from '../src/types/product.ts'
 
@@ -100,7 +100,6 @@ for (const group of groupsOf('moda')) {
 }
 
 const moda = products.filter((p) => universeOf(p.category) === 'moda')
-const tech = products.filter((p) => universeOf(p.category) === 'tech')
 const byBrand = (list: Product[]) => {
   const map = new Map<string, Product[]>()
   for (const p of list) if (p.brand) map.set(p.brand, [...(map.get(p.brand) ?? []), p])
@@ -149,47 +148,52 @@ for (const g of ['donna', 'uomo'] as const) {
   )
 }
 
-// --- Tech: categorie, marche, offerte (niente uomo/donna) ---
-for (const group of groupsOf('tech')) {
-  for (const item of group.items) {
-    const label = item.label
+// --- Tech, Gadget, Snack: categorie, marche, offerte (niente uomo/donna) ---
+const OTHER = {
+  tech: { what: 'prodotti tech', deals: 'Offerte tech di oggi: cuffie, smartphone, gaming', dealsH1: 'Offerte tech di oggi',
+    dealsIntro: 'Cuffie, smartphone, smartwatch, console e videogiochi scontati almeno del 5%, aggiornati più volte al giorno.' },
+  gadget: { what: 'gadget e idee regalo', deals: 'Idee regalo in offerta: gadget, giochi e LEGO', dealsH1: 'Idee regalo in offerta oggi',
+    dealsIntro: 'Gadget, lampade, tazze, giochi da tavolo, LEGO e regali curiosi scontati almeno del 5%, aggiornati più volte al giorno.' },
+  snack: { what: 'snack, dolci e caffè', deals: 'Offerte snack di oggi: cioccolato, caramelle, caffè', dealsH1: 'Offerte snack di oggi',
+    dealsIntro: 'Cioccolato, caramelle, biscotti, patatine, snack proteici, caffè e tè scontati almeno del 5%, aggiornati più volte al giorno.' },
+} as const
+for (const section of ['tech', 'gadget', 'snack'] as const) {
+  const t = OTHER[section]
+  const list = products.filter((p) => universeOf(p.category) === section)
+  for (const group of groupsOf(section)) {
+    for (const item of group.items) {
+      const label = item.label
+      add(
+        {
+          section,
+          slug: slugify(label),
+          group: group.label,
+          title: `${label} in offerta: i migliori modelli | Swipe Shopping`,
+          h1: `${label} in offerta`,
+          intro: `${label} delle migliori marche con prezzi aggiornati e sconti in evidenza. Salva quelli che ti piacciono e confrontali con calma.`,
+        },
+        products.filter((p) => p.category === item.id),
+      )
+    }
+  }
+  for (const [brand, byB] of byBrand(list)) {
     add(
       {
-        section: 'tech',
-        slug: slugify(label),
-        group: group.label,
-        title: `${label} in offerta: i migliori modelli | Swipe Shopping`,
-        h1: `${label} in offerta`,
-        intro: `${label} delle migliori marche con prezzi aggiornati e sconti in evidenza. Salva quelli che ti piacciono e confrontali con calma.`,
+        section,
+        slug: `marca-${slugify(brand)}`,
+        group: 'Marche',
+        title: `${brand} in offerta: ${t.what} | Swipe Shopping`,
+        h1: `${brand} in offerta`,
+        intro: `I prodotti ${brand} che trovi su Swipe Shopping, con prezzi aggiornati e sconti.`,
       },
-      products.filter((p) => p.category === item.id),
+      byB,
     )
   }
-}
-for (const [brand, list] of byBrand(tech)) {
   add(
-    {
-      section: 'tech',
-      slug: `marca-${slugify(brand)}`,
-      group: 'Marche',
-      title: `${brand} in offerta: prodotti tech | Swipe Shopping`,
-      h1: `${brand} tech in offerta`,
-      intro: `I prodotti ${brand} che trovi su Swipe Shopping, con prezzi aggiornati e sconti.`,
-    },
-    list,
+    { section, slug: 'offerte', group: 'Offerte', title: `${t.deals} | Swipe Shopping`, h1: t.dealsH1, intro: t.dealsIntro },
+    list.filter((p) => (price(p)?.off ?? 0) > 0),
   )
 }
-add(
-  {
-    section: 'tech',
-    slug: 'offerte',
-    group: 'Offerte',
-    title: 'Offerte tech di oggi: cuffie, smartphone, gaming | Swipe Shopping',
-    h1: 'Offerte tech di oggi',
-    intro: 'Cuffie, smartphone, smartwatch, console e videogiochi scontati almeno del 5%, aggiornati più volte al giorno.',
-  },
-  tech.filter((p) => (price(p)?.off ?? 0) > 0),
-)
 
 const CSS = `
 :root{color-scheme:light dark;--bg:#fafafa;--card:#fff;--text:#171717;--muted:#737373;--line:#e5e5e5;--accent:#f43f5e}
@@ -212,7 +216,7 @@ main{max-width:1100px;margin:0 auto;padding:0 16px 32px}h1{font-size:28px;line-h
 .links a{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;text-decoration:none}
 footer{max-width:1100px;margin:0 auto;padding:16px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}`
 
-function layout(opts: { title: string; description: string; path: string; body: string; jsonLd?: object; tech?: boolean }) {
+function layout(opts: { title: string; description: string; path: string; body: string; jsonLd?: object; section: Universe }) {
   return `<!doctype html>
 <html lang="it">
 <head>
@@ -228,11 +232,11 @@ function layout(opts: { title: string; description: string; path: string; body: 
 <meta property="og:description" content="${esc(opts.description)}">
 <meta property="og:url" content="${SITE}${opts.path}">
 <meta property="og:image" content="${SITE}/icons/og-image.png">
-<style>${CSS}${opts.tech ? ':root{--accent:#f97316}' : ''}</style>
+<style>${CSS}:root{--accent:${sectionOf(opts.section).color}}</style>
 ${opts.jsonLd ? `<script type="application/ld+json">${JSON.stringify(opts.jsonLd).replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
-<header><a class="logo" href="/">Swipe<span>Shopping</span></a><a class="cta" href="/#/scopri${opts.tech ? '?sezione=tech' : ''}">Apri l'app</a></header>
+<header><a class="logo" href="/">Swipe<span>Shopping</span></a><a class="cta" href="/${opts.section === 'moda' ? '' : `?sezione=${opts.section}`}#/scopri">Apri l'app</a></header>
 <main>${opts.body}</main>
 <footer>I link verso i negozi sono link di affiliazione: se acquisti, potremmo ricevere una commissione senza costi aggiuntivi per te. In qualità di Affiliato Amazon, ricevo un guadagno dagli acquisti idonei. Prezzi e disponibilità sono indicativi e possono cambiare: fa fede quello mostrato dal negozio al momento dell'acquisto. · <a href="/#/privacy">Privacy e termini</a></footer>
 </body>
@@ -257,9 +261,9 @@ function linksSection(section: Universe, current: string) {
 }
 
 const otherSection = (section: Universe) =>
-  section === 'moda'
-    ? `<h2>Tech</h2><ul><li><a href="/tech/">Cuffie, smartphone, gaming e altro</a></li></ul>`
-    : `<h2>Moda</h2><ul><li><a href="/moda/">Abbigliamento, scarpe, borse e profumi</a></li></ul>`
+  `<h2>Altre sezioni</h2><ul>${SECTIONS.filter((x) => x.id !== section)
+    .map((x) => `<li><a href="/${x.id}/">${x.label}: ${esc(x.hint.toLowerCase())}</a></li>`)
+    .join('')}</ul>`
 
 for (const pg of pages) {
   const genderLinks = pages.filter((x) => x.section === pg.section && (x.slug === `${pg.slug}-donna` || x.slug === `${pg.slug}-uomo`))
@@ -277,7 +281,7 @@ for (const pg of pages) {
       description: pg.intro,
       path: pathOf(pg),
       body,
-      tech: pg.section === 'tech',
+      section: pg.section,
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
@@ -300,8 +304,18 @@ const INDEX = {
     description: 'Cuffie, auricolari, casse, smartphone, smartwatch, tablet, fotocamere, console e videogiochi delle migliori marche, con le offerte del giorno.',
     h1: 'Tech in offerta',
   },
+  gadget: {
+    title: 'Idee regalo e gadget curiosi: lampade, tazze, giochi, LEGO | Swipe Shopping',
+    description: 'Gadget da cucina, lampade, tazze, giochi da tavolo, rompicapi, LEGO e regali divertenti delle migliori marche, con le offerte del giorno.',
+    h1: 'Gadget e idee regalo',
+  },
+  snack: {
+    title: 'Snack in offerta: cioccolato, caramelle, patatine, caffè | Swipe Shopping',
+    description: 'Cioccolato, caramelle, biscotti, patatine, frutta secca, snack proteici, caffè e tè delle migliori marche, con le offerte del giorno.',
+    h1: 'Snack in offerta',
+  },
 } as const
-for (const section of ['moda', 'tech'] as const) {
+for (const section of UNIVERSES) {
   const ix = INDEX[section]
   mkdirSync(new URL(`${section}/`, dist), { recursive: true })
   writeFileSync(
@@ -310,13 +324,13 @@ for (const section of ['moda', 'tech'] as const) {
       title: ix.title,
       description: ix.description,
       path: `/${section}/`,
-      tech: section === 'tech',
+      section,
       body: `<h1>${ix.h1}</h1><p class="intro">Scegli una categoria, una marca o le offerte del giorno. Oppure apri l'app e scopri i prodotti uno alla volta con uno swipe.</p>${linksSection(section, '')}`,
     }),
   )
 }
 
-const urls = ['/', '/moda/', '/tech/', ...pages.map(pathOf)]
+const urls = ['/', ...UNIVERSES.map((u) => `/${u}/`), ...pages.map(pathOf)]
 const lastmod = builtAt.toISOString().slice(0, 10)
 writeFileSync(
   new URL('sitemap.xml', dist),

@@ -2,6 +2,7 @@ import { Check, ChevronDown, Cookie, Cpu, Gift, Moon, Shirt, Sun } from 'lucide-
 import { useEffect, useRef, useState } from 'react'
 import { APP_NAME } from '../config/app'
 import { SECTIONS, sectionOf, type Universe } from '../config/categories'
+import { load, save } from '../lib/storage'
 import { useTheme } from '../lib/theme'
 import { useApp } from '../state/AppState'
 
@@ -38,6 +39,9 @@ export function Header() {
 
 const ICONS: Record<Universe, typeof Shirt> = { moda: Shirt, tech: Cpu, gadget: Gift, snack: Cookie }
 
+/** Sezioni nuove: hanno il segno "Nuovo" finché l'utente non le apre. Aggiungere qui le prossime. */
+const NEW_SECTIONS: Universe[] = ['gadget', 'snack']
+
 /** Menu delle sezioni: ognuna è come un'app a sé, con filtri e preferiti suoi. */
 function SectionMenu() {
   const { state, actions } = useApp()
@@ -45,6 +49,17 @@ function SectionMenu() {
   const ref = useRef<HTMLDivElement>(null)
   const current = sectionOf(state.mode)
   const Icon = ICONS[current.id]
+  const [visited, setVisited] = useState(() => load<Universe[]>('sectionsVisited', []))
+  const [menuSeen, setMenuSeen] = useState(() => load<boolean>('sectionsMenuSeen', false))
+  const isNew = (u: Universe) => NEW_SECTIONS.includes(u) && !visited.includes(u) && u !== state.mode
+  // Il pallino sul pulsante sparisce alla prima apertura del menu; il "Nuovo" nel menu quando si apre la sezione.
+  const dot = !menuSeen && NEW_SECTIONS.some(isNew)
+
+  // Anche se si arriva alla sezione in altri modi (benvenuto, link condiviso): la sezione aperta non è più nuova.
+  useEffect(() => {
+    const saved = load<Universe[]>('sectionsVisited', [])
+    if (NEW_SECTIONS.includes(state.mode) && !saved.includes(state.mode)) save('sectionsVisited', [...saved, state.mode])
+  }, [state.mode])
 
   useEffect(() => {
     if (!open) return
@@ -64,12 +79,21 @@ function SectionMenu() {
     <div ref={ref} className="relative">
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          setOpen(!open)
+          if (!menuSeen) {
+            setMenuSeen(true)
+            save('sectionsMenuSeen', true)
+          }
+        }}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Sezione ${current.label}: cambia sezione`}
-        className="flex h-10 w-28 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-rose-500 bg-transparent text-rose-500 active:scale-95"
+        className="relative flex h-10 w-28 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-rose-500 bg-transparent text-rose-500 active:scale-95"
       >
+        {dot && (
+          <span className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-[#8b5cf6] ring-2 ring-neutral-50" aria-label="Nuove sezioni" />
+        )}
         <Icon className="size-4 shrink-0" />
         <span className="flex flex-col items-start leading-none">
           <span className="text-[9px] font-semibold uppercase tracking-wide opacity-80">Sezioni</span>
@@ -89,6 +113,7 @@ function SectionMenu() {
                 role="menuitemradio"
                 aria-checked={active}
                 onClick={() => {
+                  if (!visited.includes(s.id)) setVisited([...visited, s.id])
                   actions.setMode(s.id)
                   setOpen(false)
                 }}
@@ -99,7 +124,14 @@ function SectionMenu() {
                   <SIcon className="size-4.5" />
                 </span>
                 <span className="min-w-0 flex-1 leading-tight">
-                  <span className="block font-semibold">{s.label}</span>
+                  <span className="flex items-center gap-1.5 font-semibold">
+                    {s.label}
+                    {isNew(s.id) && (
+                      <span className="rounded-full px-1.5 py-px text-[10px] font-bold uppercase text-[#fff]" style={{ background: s.color }}>
+                        Nuovo
+                      </span>
+                    )}
+                  </span>
                   <span className="block truncate text-xs text-neutral-500">{s.hint}</span>
                 </span>
                 {active && <Check className="size-4 shrink-0" style={{ color: s.color }} />}

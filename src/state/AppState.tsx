@@ -5,6 +5,7 @@ import { loadCatalog } from '../lib/catalog'
 import { fetchUserData, mergeUserData, saveUserData } from '../lib/cloudSync'
 import { matchesFilters, normalizeFilters, sortProducts } from '../lib/filters'
 import { setNewBaseline } from '../lib/newness'
+import { modelKey, onePerModel } from '../lib/dedupe'
 import { discountBadge } from '../lib/price'
 import { sharedProductId } from '../lib/share'
 import { load, save } from '../lib/storage'
@@ -61,7 +62,12 @@ const otherSectionFilters = (make: (u: OtherSection) => Filters) =>
 /** ?sezione=tech arriva dalle pagine Google ("Apri l'app"); altrimenti l'ultima sezione aperta. */
 function initialMode(): Universe {
   const fromUrl = new URLSearchParams(window.location.search).get('sezione')
-  if (isUniverse(fromUrl)) return fromUrl
+  if (isUniverse(fromUrl)) {
+    // Usato una volta: poi vale la sezione scelta dall'utente, anche ricaricando.
+    window.history.replaceState(null, '', window.location.pathname + window.location.hash)
+    save('mode', fromUrl)
+    return fromUrl
+  }
   const saved = load<string>('mode', 'moda')
   return isUniverse(saved) ? saved : 'moda'
 }
@@ -219,7 +225,10 @@ function useAppStore() {
         universeOf(p.category) === state.mode &&
         matchesFilters(p, activeFilters),
     )
-    const sorted = sortProducts(list, activeFilters.sort, MIX_SEED)
+    // Una variante per modello: niente stessa felpa in tre colori di fila. Un modello già scartato o salvato non torna.
+    const byId = new Map(products.map((p) => [p.id, p]))
+    const seenModels = new Set([...seen].flatMap((id) => (byId.has(id) ? [modelKey(byId.get(id)!)] : [])))
+    const sorted = onePerModel(sortProducts(list, activeFilters.sort, MIX_SEED), seenModels)
     const shared = sharedId ? products.find((p) => p.id === sharedId) : undefined
     return shared ? [shared, ...sorted.filter((p) => p.id !== shared.id)] : sorted
   }, [products, state.disliked, state.wishlist, state.mode, activeFilters, sharedId])
