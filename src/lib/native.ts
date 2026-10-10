@@ -6,6 +6,9 @@ export const isNative = Capacitor.isNativePlatform()
 /** Il sito: da qui l'app scarica catalogo e dettagli sempre aggiornati, e qui tornano i link delle email. */
 export const SITE = 'https://swipeshopping.app/'
 
+/** Indirizzo che apre direttamente l'app (dichiarato in AndroidManifest.xml): qui tornano i link delle email. */
+export const APP_AUTH_URL = 'app.swipeshopping://auth'
+
 /** Dove leggere i dati (catalogo, dettagli): nel sito accanto alla pagina, nell'app dal sito online. */
 export const DATA_BASE = isNative ? SITE : import.meta.env.BASE_URL
 

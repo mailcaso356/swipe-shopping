@@ -243,7 +243,7 @@ export function AuthForm({ initialMode = 'accedi' }: { initialMode?: Mode }) {
           <span>Voglio ricevere via email le novità di Swipe Shopping. Puoi cambiare idea quando vuoi dal Profilo.</span>
         </label>
       )}
-      {error && <p className="text-rose-600">{error}</p>}
+      {(error || auth.linkError) && <p className="text-rose-600">{error || auth.linkError}</p>}
       {info && (
         <p className="flex gap-2 rounded-xl bg-emerald-50 p-3 text-emerald-800">
           <Mail className="mt-0.5 size-4 shrink-0" />

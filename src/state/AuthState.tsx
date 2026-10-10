@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { APP_AUTH_URL, isNative } from '../lib/native'
 import { authRedirectUrl, supabase } from '../lib/supabase'
 
 /** Messaggi d'errore di Supabase tradotti in italiano semplice. */
@@ -57,11 +58,53 @@ function useAutoLoginAfterConfirm(loggedIn: boolean) {
   }, [loggedIn])
 }
 
+/**
+ * Nell'app: il link dell'email (conferma o password dimenticata) riapre l'app con ?code=...,
+ * che scambiamo con la sessione. Funziona perché la registrazione è partita da qui (PKCE).
+ */
+function useAppAuthLinks(onError: (message: string) => void) {
+  useEffect(() => {
+    if (!supabase || !isNative) return
+    let remove: (() => void) | undefined
+    let cancelled = false
+    const handle = async (url: string | undefined) => {
+      if (!url?.startsWith(APP_AUTH_URL)) return
+      // Si apre il Profilo: lì si vede l'accesso fatto, il modulo per la nuova password o l'errore.
+      window.location.hash = '#/profilo'
+      // Parametri sia dopo ? sia dopo # (Supabase mette gli errori nel #).
+      const params = new URLSearchParams(url.slice(APP_AUTH_URL.length).replace(/^[/?#]+/, '').replace('#', '&'))
+      const code = params.get('code')
+      const err = params.get('error_description')
+      if (code) {
+        const { error } = await supabase!.auth.exchangeCodeForSession(code)
+        if (!error) pendingSignup = null
+        else onError(friendlyError(error.message))
+      } else if (err) {
+        onError(/expired|invalid/i.test(err) ? 'Il link è scaduto o già usato. Prova ad accedere.' : err)
+      }
+    }
+    void import('@capacitor/app').then(async ({ App }) => {
+      if (cancelled) return
+      const sub = await App.addListener('appUrlOpen', ({ url }) => void handle(url))
+      remove = () => void sub.remove()
+      if (cancelled) remove()
+      // App chiusa: il link la apre da zero.
+      void handle((await App.getLaunchUrl())?.url)
+    })
+    return () => {
+      cancelled = true
+      remove?.()
+    }
+  }, [onError])
+}
+
 function useAuthStore() {
   const [session, setSession] = useState<Session | null>(null)
   const [ready, setReady] = useState(!supabase)
   /** true quando l'utente arriva dal link "password dimenticata" */
   const [recovering, setRecovering] = useState(false)
+  /** errore del link email aperto nell'app (es. link scaduto) */
+  const [linkError, setLinkError] = useState('')
 
   useEffect(() => {
     if (!supabase) return
@@ -81,6 +124,7 @@ function useAuthStore() {
   }, [])
 
   useAutoLoginAfterConfirm(!!session)
+  useAppAuthLinks(setLinkError)
 
   return useMemo(
     () => ({
@@ -88,6 +132,7 @@ function useAuthStore() {
       ready,
       user: session?.user ?? null,
       recovering,
+      linkError,
       signUp: async (email: string, password: string, emailNews: boolean) => {
         await run(() =>
           supabase!.auth.signUp({
@@ -115,7 +160,7 @@ function useAuthStore() {
         await supabase!.auth.signOut()
       },
     }),
-    [session, ready, recovering],
+    [session, ready, recovering, linkError],
   )
 }
 

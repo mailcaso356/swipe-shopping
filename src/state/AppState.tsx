@@ -43,7 +43,7 @@ type Action =
   | { type: 'like' | 'dislike'; product: Product }
   | { type: 'undo' }
   | { type: 'remove'; id: string }
-  | { type: 'filters'; filters: Filters }
+  | { type: 'filters'; filters: Filters; section?: Universe }
   | { type: 'mode'; mode: Universe }
   | { type: 'resetSeen' }
   | { type: 'clearAll' }
@@ -114,10 +114,12 @@ function reducer(state: State, action: Action): State {
     }
     case 'remove':
       return { ...state, wishlist: state.wishlist.filter((w) => w.product.id !== action.id), lastAction: null }
-    case 'filters':
-      return state.mode === 'moda'
+    case 'filters': {
+      const section = action.section ?? state.mode
+      return section === 'moda'
         ? { ...state, filters: normalizeFilters(action.filters) }
-        : { ...state, sectionFilters: { ...state.sectionFilters, [state.mode]: normalizeFilters(action.filters) } }
+        : { ...state, sectionFilters: { ...state.sectionFilters, [section]: normalizeFilters(action.filters) } }
+    }
     case 'mode':
       return { ...state, mode: action.mode, lastAction: null }
     case 'resetSeen':
@@ -279,6 +281,8 @@ function useAppStore() {
         dispatch({ type: 'remove', id: product.id })
       },
       setFilters: (filters: Filters) => dispatch({ type: 'filters', filters }),
+      /** Filtri di una sezione diversa da quella aperta (es. il genere scelto nel benvenuto vale anche per Beauty) */
+      setSectionFilters: (section: Universe, filters: Filters) => dispatch({ type: 'filters', filters, section }),
       /** Cambia sezione (moda, tech, gadget…) */
       setMode: (mode: Universe) => dispatch({ type: 'mode', mode }),
       resetSeen: () => dispatch({ type: 'resetSeen' }),

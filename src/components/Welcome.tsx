@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Cpu, Heart, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { APP_NAME } from '../config/app'
-import { CATEGORY_GROUPS, type CategoryId } from '../config/categories'
+import { CATEGORY_GROUPS, SECTIONS, type CategoryId } from '../config/categories'
 import { load, save } from '../lib/storage'
 import { routeHref } from '../lib/useHashRoute'
 import { useApp } from '../state/AppState'
@@ -53,7 +53,11 @@ export function Welcome() {
     const categories = CATEGORY_GROUPS.filter((g) => groups.includes(g.id)).flatMap((g) =>
       g.items.map((i) => i.id as CategoryId),
     )
-    actions.setFilters({ ...state.filters, gender, categories })
+    actions.setSectionFilters('moda', { ...state.filters, gender, categories })
+    // Il genere vale anche nelle altre sezioni divise per genere (Beauty).
+    for (const s of SECTIONS) {
+      if (s.id !== 'moda' && s.gender) actions.setSectionFilters(s.id, { ...state.sectionFilters[s.id], gender })
+    }
     // Si parte dalla moda; chi sceglie soprattutto un'altra sezione (al massimo una categoria moda) parte da lì.
     const extra = EXTRA_SECTIONS.find((s) => groups.includes(s.id))
     const modaPicked = groups.filter((g) => !EXTRA_SECTIONS.some((s) => s.id === g)).length
