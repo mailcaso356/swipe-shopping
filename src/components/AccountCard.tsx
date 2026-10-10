@@ -83,8 +83,8 @@ function LoggedIn({ email, sync, children }: { email: string; sync: SyncStatus; 
   )
 }
 
-/** "Esci" ed "Elimina account": in fondo al Profilo, solo con un account. */
-export function AccountActions() {
+/** "Esci" ed "Elimina account" (in fondo, dopo `children`): nell'ultimo riquadro del Profilo, solo con un account. */
+export function AccountActions({ children }: { children?: ReactNode }) {
   const auth = useAuth()
   const { actions } = useApp()
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -121,6 +121,7 @@ export function AccountActions() {
       >
         <LogOut className="size-4" /> Esci
       </button>
+      {children}
       {confirmDelete ? (
         <div className="flex flex-wrap items-center gap-2">
           <span>Eliminare l'account e tutti i dati salvati?</span>

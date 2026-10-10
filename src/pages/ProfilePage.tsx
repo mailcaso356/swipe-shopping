@@ -22,6 +22,39 @@ export function ProfilePage() {
   const stats = isAdmin && consent === 'granted' ? summary() : null
   const titleOf = (id: string) => products.find((p) => p.id === id)?.title ?? id
 
+  const reset = confirmClear ? (
+    <div className="flex flex-wrap items-center gap-2 text-sm">
+      <span>Svuotare preferiti, scartati e filtri? L'account resta.</span>
+      <button
+        type="button"
+        onClick={() => {
+          actions.clearAll()
+          setConsent('unset')
+          remove('onboarded')
+          setConfirmClear(false)
+        }}
+        className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-[#fff]"
+      >
+        Sì, ricomincia
+      </button>
+      <button type="button" onClick={() => setConfirmClear(false)} className="px-2 py-1 font-medium text-neutral-500">
+        Annulla
+      </button>
+    </div>
+  ) : (
+    <button
+      type="button"
+      onClick={() => setConfirmClear(true)}
+      className="inline-flex items-center gap-2 text-left text-sm font-medium text-rose-600"
+    >
+      <RotateCcw className="size-4" />
+      <span>
+        Ricomincia da zero
+        <span className="block text-xs font-normal text-neutral-500">Svuota preferiti, scartati e filtri. L'account resta.</span>
+      </span>
+    </button>
+  )
+
   return (
     <div className="space-y-5 pb-6">
       <h1 className="text-2xl font-bold">Profilo</h1>
@@ -118,39 +151,7 @@ export function ProfilePage() {
 
       <Card icon={<Trash2 className="size-5" />} title={user ? "Account e dati" : "Dati"}>
         <div className="flex flex-col gap-2">
-          <AccountActions />
-          {confirmClear ? (
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span>Svuotare preferiti, scartati e filtri? L'account resta.</span>
-              <button
-                type="button"
-                onClick={() => {
-                  actions.clearAll()
-                  setConsent('unset')
-                  remove('onboarded')
-                  setConfirmClear(false)
-                }}
-                className="rounded-full bg-rose-600 px-3 py-1 font-semibold text-[#fff]"
-              >
-                Sì, ricomincia
-              </button>
-              <button type="button" onClick={() => setConfirmClear(false)} className="px-2 py-1 font-medium text-neutral-500">
-                Annulla
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmClear(true)}
-              className="inline-flex items-center gap-2 text-left text-sm font-medium text-rose-600"
-            >
-              <RotateCcw className="size-4" />
-              <span>
-                Ricomincia da zero
-                <span className="block text-xs font-normal text-neutral-500">Svuota preferiti, scartati e filtri. L'account resta.</span>
-              </span>
-            </button>
-          )}
+          {user ? <AccountActions>{reset}</AccountActions> : reset}
         </div>
       </Card>
 
