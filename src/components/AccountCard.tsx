@@ -178,7 +178,7 @@ export function AuthForm({ initialMode = 'accedi' }: { initialMode?: Mode }) {
       if (mode === 'accedi') await auth.signIn(email.trim(), password)
       if (mode === 'registrati') {
         await auth.signUp(email.trim(), password, news)
-        setInfo(`Ti abbiamo mandato un'email a ${email.trim()}: apri il link per confermare l'account.`)
+        setInfo(`Ti abbiamo mandato un'email a ${email.trim()}: apri il link per confermare l'account. Poi torna qui: entri in automatico.`)
       }
       if (mode === 'recupera') {
         await auth.resetPassword(email.trim())
